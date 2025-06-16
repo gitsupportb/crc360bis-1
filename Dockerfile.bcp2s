@@ -1,0 +1,122 @@
+# BCP2S Unified Container - All Services in One
+FROM node:18-alpine AS node-base
+
+# Install system dependencies
+RUN apk add --no-cache \
+    python3 \
+    py3-pip \
+    gcc \
+    musl-dev \
+    sqlite-dev \
+    curl \
+    supervisor
+
+# Install pnpm globally
+RUN npm install -g pnpm
+
+# Set working directory
+WORKDIR /app
+
+# ================================
+# STAGE 1: Build Node.js Services
+# ================================
+
+# Copy package.json files for all Node.js services
+COPY package.json pnpm-lock.yaml* ./
+
+# Copy all source code
+COPY . .
+
+# Install dependencies for main dashboard
+RUN pnpm install
+
+# Install dependencies for other Node.js services
+WORKDIR /app/app/dashboard/bcp2s-risk-platform
+RUN pnpm install
+
+WORKDIR /app/app/documents/bcp-docs-platforme
+RUN pnpm install
+
+WORKDIR /app/app/calculs/bcp2s-risk-platform
+RUN pnpm install
+
+WORKDIR "/app/app/aml/LBCFT WEBAPP (1)/LBCFT WEBAPP"
+RUN npm install
+
+# ================================
+# STAGE 2: Setup Python Services
+# ================================
+
+WORKDIR /app
+
+# Install Django and dependencies for Python services
+RUN pip3 install --break-system-packages \
+    Django>=5.1.6 \
+    django-cors-headers
+
+# Source code already copied above
+
+# ================================
+# STAGE 4: Setup Django Services
+# ================================
+
+# Setup AMMC Django service
+WORKDIR /app/app/dashboard/bcp2s-risk-platform/AMMC
+RUN python3 manage.py migrate
+
+# Setup BAM Django service
+WORKDIR /app/app/dashboard/bcp2s-risk-platform/components/myfirstproject
+RUN python3 manage.py migrate
+RUN mkdir -p media/uploaded_reports
+
+# ================================
+# STAGE 5: Build Next.js Applications
+# ================================
+
+# Build main dashboard
+WORKDIR /app
+RUN pnpm build
+
+# Build other Next.js services
+WORKDIR /app/app/dashboard/bcp2s-risk-platform
+RUN pnpm build
+
+WORKDIR /app/app/documents/bcp-docs-platforme
+RUN pnpm build
+
+WORKDIR /app/app/calculs/bcp2s-risk-platform
+RUN pnpm build
+
+# ================================
+# STAGE 6: Setup Supervisor
+# ================================
+
+WORKDIR /app
+
+# Create supervisor configuration
+RUN mkdir -p /etc/supervisor/conf.d /var/log/supervisor /var/run
+
+# Copy supervisor configuration
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Create a non-root user
+RUN addgroup --system --gid 1001 bcp2s
+RUN adduser --system --uid 1001 bcp2s
+
+# Change ownership
+RUN chown -R bcp2s:bcp2s /app
+
+# Switch to non-root user
+USER bcp2s
+
+# Expose all ports
+EXPOSE 3000 3010 3003 3005 5000 8080 8000
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV DJANGO_SETTINGS_MODULE_AMMC=AMMC.settings
+ENV DJANGO_SETTINGS_MODULE_BAM=myfirstproject.settings
+ENV DEBUG=1
+
+# Start all services using supervisor
+CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

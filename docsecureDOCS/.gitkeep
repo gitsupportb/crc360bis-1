@@ -1,0 +1,2 @@
+# This file ensures the docsecureDOCS directory is tracked by Git
+# Actual document files are ignored by .gitignore for security

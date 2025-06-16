@@ -1,0 +1,57 @@
+{
+  "generated": "2025-06-12T16:13:47.206058",
+  "generator": "generate-file-listing-new.py",
+  "description": "Real file listing for BCP Securities Services reporting dashboard",
+  "base_path": "./UPLOADED_REPORTINGS",
+  "structure": {
+    "III___Etats_relatifs_à_la_réglementation_prudentielle": {
+      "Etat_LCR": {
+        "2025": {
+          "1": [
+            "Etat  331 -  LCR - Jan 2025 --BCP2S.xlsx"
+          ],
+          "2": [
+            "Etat  331 -  LCR - Fév 2025 -BCP2S.xlsx"
+          ],
+          "3": [
+            "Etat  331 -  LCR - Mars 2025 -BCP2S.xlsx"
+          ],
+          "4": [
+            "Etat  331 -  LCR - Avril 2025 --BCP2S.xlsx"
+          ],
+          "5": [],
+          "6": [],
+          "7": [],
+          "8": [],
+          "9": [],
+          "10": [],
+          "11": [],
+          "12": []
+        }
+      },
+      "Reporting_réglementaire_IRRBB": {
+        "2025": {
+          "1": [],
+          "2": [],
+          "3": [],
+          "4": [],
+          "5": [],
+          "6": [
+            "Copie de Reportings AMMC (003).xlsx"
+          ],
+          "7": [],
+          "8": [],
+          "9": [],
+          "10": [],
+          "11": [],
+          "12": []
+        }
+      }
+    }
+  },
+  "statistics": {
+    "total_categories": 1,
+    "total_reports": 2,
+    "total_files": 5
+  }
+}

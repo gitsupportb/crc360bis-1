@@ -1,0 +1,21 @@
+BCP Securities Services - Upload Test File
+==========================================
+
+This file is created to test the hierarchical upload functionality.
+
+Test Details:
+- Authority: BAM
+- Category: III – Etats relatifs à la réglementation prudentielle  
+- Report: Reporting réglementaire IRRBB
+- Expected Path: UPLOADED_REPORTINGS/BAM/III___Etats_relatifs_à_la_réglementation_prudentielle/Reporting_réglementaire_IRRBB/2025/6/
+
+Test Objectives:
+1. ✅ Verify hierarchical upload works without errors
+2. ✅ Verify upload logging works correctly
+3. ✅ Verify file manager refresh works
+4. ✅ Verify proper folder structure creation
+
+If this file appears in the correct location, the upload system is working properly.
+
+Test performed on: June 2025
+File created for: Upload functionality verification

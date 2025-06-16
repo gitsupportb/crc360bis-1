@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AML Center - Sanctions List Matching Tool</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/amlcenter/css/styles.css">
+  <style>
+    /* Clean professional styling inspired by Rep Watch */
+    .aml-header {
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+    }
+
+    .aml-logo {
+      width: 40px;
+      height: 40px;
+      background: white;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+    }
+
+    .control-panel {
+      background: white;
+      border-radius: 10px;
+      padding: 15px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .section-card {
+      background: white;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      border: none;
+    }
+
+    .section-card .card-header {
+      background: #f8f9fa;
+      border-bottom: 1px solid #dee2e6;
+      font-weight: 600;
+      color: #333;
+      padding: 15px 20px;
+    }
+
+    .section-card .card-body {
+      padding: 20px;
+    }
+
+    .clean-table {
+      margin: 0;
+      border: none;
+    }
+
+    .clean-table th {
+      background: #ff6b35;
+      color: white;
+      font-weight: 600;
+      padding: 12px 15px;
+      border: none;
+      font-size: 0.9rem;
+    }
+
+    .clean-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #f0f0f0;
+      border-left: none;
+      border-right: none;
+      vertical-align: middle;
+    }
+
+    .clean-table tbody tr:hover {
+      background: #f8f9fa;
+    }
+
+    .clean-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .badge-person {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+
+    .badge-entity {
+      background: #f3e5f5;
+      color: #7b1fa2;
+    }
+
+    .badge-active {
+      background: #e8f5e8;
+      color: #2e7d32;
+    }
+
+    .action-btn {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      border-radius: 6px;
+      border: none;
+      font-weight: 500;
+    }
+
+    .nav-tabs-clean {
+      border-bottom: 2px solid #f0f0f0;
+      background: #f8f9fa;
+      padding: 10px 20px 0;
+      margin: 0;
+    }
+
+    .nav-tabs-clean .nav-link {
+      border: none;
+      border-radius: 8px 8px 0 0;
+      color: #666;
+      font-weight: 500;
+      padding: 10px 15px;
+      margin-right: 5px;
+      background: transparent;
+    }
+
+    .nav-tabs-clean .nav-link.active {
+      background: #ff6b35;
+      color: white;
+      border: none;
+    }
+
+    .nav-tabs-clean .nav-link:hover {
+      background: rgba(255, 107, 53, 0.1);
+      color: #ff6b35;
+      border: none;
+    }
+
+    /* Back to Main Menu button styling */
+    .btn-outline-light {
+      border-color: rgba(255, 255, 255, 0.3);
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .btn-outline-light:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+      color: white;
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <!-- AML Center Header -->
+    <div class="aml-header d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center">
+        <div class="aml-logo">
+          <i class="fas fa-shield-alt text-primary"></i>
+        </div>
+        <div>
+          <h4 class="mb-0">AML Center</h4>
+          <small>Sanctions List Matching Tool</small>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <a href="/" class="btn btn-outline-light btn-sm me-2">
+          <i class="fas fa-arrow-left me-2"></i>Back to Main Menu
+        </a>
+        <div class="me-3">
+          <i class="fas fa-user-circle me-2"></i>
+          <small><%= new Date().toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %></small>
+        </div>
+        <a href="/amlcenter/client-space" class="btn btn-light btn-sm">
+          <i class="fas fa-users me-2"></i>Client Space
+        </a>
+      </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="control-panel d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center">
+        <i class="fas fa-cogs text-primary me-2"></i>
+        <span class="me-3"><strong>Data Management:</strong></span>
+        <% if (pdfData && pdfData.length > 0) { %>
+          <span class="badge bg-success me-3">
+            <i class="fas fa-check me-1"></i><%= allPdfData.length %> entries loaded
+          </span>
+        <% } else { %>
+          <span class="badge bg-warning me-3">
+            <i class="fas fa-exclamation-triangle me-1"></i>No data loaded
+          </span>
+        <% } %>
+      </div>
+      <div class="d-flex align-items-center">
+        <% if (pdfData && pdfData.length > 0) { %>
+          <button onclick="scrollToAdvancedSearch()" class="btn btn-primary btn-sm me-2">
+            <i class="fas fa-search me-1"></i>Advanced Search
+          </button>
+        <% } %>
+        <button class="btn btn-success btn-sm" onclick="document.querySelector('#pdfFile').click()">
+          <i class="fas fa-upload me-1"></i>Upload Data
+        </button>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="section-card">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-upload me-2"></i>Upload Sanctions Data</h5>
+          </div>
+          <div class="card-body">
+            <nav class="nav-tabs-clean mb-3">
+              <div class="nav nav-tabs" id="sanctionsTab" role="tablist">
+                <button class="nav-link active" id="pdf-tab" data-bs-toggle="tab" data-bs-target="#pdf" type="button" role="tab" aria-controls="pdf" aria-selected="true">
+                  <i class="fas fa-file-pdf me-2"></i>PDF Format
+                </button>
+                <button class="nav-link" id="xml-tab" data-bs-toggle="tab" data-bs-target="#xml" type="button" role="tab" aria-controls="xml" aria-selected="false">
+                  <i class="fas fa-code me-2"></i>XML Format
+                </button>
+              </div>
+            </nav>
+
+            <div class="tab-content" id="sanctionsTabContent">
+              <div class="tab-pane fade show active" id="pdf" role="tabpanel" aria-labelledby="pdf-tab">
+                <% if (!pdfData) { %>
+                  <form action="/amlcenter/upload-pdf" method="post" enctype="multipart/form-data" id="pdfUploadForm">
+                    <div class="file-upload-area" onclick="document.getElementById('pdfFile').click()">
+                      <input type="file" class="file-input-hidden" id="pdfFile" name="pdfFile" accept=".pdf" required>
+                      <div class="file-upload-icon">
+                        <i class="fas fa-file-pdf"></i>
+                      </div>
+                      <div class="file-upload-text">Click to select UN Sanctions PDF</div>
+                      <div class="file-upload-hint">or drag and drop your PDF file here</div>
+                    </div>
+                    <div class="mt-3 d-grid">
+                      <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-upload me-2"></i>Upload and Process PDF
+                      </button>
+                    </div>
+                  </form>
+                <% } else { %>
+                  <div class="alert alert-success">
+                    <div class="d-flex align-items-center">
+                      <i class="fas fa-check-circle me-3" style="font-size: 1.5rem;"></i>
+                      <div>
+                        <strong>Sanctions Data Loaded Successfully!</strong><br>
+                        <small class="text-muted">Found <%= allPdfData.length %> entries in the sanctions database.</small>
+                      </div>
+                    </div>
+                  </div>
+                  <form action="/amlcenter/upload-pdf" method="post" enctype="multipart/form-data" id="pdfUpdateForm">
+                    <div class="file-upload-area" onclick="document.getElementById('pdfFileUpdate').click()">
+                      <input type="file" class="file-input-hidden" id="pdfFileUpdate" name="pdfFile" accept=".pdf" required>
+                      <div class="file-upload-icon">
+                        <i class="fas fa-sync-alt"></i>
+                      </div>
+                      <div class="file-upload-text">Click to update sanctions PDF</div>
+                      <div class="file-upload-hint">Replace current data with new PDF file</div>
+                    </div>
+                    <div class="mt-3 d-grid">
+                      <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-sync-alt me-2"></i>Update PDF Data
+                      </button>
+                    </div>
+                  </form>
+                <% } %>
+              </div>
+
+              <div class="tab-pane fade" id="xml" role="tabpanel" aria-labelledby="xml-tab">
+                <% if (!pdfData) { %>
+                  <form action="/amlcenter/upload-xml" method="post" enctype="multipart/form-data" id="xmlUploadForm">
+                    <div class="file-upload-area" onclick="document.getElementById('xmlFile').click()">
+                      <input type="file" class="file-input-hidden" id="xmlFile" name="xmlFile" accept=".xml" required>
+                      <div class="file-upload-icon">
+                        <i class="fas fa-code"></i>
+                      </div>
+                      <div class="file-upload-text">Click to select UN Sanctions XML</div>
+                      <div class="file-upload-hint">or drag and drop your XML file here</div>
+                    </div>
+                    <div class="mt-3 d-grid">
+                      <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-upload me-2"></i>Upload and Process XML
+                      </button>
+                    </div>
+                  </form>
+                <% } else { %>
+                  <div class="alert alert-success">
+                    <div class="d-flex align-items-center">
+                      <i class="fas fa-check-circle me-3" style="font-size: 1.5rem;"></i>
+                      <div>
+                        <strong>Sanctions Data Loaded Successfully!</strong><br>
+                        <small class="text-muted">Found <%= allPdfData.length %> entries in the sanctions database.</small>
+                      </div>
+                    </div>
+                  </div>
+                  <form action="/amlcenter/upload-xml" method="post" enctype="multipart/form-data" id="xmlUpdateForm">
+                    <div class="file-upload-area" onclick="document.getElementById('xmlFileUpdate').click()">
+                      <input type="file" class="file-input-hidden" id="xmlFileUpdate" name="xmlFile" accept=".xml" required>
+                      <div class="file-upload-icon">
+                        <i class="fas fa-sync-alt"></i>
+                      </div>
+                      <div class="file-upload-text">Click to update sanctions XML</div>
+                      <div class="file-upload-hint">Replace current data with new XML file</div>
+                    </div>
+                    <div class="mt-3 d-grid">
+                      <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-sync-alt me-2"></i>Update XML Data
+                      </button>
+                    </div>
+                  </form>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6">
+        <div class="section-card">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-search me-2"></i>Match with Excel Data</h5>
+          </div>
+          <div class="card-body">
+            <% if (!pdfData) { %>
+              <div class="alert alert-warning">
+                <div class="d-flex align-items-center">
+                  <i class="fas fa-exclamation-triangle me-3" style="font-size: 1.5rem;"></i>
+                  <div>
+                    <strong>Sanctions Data Required</strong><br>
+                    <small class="text-muted">Please upload sanctions data first to enable matching.</small>
+                  </div>
+                </div>
+              </div>
+            <% } else { %>
+              <form action="/amlcenter/match-excel" method="post" enctype="multipart/form-data" id="excelMatchForm">
+                <div class="file-upload-area" onclick="document.getElementById('excelFile').click()">
+                  <input type="file" class="file-input-hidden" id="excelFile" name="excelFile" accept=".xlsx,.xls" required>
+                  <div class="file-upload-icon">
+                    <i class="fas fa-file-excel"></i>
+                  </div>
+                  <div class="file-upload-text">Click to select Excel file</div>
+                  <div class="file-upload-hint">Upload .xlsx or .xls file with names to match</div>
+                </div>
+                <div class="mt-3 d-grid">
+                  <button type="submit" class="btn btn-success">
+                    <i class="fas fa-search me-2"></i>Match Against Sanctions
+                  </button>
+                </div>
+              </form>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="section-card" id="advanced-search-section">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Advanced Search & Filters</h5>
+          </div>
+          <div class="card-body">
+            <% if (!pdfData) { %>
+              <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>Please upload a sanctions PDF first to enable search.
+              </div>
+            <% } else { %>
+              <form action="/amlcenter/search" method="get">
+                <div class="row mb-3">
+                  <div class="col-md-3">
+                    <label for="idFilter" class="form-label">ID</label>
+                    <input type="text" class="form-control" id="idFilter" name="idFilter" placeholder="Filter by ID...">
+                  </div>
+                  <div class="col-md-3">
+                    <label for="nameFilter" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="nameFilter" name="nameFilter" placeholder="Filter by name...">
+                  </div>
+                  <div class="col-md-3">
+                    <label for="typeFilter" class="form-label">Type</label>
+                    <select class="form-select" id="typeFilter" name="typeFilter">
+                      <option value="">All Types</option>
+                      <option value="person">Person</option>
+                      <option value="entity">Entity</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label for="nationalityFilter" class="form-label">Nationality</label>
+                    <input type="text" class="form-control" id="nationalityFilter" name="nationalityFilter" placeholder="Filter by nationality...">
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-md-9">
+                    <label for="query" class="form-label">General Search</label>
+                    <input type="text" class="form-control" id="query" name="query" placeholder="Search across all fields...">
+                  </div>
+                  <div class="col-md-3">
+                    <label for="perPage" class="form-label">Results per page</label>
+                    <select class="form-select" id="perPage" name="perPage">
+                      <option value="20">20 results</option>
+                      <option value="50">50 results</option>
+                      <option value="100">100 results</option>
+                      <option value="-1">All results</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button class="action-btn btn-primary" type="submit"><i class="fas fa-search me-2"></i>Search</button>
+                </div>
+              </form>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <% if (pdfData && pdfData.length > 0) { %>
+      <div class="section-card mb-4" id="sanctions-database">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-database me-2"></i>Sanctions Database</h5>
+        </div>
+        <div class="card-body p-0">
+          <% if (allPdfData && allPdfData.length > 0) { %>
+            <div class="table-info-bar">
+              <div class="showing-results">
+                <% if (perPage === -1) { %>
+                  Showing all <strong><%= allPdfData.length %></strong> entries
+                <% } else { %>
+                  Showing <strong><%= ((currentPage - 1) * perPage) + 1 %></strong> to <strong><%= Math.min(currentPage * perPage, allPdfData.length) %></strong> of <strong><%= allPdfData.length %></strong> entries
+                  <span class="text-muted">(Page <%= currentPage %> of <%= totalPages %>)</span>
+                <% } %>
+              </div>
+              <div class="results-per-page">
+                <label for="perPageSelect">Show:</label>
+                <select id="perPageSelect" onchange="handlePerPageChange(this)">
+                  <option value="20" <%= perPage === 20 ? 'selected' : '' %>>20</option>
+                  <option value="50" <%= perPage === 50 ? 'selected' : '' %>>50</option>
+                  <option value="100" <%= perPage === 100 ? 'selected' : '' %>>100</option>
+                  <option value="-1" <%= perPage === -1 ? 'selected' : '' %>>All</option>
+                </select>
+              </div>
+            </div>
+          <% } %>
+          <div class="table-responsive">
+            <table class="clean-table table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Nationality</th>
+                  <th>Listed On</th>
+                  <th>Last Updated</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% pdfData.forEach(entry => { %>
+                  <tr>
+                    <td><span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #6b7280;"><%= entry.id %></span></td>
+                    <td><strong><%= entry.name %></strong></td>
+                    <td>
+                      <span class="status-badge <%= entry.type === 'person' ? 'badge-person' : 'badge-entity' %>">
+                        <%= entry.type === 'person' ? 'Person' : 'Entity' %>
+                      </span>
+                    </td>
+                    <td><%= entry.nationality || '—' %></td>
+                    <td><%= entry.listedOn || '—' %></td>
+                    <td><%= entry.lastUpdated || '—' %></td>
+                    <td>
+                      <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detailsModal<%= entry.id.replace(/\./g, '') %>" style="font-size: 11px; padding: 4px 8px; border-radius: 4px;">
+                        <i class="fas fa-eye me-1"></i>View
+                      </button>
+                    </td>
+                  </tr>
+                  
+                  <!-- Modal for details -->
+                  <div class="modal fade" id="detailsModal<%= entry.id.replace(/\./g, '') %>" tabindex="-1" aria-labelledby="detailsModalLabel<%= entry.id.replace(/\./g, '') %>" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="detailsModalLabel<%= entry.id.replace(/\./g, '') %>"><%= entry.id %> - <%= entry.name %></h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <% if (entry.type === 'entity') { %>
+                            <!-- Entity Details -->
+                            <div class="row">
+                              <div class="col-md-6">
+                                <p><strong>ID:</strong> <%= entry.id %></p>
+                                <p><strong>Nom:</strong> <%= entry.name %></p>
+                                <% if (entry.originalScript) { %>
+                                  <p><strong>Nom (alphabet d'origine):</strong> <%= entry.originalScript %></p>
+                                <% } %>
+                                <% if (entry.otherNames && entry.otherNames.length > 0) { %>
+                                  <p><strong>Autre(s) nom(s) connu(s):</strong></p>
+                                  <ul>
+                                    <% entry.otherNames.forEach(name => { %>
+                                      <li><%= name %></li>
+                                    <% }); %>
+                                  </ul>
+                                <% } %>
+                                <% if (entry.previouslyKnownAs && entry.previouslyKnownAs.length > 0) { %>
+                                  <p><strong>Précédemment connu(e) sous le nom de:</strong></p>
+                                  <ul>
+                                    <% entry.previouslyKnownAs.forEach(name => { %>
+                                      <li><%= name %></li>
+                                    <% }); %>
+                                  </ul>
+                                <% } %>
+                                <!-- Improved address display to handle array format -->
+                                <% if (entry.address) { %>
+                                  <% if (Array.isArray(entry.address) && entry.address.length > 0) { %>
+                                    <p><strong>Adresse:</strong></p>
+                                    <ul>
+                                      <% entry.address.forEach((addr, index) => { %>
+                                        <li><%= String.fromCharCode(97 + index) %>) <%= addr %></li>
+                                      <% }); %>
+                                    </ul>
+                                  <% } else if (typeof entry.address === 'string') { %>
+                                    <p><strong>Adresse:</strong> <%= entry.address %></p>
+                                  <% } else { %>
+                                    <p><strong>Adresse:</strong> N/A</p>
+                                  <% } %>
+                                <% } else { %>
+                                  <p><strong>Adresse:</strong> N/A</p>
+                                <% } %>
+                              </div>
+                              <div class="col-md-6">
+                                <p><strong>Nationalité:</strong> <%= entry.nationality || 'N/A' %></p>
+                                <p><strong>Date d'inscription:</strong> <%= entry.listedOn || 'N/A' %></p>
+                                <p><strong>Dernière mise à jour:</strong> <%= entry.lastUpdated || 'N/A' %></p>
+                                <% if (entry.status) { %>
+                                  <p><strong>Statut:</strong> <%= entry.status %></p>
+                                <% } %>
+                                <% if (entry.associatedWith && entry.associatedWith.length > 0) { %>
+                                  <p><strong>Associé à:</strong></p>
+                                  <ul>
+                                    <% entry.associatedWith.forEach(assoc => { %>
+                                      <li><%= assoc %></li>
+                                    <% }); %>
+                                  </ul>
+                                <% } %>
+                                <p><strong>Renseignements divers:</strong> 
+                                  <% if (entry.otherInfo) { %>
+                                    <% 
+                                      // Clean up any embedded IDs in the display
+                                      let displayInfo = entry.otherInfo;
+                                      const embeddedIdMatch = displayInfo.match(/\b([A-Z]{2,3})\.\d+\b/);
+                                      if (embeddedIdMatch) {
+                                        const embeddedIdPos = displayInfo.indexOf(embeddedIdMatch[0]);
+                                        const beforeId = displayInfo.substring(Math.max(0, embeddedIdPos - 30), embeddedIdPos).toLowerCase();
+                                        if (!beforeId.includes("associé") && !beforeId.includes("associée") && 
+                                            !beforeId.includes("référence") && !beforeId.includes("reference")) {
+                                          displayInfo = displayInfo.substring(0, embeddedIdPos).trim();
+                                        }
+                                      }
+                                    %>
+                                    <%= displayInfo %>
+                                  <% } else { %>
+                                    N/A
+                                  <% } %>
+                                </p>
+                                
+                                <% if (entry.notes) { %>
+                                  <p><strong>Notes supplémentaires:</strong> <%= entry.notes %></p>
+                                <% } %>
+                              </div>
+                            </div>
+                          <% } else { %>
+                            <!-- Person Details -->
+                            <div class="row">
+                              <div class="col-md-6">
+                                <p><strong>ID:</strong> <%= entry.id %></p>
+                                <p><strong>Nom:</strong> <%= entry.name %></p>
+                                <p><strong>Titre:</strong> <%= entry.title || 'N/A' %></p>
+                                <p><strong>Désignation:</strong> <%= entry.designation || 'N/A' %></p>
+                                <p><strong>Date de naissance:</strong> <%= entry.dateOfBirth || 'N/A' %></p>
+                                <p><strong>Lieu de naissance:</strong> <%= entry.placeOfBirth || 'N/A' %></p>
+                                <% if (entry.reliableAlias && entry.reliableAlias.length > 0) { %>
+                                  <p><strong>Pseudonyme fiable:</strong></p>
+                                  <ul>
+                                    <% entry.reliableAlias.forEach(alias => { %>
+                                      <li><%= alias %></li>
+                                    <% }); %>
+                                  </ul>
+                                <% } %>
+                                <% if (entry.unreliableAlias && entry.unreliableAlias.length > 0) { %>
+                                  <p><strong>Pseudonyme peu fiable:</strong></p>
+                                  <ul>
+                                    <% entry.unreliableAlias.forEach(alias => { %>
+                                      <li><%= alias %></li>
+                                    <% }); %>
+                                  </ul>
+                                <% } %>
+                              </div>
+                              <div class="col-md-6">
+                                <% if (entry.gender) { %>
+                                  <p><strong>Genre:</strong> <%= entry.gender %></p>
+                                <% } %>
+                                <p><strong>Nationalité:</strong> <%= entry.nationality || 'N/A' %></p>
+                                <p><strong>Numéro de passeport:</strong> <%= entry.passportNo || 'N/A' %></p>
+                                <p><strong>Numéro national d'identification:</strong> <%= entry.nationalId || 'N/A' %></p>
+                                
+                                <% if (entry.documents && entry.documents.length > 0) { %>
+                                  <p><strong>Documents d'identification:</strong></p>
+                                  <ul class="list-group">
+                                    <% entry.documents.forEach((doc, index) => { %>
+                                      <li class="list-group-item">
+                                        <strong>Document <%= index + 1 %>:</strong>
+                                        <% if (doc.type || doc.type2) { %>
+                                          <div><strong>Type:</strong> <%= doc.type %><%= doc.type2 ? ', ' + doc.type2 : '' %></div>
+                                        <% } %>
+                                        <% if (doc.number) { %>
+                                          <div><strong>Numéro:</strong> <%= doc.number %></div>
+                                        <% } %>
+                                        <% if (doc.countryOfIssue) { %>
+                                          <div><strong>Pays d'émission:</strong> <%= doc.countryOfIssue %></div>
+                                        <% } %>
+                                        <% if (doc.dateOfIssue) { %>
+                                          <div><strong>Date d'émission:</strong> <%= doc.dateOfIssue %></div>
+                                        <% } %>
+                                        <% if (doc.cityOfIssue) { %>
+                                          <div><strong>Ville d'émission:</strong> <%= doc.cityOfIssue %></div>
+                                        <% } %>
+                                        <% if (doc.note) { %>
+                                          <div><strong>Note:</strong> <%= doc.note %></div>
+                                        <% } %>
+                                      </li>
+                                    <% }); %>
+                                  </ul>
+                                <% } %></p>
+                                
+                                <!-- Improved address display to handle array format -->
+                                <% if (entry.address) { %>
+                                  <% if (Array.isArray(entry.address) && entry.address.length > 0) { %>
+                                    <p><strong>Adresse:</strong></p>
+                                    <ul>
+                                      <% entry.address.forEach((addr, index) => { %>
+                                        <li><%= String.fromCharCode(97 + index) %>) <%= addr %></li>
+                                      <% }); %>
+                                    </ul>
+                                  <% } else if (typeof entry.address === 'string') { %>
+                                    <p><strong>Adresse:</strong> <%= entry.address %></p>
+                                  <% } else { %>
+                                    <p><strong>Adresse:</strong> N/A</p>
+                                  <% } %>
+                                <% } else { %>
+                                  <p><strong>Adresse:</strong> N/A</p>
+                                <% } %>
+                                <p><strong>Date d'inscription:</strong> <%= entry.listedOn || 'N/A' %></p>
+                                <p><strong>Renseignements divers:</strong> 
+                                  <% if (entry.otherInfo) { %>
+                                    <% 
+                                      // Clean up any embedded IDs in the display
+                                      let displayInfo = entry.otherInfo;
+                                      const embeddedIdMatch = displayInfo.match(/\b([A-Z]{2,3})\.\d+\b/);
+                                      if (embeddedIdMatch) {
+                                        const embeddedIdPos = displayInfo.indexOf(embeddedIdMatch[0]);
+                                        const beforeId = displayInfo.substring(Math.max(0, embeddedIdPos - 30), embeddedIdPos).toLowerCase();
+                                        if (!beforeId.includes("associé") && !beforeId.includes("associée") && 
+                                            !beforeId.includes("référence") && !beforeId.includes("reference")) {
+                                          displayInfo = displayInfo.substring(0, embeddedIdPos).trim();
+                                        }
+                                      }
+                                    %>
+                                    <%= displayInfo %>
+                                  <% } else { %>
+                                    N/A
+                                  <% } %>
+                                </p>
+                                
+                                <% if (entry.notes) { %>
+                                  <p><strong>Notes supplémentaires:</strong> <%= entry.notes %></p>
+                                <% } %>
+                              </div>
+                            </div>
+                          <% } %>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <% if (allPdfData && allPdfData.length > perPage && perPage !== -1) { %>
+            <div class="d-flex justify-content-center mt-3 mb-3">
+              <nav aria-label="Sanctions data pagination">
+                <ul class="pagination">
+                  <%
+                    const pagesToShow = 5; // Show 5 page numbers at most
+                    const startPage = Math.max(1, currentPage - Math.floor(pagesToShow / 2));
+                    const endPage = Math.min(totalPages, startPage + pagesToShow - 1);
+                    const adjustedStartPage = Math.max(1, endPage - pagesToShow + 1);
+                  %>
+
+                  <!-- Previous button -->
+                  <% if (currentPage > 1) { %>
+                    <li class="page-item">
+                      <a class="page-link" href="/amlcenter?page=<%= currentPage - 1 %>&perPage=<%= perPage %>" aria-label="Previous">
+                        <i class="fas fa-chevron-left"></i>
+                      </a>
+                    </li>
+                  <% } else { %>
+                    <li class="page-item disabled">
+                      <span class="page-link" aria-label="Previous">
+                        <i class="fas fa-chevron-left"></i>
+                      </span>
+                    </li>
+                  <% } %>
+
+                  <!-- First page if not in range -->
+                  <% if (adjustedStartPage > 1) { %>
+                    <li class="page-item">
+                      <a class="page-link" href="/amlcenter?page=1&perPage=<%= perPage %>">1</a>
+                    </li>
+                    <% if (adjustedStartPage > 2) { %>
+                      <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                      </li>
+                    <% } %>
+                  <% } %>
+
+                  <!-- Page numbers -->
+                  <% for (let i = adjustedStartPage; i <= endPage; i++) { %>
+                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                      <% if (i === currentPage) { %>
+                        <span class="page-link"><%= i %></span>
+                      <% } else { %>
+                        <a class="page-link" href="/amlcenter?page=<%= i %>&perPage=<%= perPage %>"><%= i %></a>
+                      <% } %>
+                    </li>
+                  <% } %>
+
+                  <!-- Last page if not in range -->
+                  <% if (endPage < totalPages) { %>
+                    <% if (endPage < totalPages - 1) { %>
+                      <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                      </li>
+                    <% } %>
+                    <li class="page-item">
+                      <a class="page-link" href="/amlcenter?page=<%= totalPages %>&perPage=<%= perPage %>"><%= totalPages %></a>
+                    </li>
+                  <% } %>
+
+                  <!-- Next button -->
+                  <% if (currentPage < totalPages) { %>
+                    <li class="page-item">
+                      <a class="page-link" href="/amlcenter?page=<%= currentPage + 1 %>&perPage=<%= perPage %>" aria-label="Next">
+                        <i class="fas fa-chevron-right"></i>
+                      </a>
+                    </li>
+                  <% } else { %>
+                    <li class="page-item disabled">
+                      <span class="page-link" aria-label="Next">
+                        <i class="fas fa-chevron-right"></i>
+                      </span>
+                    </li>
+                  <% } %>
+                </ul>
+              </nav>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    <% } %>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Show/hide loading overlay
+    function showLoading() {
+      document.getElementById('loadingOverlay').style.display = 'flex';
+    }
+
+    function hideLoading() {
+      document.getElementById('loadingOverlay').style.display = 'none';
+    }
+
+    // Handle pagination change with loading indicator
+    function handlePerPageChange(selectElement) {
+      try {
+        const perPage = selectElement.value;
+        const currentUrl = new URL(window.location);
+        currentUrl.searchParams.set('perPage', perPage);
+        currentUrl.searchParams.delete('page'); // Reset to first page
+
+        // Show loading indicator
+        selectElement.disabled = true;
+        const originalText = selectElement.options[selectElement.selectedIndex].text;
+        selectElement.options[selectElement.selectedIndex].text = 'Loading...';
+
+        // Navigate to new URL
+        window.location.href = currentUrl.toString();
+      } catch (error) {
+        console.error('Error changing page size:', error);
+        selectElement.disabled = false;
+        selectElement.options[selectElement.selectedIndex].text = originalText;
+        alert('Error changing page size. Please try again.');
+      }
+    }
+
+    // Add smooth scrolling to search results
+    document.addEventListener('DOMContentLoaded', function() {
+      // Auto-scroll to results if they exist
+      const resultsSection = document.querySelector('.card-header:has(h5:contains("Sanctions Data"))');
+      if (resultsSection && window.location.search.includes('perPage')) {
+        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      // Add loading states to forms
+      const forms = document.querySelectorAll('form');
+      forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+          const submitBtn = form.querySelector('button[type="submit"]');
+          if (submitBtn) {
+            // Show loading overlay for file uploads and searches
+            if (form.enctype === 'multipart/form-data' || form.action.includes('search')) {
+              showLoading();
+            }
+
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Processing...';
+            submitBtn.disabled = true;
+
+            // Re-enable after a timeout as fallback
+            setTimeout(() => {
+              hideLoading();
+              submitBtn.textContent = originalText;
+              submitBtn.disabled = false;
+            }, 30000);
+          }
+        });
+      });
+
+      // Enhance table responsiveness
+      const tables = document.querySelectorAll('table');
+      tables.forEach(table => {
+        if (!table.parentElement.classList.contains('table-responsive')) {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'table-responsive';
+          table.parentNode.insertBefore(wrapper, table);
+          wrapper.appendChild(table);
+        }
+      });
+    });
+
+    // Enhanced search functionality
+    function enhanceSearch() {
+      const searchInputs = document.querySelectorAll('input[type="text"]');
+      searchInputs.forEach(input => {
+        input.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            const form = input.closest('form');
+            if (form) {
+              form.submit();
+            }
+          }
+        });
+
+        // Add focus animations
+        input.addEventListener('focus', function() {
+          this.parentElement.style.transform = 'translateY(-2px)';
+        });
+
+        input.addEventListener('blur', function() {
+          this.parentElement.style.transform = 'translateY(0)';
+        });
+      });
+    }
+
+    // Add enhanced animations
+    function addAnimations() {
+      // Animate cards on scroll
+      const cards = document.querySelectorAll('.section-card');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('fade-in-up');
+          }
+        });
+      }, { threshold: 0.1 });
+
+      cards.forEach(card => observer.observe(card));
+
+      // Add button loading states
+      const buttons = document.querySelectorAll('.action-btn');
+      buttons.forEach(btn => {
+        btn.addEventListener('click', function() {
+          if (!this.classList.contains('loading')) {
+            this.classList.add('loading');
+            setTimeout(() => {
+              this.classList.remove('loading');
+            }, 2000);
+          }
+        });
+      });
+
+      // Add table row stagger animation
+      const tableRows = document.querySelectorAll('.clean-table tbody tr');
+      tableRows.forEach((row, index) => {
+        row.style.animationDelay = `${index * 0.05}s`;
+      });
+    }
+
+    // Enhanced form interactions
+    function enhanceFormInteractions() {
+      const formControls = document.querySelectorAll('.form-control, .form-select');
+      formControls.forEach(control => {
+        control.addEventListener('focus', function() {
+          this.closest('.mb-3')?.style.setProperty('transform', 'translateY(-2px)');
+        });
+
+        control.addEventListener('blur', function() {
+          this.closest('.mb-3')?.style.setProperty('transform', 'translateY(0)');
+        });
+      });
+    }
+
+    // Add smooth scrolling for navigation
+    function addSmoothScrolling() {
+      const links = document.querySelectorAll('a[href^="#"]');
+      links.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        });
+      });
+    }
+
+    // Scroll to advanced search section
+    function scrollToAdvancedSearch() {
+      const advancedSearchSection = document.querySelector('#advanced-search-section');
+      if (advancedSearchSection) {
+        advancedSearchSection.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+
+        // Focus on the first input field
+        setTimeout(() => {
+          const firstInput = advancedSearchSection.querySelector('input[type="text"]');
+          if (firstInput) {
+            firstInput.focus();
+          }
+        }, 500);
+      }
+    }
+
+    // Enhanced file upload functionality
+    function enhanceFileUploads() {
+      const fileUploadAreas = document.querySelectorAll('.file-upload-area');
+
+      fileUploadAreas.forEach(area => {
+        const fileInput = area.querySelector('.file-input-hidden');
+        const uploadText = area.querySelector('.file-upload-text');
+        const uploadHint = area.querySelector('.file-upload-hint');
+        const originalText = uploadText.textContent;
+        const originalHint = uploadHint.textContent;
+
+        // Handle file selection
+        fileInput.addEventListener('change', function(e) {
+          const file = e.target.files[0];
+          if (file) {
+            uploadText.textContent = file.name;
+            uploadHint.textContent = `File selected: ${(file.size / 1024 / 1024).toFixed(2)} MB`;
+            area.classList.add('upload-success');
+          } else {
+            uploadText.textContent = originalText;
+            uploadHint.textContent = originalHint;
+            area.classList.remove('upload-success');
+          }
+        });
+
+        // Drag and drop functionality
+        area.addEventListener('dragover', function(e) {
+          e.preventDefault();
+          area.classList.add('dragover');
+        });
+
+        area.addEventListener('dragleave', function(e) {
+          e.preventDefault();
+          area.classList.remove('dragover');
+        });
+
+        area.addEventListener('drop', function(e) {
+          e.preventDefault();
+          area.classList.remove('dragover');
+
+          const files = e.dataTransfer.files;
+          if (files.length > 0) {
+            const file = files[0];
+            const acceptedTypes = fileInput.accept.split(',').map(type => type.trim());
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+
+            if (acceptedTypes.includes(fileExtension)) {
+              fileInput.files = files;
+              fileInput.dispatchEvent(new Event('change'));
+            } else {
+              alert(`Please select a valid file type: ${acceptedTypes.join(', ')}`);
+            }
+          }
+        });
+      });
+    }
+
+    // Initialize all enhancements
+    document.addEventListener('DOMContentLoaded', function() {
+      enhanceSearch();
+      addAnimations();
+      enhanceFormInteractions();
+      addSmoothScrolling();
+      enhanceFileUploads();
+
+      // Add a subtle parallax effect to the header
+      const header = document.querySelector('.aml-header');
+      if (header) {
+        window.addEventListener('scroll', () => {
+          const scrolled = window.pageYOffset;
+          header.style.transform = `translateY(${scrolled * 0.1}px)`;
+        });
+      }
+    });
+  </script>
+</body>
+</html>

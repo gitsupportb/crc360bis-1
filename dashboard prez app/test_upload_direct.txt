@@ -1,0 +1,18 @@
+BCP Securities Services - Direct Upload Test
+==========================================
+
+This is a test file to verify the upload functionality works correctly.
+
+Test Details:
+- Authority: BAM
+- Category: III – Etats relatifs à la réglementation prudentielle  
+- Report: Reporting réglementaire IRRBB
+- Expected Path: UPLOADED_REPORTINGS/BAM/III___Etats_relatifs_à_la_réglementation_prudentielle/Reporting_réglementaire_IRRBB/2025/6/
+
+This test will verify:
+1. Upload API endpoint works
+2. File is saved to correct location
+3. Upload logging works
+4. Volume mount syncs to host
+
+Test timestamp: 2025-06-12

@@ -1,0 +1,189 @@
+version: '3.8'
+
+services:
+  # BCP2S Unified Container - All Services in One (Production)
+  bcp2s:
+    build:
+      context: .
+      dockerfile: Dockerfile.bcp2s
+    container_name: bcp2s-unified
+    ports:
+      - "3000:3000"   # Main Dashboard
+      - "3010:3010"   # Rep Watch
+      - "3003:3003"   # Documents Service
+      - "3005:3005"   # Calculs Service
+      - "5000:5000"   # AML Service
+      - "8080:8080"   # AMMC Service
+      - "8000:8000"   # BAM Service
+    environment:
+      - NODE_ENV=production
+      - DJANGO_SETTINGS_MODULE_AMMC=AMMC.settings
+      - DJANGO_SETTINGS_MODULE_BAM=myfirstproject.settings
+      - DEBUG=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health && curl -f http://localhost:8080/admin/ && curl -f http://localhost:8000/ || exit 1"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 60s
+    networks:
+      - bcp2s-network
+    profiles:
+      - unified
+
+  # BCP2S Unified Container - All Services in One (Development)
+  bcp2s-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.bcp2s-dev
+    container_name: bcp2s-unified-dev
+    ports:
+      - "3000:3000"   # Main Dashboard
+      - "3010:3010"   # Rep Watch
+      - "3003:3003"   # Documents Service
+      - "3005:3005"   # Calculs Service
+      - "5000:5000"   # AML Service
+      - "8080:8080"   # AMMC Service
+      - "8000:8000"   # BAM Service
+    environment:
+      - NODE_ENV=development
+      - DJANGO_SETTINGS_MODULE_AMMC=AMMC.settings
+      - DJANGO_SETTINGS_MODULE_BAM=myfirstproject.settings
+      - DEBUG=1
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/app/dashboard/bcp2s-risk-platform/node_modules
+      - /app/app/documents/bcp-docs-platforme/node_modules
+      - /app/app/calculs/bcp2s-risk-platform/node_modules
+      - "/app/app/aml/LBCFT WEBAPP (1)/LBCFT WEBAPP/node_modules"
+    restart: unless-stopped
+    networks:
+      - bcp2s-network
+    profiles:
+      - unified-dev
+
+  # Individual Services (for development/testing)
+  main-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.main
+    container_name: bcp-dashboard-main
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - bcp2s-network
+    profiles:
+      - individual
+
+  rep-watch:
+    build:
+      context: ./app/dashboard/bcp2s-risk-platform
+      dockerfile: Dockerfile
+    container_name: bcp-rep-watch
+    ports:
+      - "3010:3010"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./app/dashboard/bcp2s-risk-platform:/app
+      - /app/node_modules
+    networks:
+      - bcp2s-network
+    profiles:
+      - individual
+
+  docs-service:
+    build:
+      context: ./app/documents/bcp-docs-platforme
+      dockerfile: Dockerfile
+    container_name: bcp-docs-service
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./app/documents/bcp-docs-platforme:/app
+      - /app/node_modules
+    networks:
+      - bcp2s-network
+    profiles:
+      - individual
+
+  calculs-service:
+    build:
+      context: ./app/calculs/bcp2s-risk-platform
+      dockerfile: Dockerfile
+    container_name: bcp-calculs-service
+    ports:
+      - "3005:3005"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./app/calculs/bcp2s-risk-platform:/app
+      - /app/node_modules
+    networks:
+      - bcp2s-network
+    profiles:
+      - individual
+
+  aml-service:
+    build:
+      context: ./app/aml/LBCFT WEBAPP (1)/LBCFT WEBAPP
+      dockerfile: Dockerfile
+    container_name: bcp-aml-service
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - "./app/aml/LBCFT WEBAPP (1)/LBCFT WEBAPP:/app"
+      - /app/node_modules
+    networks:
+      - bcp2s-network
+    profiles:
+      - individual
+
+  ammc-service:
+    build:
+      context: ./app/dashboard/bcp2s-risk-platform/AMMC
+      dockerfile: Dockerfile
+    container_name: bcp-ammc-service
+    ports:
+      - "8080:8080"
+    environment:
+      - DJANGO_SETTINGS_MODULE=AMMC.settings
+      - DEBUG=1
+    volumes:
+      - ./app/dashboard/bcp2s-risk-platform/AMMC:/app
+    networks:
+      - bcp2s-network
+    profiles:
+      - individual
+
+  bam-service:
+    build:
+      context: ./app/dashboard/bcp2s-risk-platform/components/myfirstproject
+      dockerfile: Dockerfile
+    container_name: bcp-bam-service
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=myfirstproject.settings
+      - DEBUG=1
+    volumes:
+      - ./app/dashboard/bcp2s-risk-platform/components/myfirstproject:/app
+    networks:
+      - bcp2s-network
+    profiles:
+      - individual
+
+networks:
+  bcp2s-network:
+    driver: bridge

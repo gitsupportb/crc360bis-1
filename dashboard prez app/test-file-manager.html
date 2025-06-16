@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Manager Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        pre { background-color: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>File Manager Test</h1>
+    <div id="test-results"></div>
+
+    <script src="file-manager.js"></script>
+    <script>
+        async function runTests() {
+            const resultsDiv = document.getElementById('test-results');
+            
+            function addResult(message, type = 'info') {
+                const div = document.createElement('div');
+                div.className = `test-result ${type}`;
+                div.innerHTML = message;
+                resultsDiv.appendChild(div);
+            }
+
+            addResult('🚀 Starting File Manager Tests...', 'info');
+
+            try {
+                // Test 1: Check if FileManager class exists
+                if (typeof FileManager !== 'undefined') {
+                    addResult('✅ Test 1: FileManager class is available', 'success');
+                } else {
+                    addResult('❌ Test 1: FileManager class not found', 'error');
+                    return;
+                }
+
+                // Test 2: Create FileManager instance
+                const fileManager = new FileManager();
+                addResult('✅ Test 2: FileManager instance created successfully', 'success');
+
+                // Test 3: Initialize file manager
+                addResult('🔧 Test 3: Initializing file manager...', 'info');
+                await fileManager.init();
+                addResult('✅ Test 3: File manager initialized successfully', 'success');
+
+                // Test 4: Check file structure
+                const structure = fileManager.fileStructure;
+                addResult(`📊 Test 4: File structure loaded with ${Object.keys(structure).length} top-level categories`, 'success');
+                
+                // Test 5: Check for specific uploaded file
+                const irrbbFiles = structure?.["III___Etats_relatifs_à_la_réglementation_prudentielle"]?.["Reporting_réglementaire_IRRBB"]?.["2025"]?.["6"];
+                if (irrbbFiles && irrbbFiles.length > 0) {
+                    addResult(`✅ Test 5: Uploaded IRRBB file found: ${irrbbFiles.join(', ')}`, 'success');
+                } else {
+                    addResult('❌ Test 5: Uploaded IRRBB file not found in structure', 'error');
+                }
+
+                // Test 6: Check for LCR files
+                const lcrFiles = structure?.["III___Etats_relatifs_à_la_réglementation_prudentielle"]?.["Etat_LCR"]?.["2025"];
+                if (lcrFiles) {
+                    const totalLcrFiles = Object.values(lcrFiles).flat().length;
+                    addResult(`✅ Test 6: LCR files found: ${totalLcrFiles} files total`, 'success');
+                } else {
+                    addResult('❌ Test 6: LCR files not found in structure', 'error');
+                }
+
+                // Test 7: Display structure summary
+                addResult('<h3>📋 Structure Summary:</h3>', 'info');
+                addResult(`<pre>${JSON.stringify(structure, null, 2)}</pre>`, 'info');
+
+            } catch (error) {
+                addResult(`❌ Test failed with error: ${error.message}`, 'error');
+                addResult(`<pre>Stack trace: ${error.stack}</pre>`, 'error');
+            }
+        }
+
+        // Run tests when page loads
+        window.addEventListener('load', runTests);
+    </script>
+</body>
+</html>

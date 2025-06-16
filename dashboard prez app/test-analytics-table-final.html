@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Table Final Test - BCP Securities Services</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        .btn {
+            background-color: #FF6B35;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover { background-color: #e55a2b; }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 300px;
+        }
+        .dashboard-frame {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Analytics Table Final Test</h1>
+        <p>Testing the detailed analytics table in the "Progression Overview (2)" tab to ensure it displays all 100 reportings from BAM, AMMC, and DGI regulators.</p>
+        
+        <div class="test-section">
+            <h2>🔧 Test Controls</h2>
+            <button class="btn" onclick="testAnalyticsTableIntegration()">🚀 Test Analytics Table Integration</button>
+            <button class="btn" onclick="testDataLoading()">📊 Test Data Loading</button>
+            <button class="btn" onclick="testTableFiltering()">🔍 Test Table Filtering</button>
+            <button class="btn" onclick="openDashboard()">📋 Open Dashboard</button>
+            <button class="btn" onclick="clearResults()">🗑️ Clear Results</button>
+        </div>
+        
+        <div id="testResults"></div>
+        
+        <div class="test-section">
+            <h2>📋 Dashboard Integration</h2>
+            <p>The dashboard will be loaded below for direct testing:</p>
+            <iframe id="dashboardFrame" class="dashboard-frame" src="complete_dashboard.html"></iframe>
+        </div>
+    </div>
+    
+    <script src="reporting-data-manager.js"></script>
+    <script>
+        let testResults = [];
+        
+        function addTestResult(category, test, status, message, details = null) {
+            testResults.push({
+                category,
+                test,
+                status,
+                message,
+                details,
+                timestamp: new Date().toISOString()
+            });
+            displayResults();
+        }
+        
+        function displayResults() {
+            const resultsDiv = document.getElementById('testResults');
+            let html = '<div class="test-section"><h2>📊 Test Results</h2>';
+            
+            const categories = [...new Set(testResults.map(r => r.category))];
+            
+            categories.forEach(category => {
+                html += `<h3>${category}</h3>`;
+                const categoryResults = testResults.filter(r => r.category === category);
+                
+                categoryResults.forEach(result => {
+                    const statusIcon = result.status === 'success' ? '✅' : 
+                                     result.status === 'error' ? '❌' : 
+                                     result.status === 'warning' ? '⚠️' : 'ℹ️';
+                    
+                    html += `<div class="test-result ${result.status}">`;
+                    html += `${statusIcon} <strong>${result.test}:</strong> ${result.message}`;
+                    if (result.details) {
+                        html += `<pre>${JSON.stringify(result.details, null, 2)}</pre>`;
+                    }
+                    html += `</div>`;
+                });
+            });
+            
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+        }
+        
+        async function testAnalyticsTableIntegration() {
+            clearResults();
+            
+            try {
+                addTestResult('Analytics Table', 'Integration Test', 'info', 'Testing analytics table integration...');
+                
+                // Test if dashboard iframe is loaded
+                const iframe = document.getElementById('dashboardFrame');
+                const dashboardWindow = iframe.contentWindow;
+                
+                if (!dashboardWindow) {
+                    addTestResult('Analytics Table', 'Dashboard Access', 'error', 'Cannot access dashboard iframe');
+                    return;
+                }
+                
+                // Wait for dashboard to load
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                
+                // Test if required functions exist
+                if (dashboardWindow.getAllComprehensiveEvents) {
+                    addTestResult('Analytics Table', 'getAllComprehensiveEvents', 'success', 'Function found in dashboard');
+                    
+                    // Test the function
+                    try {
+                        const events = dashboardWindow.getAllComprehensiveEvents();
+                        addTestResult('Analytics Table', 'Event Collection', 'success', 
+                            `Collected ${events.length} events`,
+                            {
+                                total: events.length,
+                                BAM: events.filter(e => e.regulator === 'BAM').length,
+                                AMMC: events.filter(e => e.regulator === 'AMMC').length,
+                                DGI: events.filter(e => e.regulator === 'DGI').length
+                            });
+                    } catch (error) {
+                        addTestResult('Analytics Table', 'Event Collection', 'error', 
+                            `Error calling getAllComprehensiveEvents: ${error.message}`);
+                    }
+                } else {
+                    addTestResult('Analytics Table', 'getAllComprehensiveEvents', 'error', 'Function not found in dashboard');
+                }
+                
+                if (dashboardWindow.updateEnhancedAnalyticsTable) {
+                    addTestResult('Analytics Table', 'updateEnhancedAnalyticsTable', 'success', 'Function found in dashboard');
+                } else {
+                    addTestResult('Analytics Table', 'updateEnhancedAnalyticsTable', 'error', 'Function not found in dashboard');
+                }
+                
+                // Test if analytics table exists
+                const analyticsTable = dashboardWindow.document.getElementById('enhancedAnalyticsTable');
+                if (analyticsTable) {
+                    addTestResult('Analytics Table', 'Table Element', 'success', 'Analytics table element found');
+                    
+                    const tbody = analyticsTable.getElementsByTagName('tbody')[0];
+                    if (tbody) {
+                        const rowCount = tbody.getElementsByTagName('tr').length;
+                        addTestResult('Analytics Table', 'Table Rows', 'info', 
+                            `Found ${rowCount} rows in analytics table`);
+                    }
+                } else {
+                    addTestResult('Analytics Table', 'Table Element', 'error', 'Analytics table element not found');
+                }
+                
+            } catch (error) {
+                addTestResult('Analytics Table', 'Integration Test', 'error', 
+                    `Integration test failed: ${error.message}`);
+            }
+        }
+        
+        async function testDataLoading() {
+            clearResults();
+            
+            try {
+                addTestResult('Data Loading', 'Centralized Data', 'info', 'Testing centralized data loading...');
+                
+                if (!window.reportingDataManager) {
+                    addTestResult('Data Loading', 'Data Manager', 'error', 'reportingDataManager not available');
+                    return;
+                }
+                
+                await window.reportingDataManager.loadReportingData();
+                
+                // Test BAM data
+                const bamReportings = await window.reportingDataManager.getReportingsArray('BAM');
+                addTestResult('Data Loading', 'BAM Data', 
+                    bamReportings.length === 68 ? 'success' : 'warning',
+                    `BAM: ${bamReportings.length} reportings (expected 68)`);
+                
+                // Test AMMC data
+                const ammcReportings = await window.reportingDataManager.getReportingsArray('AMMC');
+                addTestResult('Data Loading', 'AMMC Data', 
+                    ammcReportings.length === 17 ? 'success' : 'warning',
+                    `AMMC: ${ammcReportings.length} reportings (expected 17)`);
+                
+                // Test DGI data
+                const dgiReportings = await window.reportingDataManager.getReportingsArray('DGI');
+                addTestResult('Data Loading', 'DGI Data', 
+                    dgiReportings.length === 15 ? 'success' : 'warning',
+                    `DGI: ${dgiReportings.length} reportings (expected 15)`);
+                
+                const totalReportings = bamReportings.length + ammcReportings.length + dgiReportings.length;
+                addTestResult('Data Loading', 'Total Count', 
+                    totalReportings === 100 ? 'success' : 'warning',
+                    `Total: ${totalReportings} reportings (expected 100)`);
+                
+            } catch (error) {
+                addTestResult('Data Loading', 'Data Loading Test', 'error', 
+                    `Data loading test failed: ${error.message}`);
+            }
+        }
+        
+        async function testTableFiltering() {
+            clearResults();
+            
+            try {
+                addTestResult('Table Filtering', 'Filter Test', 'info', 'Testing table filtering functionality...');
+                
+                const iframe = document.getElementById('dashboardFrame');
+                const dashboardWindow = iframe.contentWindow;
+                
+                if (!dashboardWindow) {
+                    addTestResult('Table Filtering', 'Dashboard Access', 'error', 'Cannot access dashboard iframe');
+                    return;
+                }
+                
+                // Wait for dashboard to load
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                
+                // Test filter elements
+                const filterSelect = dashboardWindow.document.getElementById('enhancedFilterSelect');
+                if (filterSelect) {
+                    addTestResult('Table Filtering', 'Filter Element', 'success', 'Filter dropdown found');
+                    
+                    const options = Array.from(filterSelect.options).map(opt => opt.value);
+                    const expectedOptions = ['all', 'BAM', 'AMMC', 'DGI', 'I', 'II', 'III', 'BCP', 'BCP2S', 'BANK_AL_YOUSR'];
+                    const hasAllOptions = expectedOptions.every(opt => options.includes(opt));
+                    
+                    addTestResult('Table Filtering', 'Filter Options', 
+                        hasAllOptions ? 'success' : 'warning',
+                        `Filter options: ${options.join(', ')}`);
+                } else {
+                    addTestResult('Table Filtering', 'Filter Element', 'error', 'Filter dropdown not found');
+                }
+                
+                // Test search input
+                const searchInput = dashboardWindow.document.getElementById('enhancedSearchInput');
+                if (searchInput) {
+                    addTestResult('Table Filtering', 'Search Input', 'success', 'Search input found');
+                } else {
+                    addTestResult('Table Filtering', 'Search Input', 'error', 'Search input not found');
+                }
+                
+            } catch (error) {
+                addTestResult('Table Filtering', 'Filter Test', 'error', 
+                    `Filter test failed: ${error.message}`);
+            }
+        }
+        
+        function openDashboard() {
+            window.open('complete_dashboard.html', '_blank');
+        }
+        
+        function clearResults() {
+            testResults = [];
+            document.getElementById('testResults').innerHTML = '';
+        }
+        
+        // Auto-run integration test on page load
+        window.addEventListener('load', () => {
+            setTimeout(testAnalyticsTableIntegration, 2000);
+        });
+    </script>
+</body>
+</html>

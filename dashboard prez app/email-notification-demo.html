@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Notification System Demo</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .demo-section { margin: 20px 0; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .notification-card { border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin: 10px 0; background: #f9f9f9; }
+        .notification-card.urgent { border-left: 4px solid #dc3545; background: #fff5f5; }
+        .notification-card.warning { border-left: 4px solid #ffc107; background: #fffbf0; }
+        .notification-card.reminder { border-left: 4px solid #17a2b8; background: #f0f9ff; }
+        .regulator-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-right: 10px; }
+        .regulator-bam { background: #e3f2fd; color: #1976d2; }
+        .regulator-ammc { background: #f3e5f5; color: #7b1fa2; }
+        .regulator-dgi { background: #e8f5e8; color: #388e3c; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
+        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; }
+        .stat-number { font-size: 2em; font-weight: bold; margin-bottom: 5px; }
+        .stat-label { font-size: 0.9em; opacity: 0.9; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .btn-danger { background: #dc3545; color: white; }
+        .email-preview { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 15px 0; }
+        .email-header { background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%); color: white; padding: 15px; border-radius: 8px 8px 0 0; margin: -20px -20px 15px -20px; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #f8f9fa; font-weight: bold; }
+        .filter-controls { margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; }
+        select, input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📧 Email Notification System Demo</h1>
+        <p>Live demonstration of the email notification system with regulator-based structure (BAM, AMMC, DGI)</p>
+        
+        <!-- Statistics Dashboard -->
+        <div class="demo-section">
+            <h2>📊 Notification Statistics</h2>
+            <div class="stats-grid" id="statsGrid">
+                <!-- Stats will be populated by JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="demo-section">
+            <h2>🎮 Demo Controls</h2>
+            <button class="btn-primary" onclick="generateNotifications()">📅 Generate Notifications</button>
+            <button class="btn-success" onclick="previewEmail()">📧 Preview Email</button>
+            <button class="btn-warning" onclick="testEmailSend()">🚀 Test Email Send</button>
+            <button class="btn-danger" onclick="clearDemo()">🗑️ Clear Demo</button>
+        </div>
+        
+        <!-- Filters -->
+        <div class="demo-section">
+            <h2>🔍 Notification Filters</h2>
+            <div class="filter-controls">
+                <select id="regulatorFilter" onchange="filterNotifications()">
+                    <option value="all">All Regulators</option>
+                    <option value="BAM">🏦 BAM</option>
+                    <option value="AMMC">📈 AMMC</option>
+                    <option value="DGI">🏛️ DGI</option>
+                </select>
+                <select id="typeFilter" onchange="filterNotifications()">
+                    <option value="all">All Types</option>
+                    <option value="30d_reminder">30 Day Reminder</option>
+                    <option value="7d_reminder">7 Day Reminder</option>
+                    <option value="2d_warning">2 Day Warning</option>
+                    <option value="overdue">Overdue</option>
+                </select>
+                <input type="text" id="searchFilter" placeholder="Search reports..." onkeyup="filterNotifications()">
+            </div>
+        </div>
+        
+        <!-- Upcoming Notifications -->
+        <div class="demo-section">
+            <h2>📅 Upcoming Notifications</h2>
+            <div id="notificationsList">
+                <p>Click "Generate Notifications" to see upcoming email notifications...</p>
+            </div>
+        </div>
+        
+        <!-- Email Preview -->
+        <div class="demo-section" id="emailPreviewSection" style="display: none;">
+            <h2>📧 Email Preview</h2>
+            <div id="emailPreview"></div>
+        </div>
+        
+        <!-- Notification Schedule Table -->
+        <div class="demo-section">
+            <h2>📋 Notification Schedule</h2>
+            <table id="scheduleTable">
+                <thead>
+                    <tr>
+                        <th>Report Name</th>
+                        <th>Regulator</th>
+                        <th>Category</th>
+                        <th>Deadline</th>
+                        <th>Notification Type</th>
+                        <th>Send Date</th>
+                        <th>Recipients</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="scheduleTableBody">
+                    <tr><td colspan="8">No notifications generated yet</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script src="reporting-data-manager.js"></script>
+    <script src="email-notification-system.js"></script>
+    <script>
+        let emailSystem = null;
+        let allNotifications = [];
+        let filteredNotifications = [];
+        
+        async function initializeDemo() {
+            try {
+                console.log('🚀 Initializing email notification demo...');
+                
+                // Load reporting data
+                await window.reportingDataManager.loadReportingData();
+                const allReportings = await window.reportingDataManager.getReportingsArray();
+                
+                // Initialize email system
+                emailSystem = new window.EmailNotificationSystem();
+                await emailSystem.initializeWithReportingData(allReportings);
+                
+                console.log('✅ Demo initialized successfully');
+                updateStats();
+                
+            } catch (error) {
+                console.error('❌ Error initializing demo:', error);
+            }
+        }
+        
+        function updateStats() {
+            if (!emailSystem) return;
+            
+            const assignments = Object.values(emailSystem.assignments);
+            const regulatorCounts = {};
+            
+            assignments.forEach(a => {
+                const reg = a.regulator || 'BAM';
+                regulatorCounts[reg] = (regulatorCounts[reg] || 0) + 1;
+            });
+            
+            const statsHtml = `
+                <div class="stat-card">
+                    <div class="stat-number">${assignments.length}</div>
+                    <div class="stat-label">Total Assignments</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${regulatorCounts.BAM || 0}</div>
+                    <div class="stat-label">🏦 BAM Reports</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${regulatorCounts.AMMC || 0}</div>
+                    <div class="stat-label">📈 AMMC Reports</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${regulatorCounts.DGI || 0}</div>
+                    <div class="stat-label">🏛️ DGI Reports</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${allNotifications.length}</div>
+                    <div class="stat-label">📧 Notifications</div>
+                </div>
+            `;
+            
+            document.getElementById('statsGrid').innerHTML = statsHtml;
+        }
+        
+        async function generateNotifications() {
+            if (!emailSystem) {
+                alert('Please wait for system initialization...');
+                return;
+            }
+            
+            console.log('📅 Generating notifications...');
+            
+            const today = new Date();
+            allNotifications = emailSystem.generateNotificationSchedule(today);
+            filteredNotifications = [...allNotifications];
+            
+            console.log(`📧 Generated ${allNotifications.length} notifications`);
+            
+            displayNotifications();
+            updateScheduleTable();
+            updateStats();
+        }
+        
+        function displayNotifications() {
+            const container = document.getElementById('notificationsList');
+            
+            if (filteredNotifications.length === 0) {
+                container.innerHTML = '<p>No notifications match the current filters.</p>';
+                return;
+            }
+            
+            let html = '';
+            
+            filteredNotifications.slice(0, 10).forEach(notification => {
+                const regulator = notification.assignment.regulator || 'BAM';
+                const regulatorClass = `regulator-${regulator.toLowerCase()}`;
+                const urgencyClass = notification.notificationType === 'overdue' ? 'urgent' : 
+                                   notification.notificationType === '2d_warning' ? 'warning' : 'reminder';
+                
+                const daysUntilDeadline = Math.ceil((notification.deadline - new Date()) / (1000 * 60 * 60 * 24));
+                const statusText = daysUntilDeadline < 0 ? `${Math.abs(daysUntilDeadline)} days overdue` : 
+                                 `${daysUntilDeadline} days remaining`;
+                
+                html += `
+                    <div class="notification-card ${urgencyClass}">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <span class="regulator-badge ${regulatorClass}">${regulator}</span>
+                                <strong>${notification.reportName}</strong>
+                                <span style="color: #666; margin-left: 10px;">${notification.category}</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-weight: bold; color: ${daysUntilDeadline < 0 ? '#dc3545' : '#28a745'};">
+                                    ${statusText}
+                                </div>
+                                <div style="font-size: 0.9em; color: #666;">
+                                    Deadline: ${notification.deadline.toLocaleDateString()}
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                            <strong>Type:</strong> ${notification.notificationType.replace('_', ' ')} | 
+                            <strong>Send:</strong> ${notification.sendDate.toLocaleDateString()} | 
+                            <strong>Frequency:</strong> ${notification.assignment.frequency}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            if (filteredNotifications.length > 10) {
+                html += `<p style="text-align: center; color: #666; margin-top: 15px;">
+                    Showing first 10 of ${filteredNotifications.length} notifications
+                </p>`;
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        function updateScheduleTable() {
+            const tbody = document.getElementById('scheduleTableBody');
+            
+            if (filteredNotifications.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8">No notifications to display</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            
+            filteredNotifications.slice(0, 20).forEach(notification => {
+                const regulator = notification.assignment.regulator || 'BAM';
+                const regulatorIcon = regulator === 'BAM' ? '🏦' : regulator === 'AMMC' ? '📈' : '🏛️';
+                const recipients = emailSystem.getNotificationRecipients(notification);
+                const status = notification.sendDate <= new Date() ? 'Sent' : 'Pending';
+                
+                html += `
+                    <tr>
+                        <td>${notification.reportName}</td>
+                        <td>${regulatorIcon} ${regulator}</td>
+                        <td>${notification.category}</td>
+                        <td>${notification.deadline.toLocaleDateString()}</td>
+                        <td>${notification.notificationType.replace('_', ' ')}</td>
+                        <td>${notification.sendDate.toLocaleDateString()}</td>
+                        <td>${recipients.length} recipient(s)</td>
+                        <td><span style="color: ${status === 'Sent' ? '#28a745' : '#ffc107'}">${status}</span></td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+        }
+        
+        function filterNotifications() {
+            const regulatorFilter = document.getElementById('regulatorFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+            const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
+            
+            filteredNotifications = allNotifications.filter(notification => {
+                // Regulator filter
+                if (regulatorFilter !== 'all') {
+                    const regulator = notification.assignment.regulator || 'BAM';
+                    if (regulator !== regulatorFilter) return false;
+                }
+                
+                // Type filter
+                if (typeFilter !== 'all' && notification.notificationType !== typeFilter) {
+                    return false;
+                }
+                
+                // Search filter
+                if (searchFilter && !notification.reportName.toLowerCase().includes(searchFilter)) {
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            displayNotifications();
+            updateScheduleTable();
+        }
+        
+        async function previewEmail() {
+            if (filteredNotifications.length === 0) {
+                alert('Please generate notifications first');
+                return;
+            }
+            
+            const notification = filteredNotifications[0];
+            const emailContent = emailSystem.generateEmailContent(notification);
+            
+            const previewHtml = `
+                <div class="email-preview">
+                    <div class="email-header">
+                        <h3 style="margin: 0;">📧 Email Preview</h3>
+                        <p style="margin: 5px 0 0 0; opacity: 0.9;">Subject: ${emailContent.subject}</p>
+                    </div>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        ${emailContent.html}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('emailPreview').innerHTML = previewHtml;
+            document.getElementById('emailPreviewSection').style.display = 'block';
+        }
+        
+        async function testEmailSend() {
+            if (filteredNotifications.length === 0) {
+                alert('Please generate notifications first');
+                return;
+            }
+            
+            const notification = filteredNotifications[0];
+            const testRecipients = [
+                { name: 'Test Manager', email: 'manager@test.com', role: 'Manager' },
+                { name: 'Test Owner', email: 'owner@test.com', role: 'Owner' }
+            ];
+            
+            const emailContent = emailSystem.generateEmailContent(notification);
+            const result = await emailSystem.sendActualEmail(testRecipients, emailContent);
+            
+            alert(`Email send test ${result.success ? 'successful' : 'failed'}!\n\nMethod: ${result.method}\nMessage ID: ${result.messageId || 'N/A'}\nError: ${result.error || 'None'}`);
+        }
+        
+        function clearDemo() {
+            allNotifications = [];
+            filteredNotifications = [];
+            document.getElementById('notificationsList').innerHTML = '<p>Click "Generate Notifications" to see upcoming email notifications...</p>';
+            document.getElementById('scheduleTableBody').innerHTML = '<tr><td colspan="8">No notifications generated yet</td></tr>';
+            document.getElementById('emailPreviewSection').style.display = 'none';
+            updateStats();
+        }
+        
+        // Initialize demo on page load
+        window.addEventListener('load', () => {
+            setTimeout(initializeDemo, 1000);
+        });
+    </script>
+</body>
+</html>

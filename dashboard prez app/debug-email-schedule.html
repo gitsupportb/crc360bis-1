@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Email Schedule - BCP Securities</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .debug-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .debug-section h3 {
+            margin-top: 0;
+            color: #FF6B35;
+        }
+        .btn {
+            background: #FF6B35;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #FF8C42;
+        }
+        .notification-item {
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid #FF6B35;
+            background: white;
+            border-radius: 4px;
+        }
+        .overdue {
+            border-left-color: #DC3545;
+            background: #FFEBEE;
+        }
+        .warning {
+            border-left-color: #FFC107;
+            background: #FFFBF0;
+        }
+        .reminder {
+            border-left-color: #2196F3;
+            background: #E3F2FD;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Email Schedule Debug Tool</h1>
+            <p>Debug and test email notification generation</p>
+        </div>
+
+        <div class="debug-section">
+            <h3>🔄 System Status</h3>
+            <div id="systemStatus">Loading...</div>
+            <button class="btn" onclick="checkSystemStatus()">🔍 Check Status</button>
+            <button class="btn" onclick="loadEmailSystem()">📧 Load Email System</button>
+        </div>
+
+        <div class="debug-section">
+            <h3>📊 Data Sources</h3>
+            <div id="dataSources">Loading...</div>
+            <button class="btn" onclick="checkDataSources()">📋 Check Data</button>
+        </div>
+
+        <div class="debug-section">
+            <h3>📅 Generate Test Notifications</h3>
+            <div id="notificationResults">No notifications generated yet</div>
+            <button class="btn" onclick="generateTestNotifications()">🧪 Generate Notifications</button>
+            <button class="btn" onclick="showNotificationBreakdown()">📊 Show Breakdown</button>
+        </div>
+
+        <div class="debug-section">
+            <h3>🔧 Debug Console</h3>
+            <pre id="debugConsole">Debug output will appear here...</pre>
+            <button class="btn" onclick="clearDebugConsole()">🗑️ Clear Console</button>
+        </div>
+    </div>
+
+    <script src="reporting-data-manager.js"></script>
+    <script src="email-notification-system.js"></script>
+    <script>
+        let emailNotificationSystem = null;
+        let debugOutput = [];
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}`;
+            debugOutput.push(logMessage);
+            console.log(logMessage);
+            updateDebugConsole();
+        }
+
+        function updateDebugConsole() {
+            document.getElementById('debugConsole').textContent = debugOutput.slice(-20).join('\n');
+        }
+
+        function clearDebugConsole() {
+            debugOutput = [];
+            updateDebugConsole();
+        }
+
+        async function loadEmailSystem() {
+            log('🔄 Loading email notification system...');
+            
+            try {
+                // Initialize reporting data manager
+                if (!window.reportingDataManager) {
+                    window.reportingDataManager = new ReportingDataManager();
+                    log('✅ Reporting data manager created');
+                }
+
+                // Load centralized data
+                await window.reportingDataManager.loadReportingData();
+                log('✅ Centralized data loaded');
+
+                // Initialize email system
+                emailNotificationSystem = new EmailNotificationSystem();
+                window.emailNotificationSystem = emailNotificationSystem;
+                log('✅ Email notification system created');
+
+                // Get all reportings
+                const allReportings = await window.reportingDataManager.getReportingsArray();
+                log(`📊 Found ${allReportings.length} reportings`);
+
+                // Initialize with reporting data
+                await emailNotificationSystem.initializeWithReportingData(allReportings);
+                log('✅ Email system initialized with reporting data');
+
+                checkSystemStatus();
+                checkDataSources();
+
+            } catch (error) {
+                log(`❌ Error loading email system: ${error.message}`);
+            }
+        }
+
+        function checkSystemStatus() {
+            const status = document.getElementById('systemStatus');
+            
+            if (!emailNotificationSystem) {
+                status.innerHTML = '❌ Email notification system not loaded';
+                return;
+            }
+
+            const assignmentCount = Object.keys(emailNotificationSystem.assignments || {}).length;
+            const enabledCount = Object.values(emailNotificationSystem.assignments || {}).filter(a => a.emailEnabled).length;
+
+            status.innerHTML = `
+                <div>✅ Email notification system loaded</div>
+                <div>📊 Total assignments: ${assignmentCount}</div>
+                <div>📧 Email enabled: ${enabledCount}</div>
+                <div>🔧 System enabled: ${emailNotificationSystem.emailConfig?.enabled || false}</div>
+            `;
+        }
+
+        async function checkDataSources() {
+            const sources = document.getElementById('dataSources');
+            
+            if (!window.reportingDataManager) {
+                sources.innerHTML = '❌ Reporting data manager not available';
+                return;
+            }
+
+            try {
+                const allReportings = await window.reportingDataManager.getReportingsArray();
+                const regulatorCounts = {};
+                
+                allReportings.forEach(reporting => {
+                    const regulator = reporting.regulator;
+                    regulatorCounts[regulator] = (regulatorCounts[regulator] || 0) + 1;
+                });
+
+                sources.innerHTML = `
+                    <div>✅ Centralized data loaded</div>
+                    <div>📊 Total reportings: ${allReportings.length}</div>
+                    <div>🏦 BAM: ${regulatorCounts.BAM || 0}</div>
+                    <div>📈 AMMC: ${regulatorCounts.AMMC || 0}</div>
+                    <div>🏛️ DGI: ${regulatorCounts.DGI || 0}</div>
+                `;
+            } catch (error) {
+                sources.innerHTML = `❌ Error checking data sources: ${error.message}`;
+            }
+        }
+
+        function generateTestNotifications() {
+            if (!emailNotificationSystem) {
+                log('❌ Email system not loaded');
+                return;
+            }
+
+            log('🧪 Generating test notifications...');
+            
+            const today = new Date();
+            const notifications = emailNotificationSystem.generateNotificationSchedule(today);
+            
+            log(`📧 Generated ${notifications.length} notifications`);
+
+            // Group by type
+            const byType = {};
+            notifications.forEach(notif => {
+                if (!byType[notif.notificationType]) {
+                    byType[notif.notificationType] = [];
+                }
+                byType[notif.notificationType].push(notif);
+            });
+
+            let html = `<div><strong>Total notifications: ${notifications.length}</strong></div>`;
+            
+            Object.entries(byType).forEach(([type, notifs]) => {
+                const typeClass = type === 'overdue' ? 'overdue' : 
+                                 type.includes('2d') ? 'warning' : 'reminder';
+                
+                html += `<div class="notification-item ${typeClass}">
+                    <strong>${type.replace('_', ' ').toUpperCase()}: ${notifs.length}</strong>
+                    <div style="font-size: 12px; margin-top: 5px;">
+                        ${notifs.slice(0, 3).map(n => `${n.reportName} (${n.category})`).join(', ')}
+                        ${notifs.length > 3 ? `... and ${notifs.length - 3} more` : ''}
+                    </div>
+                </div>`;
+            });
+
+            document.getElementById('notificationResults').innerHTML = html;
+            log('✅ Notification display updated');
+        }
+
+        function showNotificationBreakdown() {
+            if (!emailNotificationSystem) {
+                log('❌ Email system not loaded');
+                return;
+            }
+
+            const today = new Date();
+            const notifications = emailNotificationSystem.generateNotificationSchedule(today);
+            
+            log('📊 NOTIFICATION BREAKDOWN:');
+            log('='.repeat(50));
+            
+            // Group by regulator and type
+            const breakdown = {};
+            notifications.forEach(notif => {
+                const regulator = notif.regulator || 'Unknown';
+                if (!breakdown[regulator]) {
+                    breakdown[regulator] = {};
+                }
+                if (!breakdown[regulator][notif.notificationType]) {
+                    breakdown[regulator][notif.notificationType] = 0;
+                }
+                breakdown[regulator][notif.notificationType]++;
+            });
+
+            Object.entries(breakdown).forEach(([regulator, types]) => {
+                log(`🏛️ ${regulator}:`);
+                Object.entries(types).forEach(([type, count]) => {
+                    log(`   ${type}: ${count}`);
+                });
+            });
+
+            log('='.repeat(50));
+        }
+
+        // Auto-load on page load
+        window.addEventListener('load', () => {
+            log('🚀 Debug tool loaded');
+            setTimeout(loadEmailSystem, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+"use client"
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+
+export function CreditRiskStressTest() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Stress Test du Risque de Crédit</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Libellé</TableHead>
+              <TableHead className="text-right">Situation avant le choc</TableHead>
+              <TableHead className="text-right">Situation après le choc</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell className="font-medium">Encours sain</TableCell>
+              <TableCell className="text-right">0.00</TableCell>
+              <TableCell className="text-right">0.00</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">Encours des créances en souffrance</TableCell>
+              <TableCell className="text-right">0.00</TableCell>
+              <TableCell className="text-right">0.00</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">Provisions</TableCell>
+              <TableCell className="text-right">0.00</TableCell>
+              <TableCell className="text-right">0.00</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">Fonds propres</TableCell>
+              <TableCell className="text-right">373,112.30</TableCell>
+              <TableCell className="text-right">373,112.30</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">Ratio Tier 1</TableCell>
+              <TableCell className="text-right">20.09%</TableCell>
+              <TableCell className="text-right">20.09%</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+        <div className="mt-4 text-sm text-muted-foreground">Commentaire: BCP2S ne distribue pas de crédit.</div>
+      </CardContent>
+    </Card>
+  )
+}
+

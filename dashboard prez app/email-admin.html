@@ -1,0 +1,2734 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BCP Securities Services - Email Notification Admin</title>
+  <style>
+    /* CSS Variables */
+    :root {
+      --primary-color: #FF6B35;
+      --primary-dark: #E55A2B;
+      --secondary-color: #FFA366;
+      --accent-color: #FFB366;
+      --background-color: #FFF8F5;
+      --card-background: #FFFFFF;
+      --text-primary: #2C1810;
+      --text-secondary: #8B4513;
+      --border-color: #E8D5C4;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
+      --success-color: #28A745;
+      --warning-color: #FFC107;
+      --danger-color: #DC3545;
+      --info-color: #17A2B8;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--background-color);
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    /* Header */
+    .admin-header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 20px 0;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .header-title h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--primary-color);
+      border: 2px solid var(--primary-color);
+    }
+
+    .btn-secondary:hover {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-success {
+      background: var(--success-color);
+      color: white;
+    }
+
+    .btn-warning {
+      background: var(--warning-color);
+      color: var(--text-primary);
+    }
+
+    .btn-danger {
+      background: var(--danger-color);
+      color: white;
+    }
+
+    /* Main Container */
+    .admin-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+
+    /* Navigation Tabs */
+    .admin-tabs {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 30px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .admin-tab {
+      padding: 15px 25px;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .admin-tab.active {
+      color: var(--primary-color);
+      border-bottom-color: var(--primary-color);
+      background: var(--card-background);
+    }
+
+    .admin-tab:hover {
+      color: var(--primary-color);
+      background: var(--card-background);
+    }
+
+    /* Tab Content */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Status Cards */
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .status-card {
+      background: var(--card-background);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-color);
+      transition: all 0.3s ease;
+    }
+
+    .status-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .status-card .status-icon {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .status-card h3 {
+      margin: 0 0 10px 0;
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .status-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .status-description {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    /* Content Sections */
+    .content-section {
+      background: var(--card-background);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-color);
+      margin-bottom: 25px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background: var(--background-color);
+      font-weight: 600;
+      color: var(--text-primary);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    tr:hover {
+      background: var(--background-color);
+    }
+
+    /* Filters */
+    .filters {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .filters select, .filters input {
+      padding: 10px 15px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s ease;
+      background: white;
+    }
+
+    .filters select:focus, .filters input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    }
+
+    /* Notification Badges */
+    .notification-badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-30d {
+      background: #E3F2FD;
+      color: #1976D2;
+    }
+
+    .badge-7d {
+      background: #FFF3E0;
+      color: #F57C00;
+    }
+
+    .badge-2d {
+      background: #FFEBEE;
+      color: #D32F2F;
+    }
+
+    .badge-overdue {
+      background: #FFCDD2;
+      color: #C62828;
+      animation: pulse 2s infinite;
+    }
+
+    /* Enhanced Status Classes */
+    .status-pending {
+      color: var(--warning-color);
+      font-weight: 600;
+    }
+
+    .status-sent {
+      color: var(--success-color);
+      font-weight: 600;
+    }
+
+    .status-failed {
+      color: var(--danger-color);
+      font-weight: 600;
+    }
+
+    .status-overdue {
+      color: #C62828;
+      font-weight: 700;
+      background: #FFEBEE;
+      padding: 4px 8px;
+      border-radius: 4px;
+      animation: pulse 2s infinite;
+    }
+
+    .status-sending {
+      color: #FF6B35;
+      font-weight: 600;
+      background: #FFF3E0;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    /* Enhanced Notification Type Badges */
+    .badge-30d-reminder {
+      background: #E3F2FD;
+      color: #1976D2;
+      border: 1px solid #BBDEFB;
+    }
+
+    .badge-7d-reminder {
+      background: #FFF3E0;
+      color: #F57C00;
+      border: 1px solid #FFCC02;
+    }
+
+    .badge-2d-warning {
+      background: #FFEBEE;
+      color: #D32F2F;
+      border: 1px solid #FFCDD2;
+    }
+
+    .badge-overdue {
+      background: #FFCDD2;
+      color: #C62828;
+      border: 1px solid #F8BBD9;
+      animation: pulse 2s infinite;
+      font-weight: 700;
+    }
+
+    /* Overdue Row Styling */
+    .overdue-row {
+      background: #FFEBEE !important;
+      border-left: 4px solid #C62828;
+    }
+
+    .overdue-row:hover {
+      background: #FFCDD2 !important;
+    }
+
+    /* Loading States */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+
+    .loading::before {
+      content: "⏳";
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .admin-tabs {
+        flex-wrap: wrap;
+      }
+
+      .status-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .filters {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .section-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+      }
+    }
+
+    /* Animations */
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Enhanced Assignment Table Styles */
+    .enhanced-assignment-table {
+      font-size: 13px;
+    }
+
+    .enhanced-assignment-table th {
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      padding: 10px 8px;
+      white-space: nowrap;
+    }
+
+    .enhanced-assignment-table td {
+      padding: 12px 8px;
+      vertical-align: middle;
+      border-right: 1px solid var(--border-color);
+    }
+
+    .enhanced-assignment-table .report-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      max-width: 200px;
+      word-wrap: break-word;
+    }
+
+    .enhanced-assignment-table .category-cell {
+      font-size: 11px;
+      color: var(--text-secondary);
+      max-width: 120px;
+      word-wrap: break-word;
+    }
+
+    .enhanced-assignment-table .assignment-cell {
+      max-width: 150px;
+      word-wrap: break-word;
+    }
+
+    .enhanced-assignment-table .assignment-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .enhanced-assignment-table .assignment-email {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-family: monospace;
+    }
+
+    .enhanced-assignment-table .assignment-empty {
+      color: #999;
+      font-style: italic;
+      font-size: 11px;
+    }
+
+    .enhanced-assignment-table .assignment-status {
+      text-align: center;
+    }
+
+    .enhanced-assignment-table .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+
+    .status-fully-assigned {
+      background: var(--success-color);
+    }
+
+    .status-partially-assigned {
+      background: var(--warning-color);
+    }
+
+    .status-unassigned {
+      background: var(--danger-color);
+    }
+
+    .assignment-actions {
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .assignment-actions .btn {
+      padding: 4px 8px;
+      font-size: 11px;
+      margin: 0 2px;
+    }
+
+    /* Quick Edit Styles */
+    .quick-edit-input {
+      width: 100%;
+      padding: 4px 6px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 11px;
+      background: white;
+    }
+
+    .quick-edit-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.1);
+    }
+
+    .quick-edit-save {
+      background: var(--success-color);
+      color: white;
+      border: none;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      cursor: pointer;
+      margin-left: 4px;
+    }
+
+    .quick-edit-cancel {
+      background: var(--danger-color);
+      color: white;
+      border: none;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      cursor: pointer;
+      margin-left: 2px;
+    }
+
+    /* Escalation Level Indicators */
+    .escalation-level-1 {
+      border-left: 4px solid #2196F3;
+    }
+
+    .escalation-level-2 {
+      border-left: 4px solid #FF9800;
+    }
+
+    .escalation-level-3 {
+      border-left: 4px solid #F44336;
+    }
+
+    /* Assignment Summary Styles */
+    .assignment-summary .status-card {
+      padding: 15px;
+    }
+
+    .assignment-summary .status-icon {
+      font-size: 1.5rem;
+    }
+
+    .assignment-summary .status-value {
+      font-size: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="admin-header">
+    <div class="header-content">
+      <div class="header-title">
+        <span style="font-size: 2rem;">📧</span>
+        <div>
+          <h1>Email Notification Admin</h1>
+          <p style="opacity: 0.9; font-size: 0.9rem;">BCP Securities Services - Reporting System</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="complete_dashboard.html" class="btn btn-secondary">
+          📊 Back to Dashboard
+        </a>
+        <button onclick="refreshAllData()" class="btn btn-primary">
+          🔄 Refresh
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="admin-container">
+    <!-- Navigation Tabs -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="openAdminTab(event, 'overview')">
+        📊 Overview
+      </button>
+      <button class="admin-tab" onclick="openAdminTab(event, 'schedule')">
+        📅 Email Schedule
+      </button>
+      <button class="admin-tab" onclick="openAdminTab(event, 'assignments')">
+        👥 Assignments
+      </button>
+      <button class="admin-tab" onclick="openAdminTab(event, 'history')">
+        📋 History
+      </button>
+      <button class="admin-tab" onclick="openAdminTab(event, 'settings')">
+        ⚙️ Settings
+      </button>
+    </div>
+
+    <!-- Overview Tab -->
+    <div id="overview" class="tab-content active">
+      <!-- System Status -->
+      <div class="status-grid">
+        <div class="status-card">
+          <span class="status-icon">📧</span>
+          <h3>Email System Status</h3>
+          <span id="systemStatus" class="status-value">Loading...</span>
+          <div class="status-description">Automated notifications</div>
+        </div>
+        <div class="status-card">
+          <span class="status-icon">📊</span>
+          <h3>Pending Notifications</h3>
+          <span id="pendingCount" class="status-value">0</span>
+          <div class="status-description">Emails scheduled to send</div>
+        </div>
+        <div class="status-card">
+          <span class="status-icon">✅</span>
+          <h3>Emails Sent Today</h3>
+          <span id="sentTodayCount" class="status-value">0</span>
+          <div class="status-description">Notifications delivered</div>
+        </div>
+        <div class="status-card">
+          <span class="status-icon">⚠️</span>
+          <h3>Overdue Reports</h3>
+          <span id="overdueCount" class="status-value">0</span>
+          <div class="status-description">Reports past deadline</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="content-section">
+        <div class="section-header">
+          <h2 class="section-title">🚀 Quick Actions</h2>
+        </div>
+        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+          <button onclick="testEmailSystem()" class="btn btn-primary">
+            🧪 Test Email System
+          </button>
+          <button onclick="debugEmailSystem()" class="btn btn-warning">
+            🔍 Debug System
+          </button>
+          <button onclick="forceReloadAssignments()" class="btn btn-warning">
+            🔄 Force Reload Assignments
+          </button>
+          <button onclick="clearAllAssignments()" class="btn btn-danger">
+            🗑️ Clear All Assignments
+          </button>
+          <button onclick="testDataLoading()" class="btn btn-info">
+            🧪 Test Data Loading
+          </button>
+          <button onclick="sendPendingNotifications()" class="btn btn-warning">
+            📤 Send Pending Notifications
+          </button>
+          <button onclick="viewSystemLogs()" class="btn btn-secondary">
+            📋 View System Logs
+          </button>
+          <button onclick="exportEmailData()" class="btn btn-secondary">
+            📊 Export Data
+          </button>
+          <button onclick="simulateEmailSubmission()" class="btn btn-secondary">
+            📨 Simulate Email Submission
+          </button>
+        </div>
+      </div>
+
+      <!-- Data Source Information -->
+      <div class="content-section">
+        <div class="section-header">
+          <h2 class="section-title">📊 Data Source Information</h2>
+          <button onclick="refreshDataSource()" class="btn btn-secondary">
+            🔄 Refresh
+          </button>
+        </div>
+        <div id="dataSourceInfo" class="loading">
+          Loading data source information...
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="content-section">
+        <div class="section-header">
+          <h2 class="section-title">📈 Recent Activity</h2>
+          <button onclick="refreshRecentActivity()" class="btn btn-secondary">
+            🔄 Refresh
+          </button>
+        </div>
+        <div id="recentActivity" class="loading">
+          Loading recent activity...
+        </div>
+      </div>
+    </div>
+
+    <!-- Email Schedule Tab -->
+    <div id="schedule" class="tab-content">
+      <div class="content-section">
+        <div class="section-header">
+          <h2 class="section-title">📅 Upcoming Email Notifications</h2>
+          <div style="display: flex; gap: 10px;">
+            <button onclick="forceUpdateEmailSchedule()" class="btn btn-secondary">
+              🔄 Force Refresh Schedule
+            </button>
+            <button onclick="addManualNotification()" class="btn btn-primary">
+              ➕ Add Manual Notification
+            </button>
+          </div>
+        </div>
+
+        <!-- Schedule Filters -->
+        <div class="filters">
+          <select id="scheduleTypeFilter" onchange="filterSchedule()">
+            <option value="all">All Notification Types</option>
+            <option value="30d_reminder">30 Day Reminders</option>
+            <option value="7d_reminder">7 Day Reminders</option>
+            <option value="2d_warning">2 Day Warnings</option>
+            <option value="overdue">Overdue Notifications</option>
+          </select>
+          <select id="scheduleRegulatorFilter" onchange="filterSchedule()">
+            <option value="all">All Regulators</option>
+            <option value="BAM">🏦 BAM</option>
+            <option value="AMMC">📈 AMMC</option>
+            <option value="DGI">🏛️ DGI</option>
+          </select>
+          <select id="scheduleCategoryFilter" onchange="filterSchedule()">
+            <option value="all">All Categories</option>
+            <!-- BAM Categories -->
+            <option value="I">BAM - I – Situation comptable</option>
+            <option value="II">BAM - II – Etats de synthèse</option>
+            <option value="III">BAM - III – Réglementation prudentielle</option>
+            <!-- AMMC Categories -->
+            <option value="BCP">AMMC - BCP</option>
+            <option value="BCP2S">AMMC - BCP2S</option>
+            <option value="BANK_AL_YOUSR">AMMC - BANK AL YOUSR</option>
+            <!-- DGI Categories -->
+            <option value="DGI">DGI - All Categories</option>
+          </select>
+          <input type="text" id="scheduleSearchInput" placeholder="Search reports..." onkeyup="filterSchedule()">
+        </div>
+
+        <!-- Schedule Table -->
+        <div class="table-container">
+          <table id="scheduleTable">
+            <thead>
+              <tr>
+                <th>Report Name</th>
+                <th>Category</th>
+                <th>Deadline</th>
+                <th>Notification Type</th>
+                <th>Recipients</th>
+                <th>Send Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="scheduleTableBody">
+              <tr>
+                <td colspan="8" class="loading">Loading email schedule...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Assignments Tab -->
+    <div id="assignments" class="tab-content">
+      <div class="content-section">
+        <div class="section-header">
+          <h2 class="section-title">👥 Reporting Assignments</h2>
+          <div style="display: flex; gap: 10px;">
+            <button onclick="importAssignments()" class="btn btn-secondary">
+              📥 Import CSV
+            </button>
+            <button onclick="exportAssignments()" class="btn btn-secondary">
+              📤 Export CSV
+            </button>
+            <button onclick="bulkAssignModal()" class="btn btn-primary">
+              📋 Bulk Assign
+            </button>
+          </div>
+        </div>
+
+        <!-- Assignment Filters -->
+        <div class="filters">
+          <select id="assignmentRegulatorFilter" onchange="filterAssignments()">
+            <option value="all">All Regulators</option>
+            <option value="BAM">🏦 BAM</option>
+            <option value="AMMC">📈 AMMC</option>
+            <option value="DGI">🏛️ DGI</option>
+          </select>
+          <select id="assignmentCategoryFilter" onchange="filterAssignments()">
+            <option value="all">All Categories</option>
+            <!-- BAM Categories -->
+            <option value="I">BAM - I – Situation comptable</option>
+            <option value="II">BAM - II – Etats de synthèse</option>
+            <option value="III">BAM - III – Réglementation prudentielle</option>
+            <!-- AMMC Categories -->
+            <option value="BCP">AMMC - BCP</option>
+            <option value="BCP2S">AMMC - BCP2S</option>
+            <option value="BANK_AL_YOUSR">AMMC - BANK AL YOUSR</option>
+            <!-- DGI Categories -->
+            <option value="DGI">DGI - All Categories</option>
+          </select>
+          <select id="assignmentStatusFilter" onchange="filterAssignments()">
+            <option value="all">All Statuses</option>
+            <option value="assigned">Fully Assigned</option>
+            <option value="partial">Partially Assigned</option>
+            <option value="unassigned">Unassigned</option>
+          </select>
+          <input type="text" id="assignmentSearchInput" placeholder="Search reports..." onkeyup="filterAssignments()">
+        </div>
+
+        <!-- Assignment Summary Cards -->
+        <div class="assignment-summary" style="margin-bottom: 25px;">
+          <div class="status-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div class="status-card">
+              <span class="status-icon">📊</span>
+              <h3>Total Reportings</h3>
+              <span id="totalReportings" class="status-value">68</span>
+              <div class="status-description">Across all categories</div>
+            </div>
+            <div class="status-card">
+              <span class="status-icon">✅</span>
+              <h3>Fully Assigned</h3>
+              <span id="fullyAssigned" class="status-value">0</span>
+              <div class="status-description">All three levels assigned</div>
+            </div>
+            <div class="status-card">
+              <span class="status-icon">⚠️</span>
+              <h3>Partially Assigned</h3>
+              <span id="partiallyAssigned" class="status-value">0</span>
+              <div class="status-description">Missing some assignments</div>
+            </div>
+            <div class="status-card">
+              <span class="status-icon">❌</span>
+              <h3>Unassigned</h3>
+              <span id="unassigned" class="status-value">68</span>
+              <div class="status-description">No assignments set</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Enhanced Assignment Table -->
+        <div class="table-container">
+          <table id="assignmentTable" class="enhanced-assignment-table">
+            <thead>
+              <tr>
+                <th rowspan="2" style="vertical-align: middle; border-right: 2px solid var(--border-color);">Report Name</th>
+                <th rowspan="2" style="vertical-align: middle; border-right: 2px solid var(--border-color);">Category</th>
+                <th colspan="2" style="text-align: center; background: #E3F2FD; border-right: 2px solid var(--border-color);">📧 Report Owner (Level 1)</th>
+                <th colspan="2" style="text-align: center; background: #FFF3E0; border-right: 2px solid var(--border-color);">👔 Manager (Level 2)</th>
+                <th colspan="2" style="text-align: center; background: #FFEBEE; border-right: 2px solid var(--border-color);">🏢 Senior Management (Level 3)</th>
+                <th rowspan="2" style="vertical-align: middle; border-right: 2px solid var(--border-color);">Email Enabled</th>
+                <th rowspan="2" style="vertical-align: middle;">Actions</th>
+              </tr>
+              <tr>
+                <th style="background: #E3F2FD;">Name</th>
+                <th style="background: #E3F2FD; border-right: 2px solid var(--border-color);">Email Address</th>
+                <th style="background: #FFF3E0;">Name</th>
+                <th style="background: #FFF3E0; border-right: 2px solid var(--border-color);">Email Address</th>
+                <th style="background: #FFEBEE;">Name</th>
+                <th style="background: #FFEBEE; border-right: 2px solid var(--border-color);">Email Address</th>
+              </tr>
+            </thead>
+            <tbody id="assignmentTableBody">
+              <tr>
+                <td colspan="10" class="loading">Loading all 68 reporting assignments...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Tab -->
+    <div id="history" class="tab-content">
+      <div class="content-section">
+        <div class="section-header">
+          <h2 class="section-title">📋 Email Notification History</h2>
+          <div style="display: flex; gap: 10px;">
+            <button onclick="clearHistory()" class="btn btn-danger">
+              🗑️ Clear History
+            </button>
+            <button onclick="exportHistory()" class="btn btn-secondary">
+              📊 Export History
+            </button>
+          </div>
+        </div>
+
+        <!-- History Filters -->
+        <div class="filters">
+          <select id="historyStatusFilter" onchange="filterHistory()">
+            <option value="all">All Statuses</option>
+            <option value="sent">Sent</option>
+            <option value="failed">Failed</option>
+            <option value="pending">Pending</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <select id="historyTypeFilter" onchange="filterHistory()">
+            <option value="all">All Types</option>
+            <option value="30d_reminder">30 Day Reminders</option>
+            <option value="7d_reminder">7 Day Reminders</option>
+            <option value="2d_warning">2 Day Warnings</option>
+            <option value="overdue">Overdue</option>
+            <option value="submission_confirmation">Confirmations</option>
+          </select>
+          <input type="date" id="historyDateFilter" onchange="filterHistory()">
+          <input type="text" id="historySearchInput" placeholder="Search..." onkeyup="filterHistory()">
+        </div>
+
+        <!-- History Table -->
+        <div class="table-container">
+          <table id="historyTable">
+            <thead>
+              <tr>
+                <th>Date/Time</th>
+                <th>Report Name</th>
+                <th>Category</th>
+                <th>Type</th>
+                <th>Recipients</th>
+                <th>Status</th>
+                <th>Message ID</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody">
+              <tr>
+                <td colspan="8" class="loading">Loading email history...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div id="settings" class="tab-content">
+      <div class="content-section">
+        <div class="section-header">
+          <h2 class="section-title">⚙️ Email System Configuration</h2>
+          <button onclick="saveSettings()" class="btn btn-success">
+            💾 Save Settings
+          </button>
+        </div>
+
+        <!-- Settings Form -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px;">
+          <!-- Gmail SMTP Configuration -->
+          <div>
+            <h3 style="margin-bottom: 15px; color: var(--text-primary);">📧 Gmail SMTP Configuration</h3>
+            <div style="background: #E3F2FD; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+              <h4 style="margin: 0 0 10px 0; color: #1976D2;">🔧 Setup Instructions:</h4>
+              <ol style="margin: 0; padding-left: 20px; font-size: 14px; color: #1976D2;">
+                <li>Enable 2-Factor Authentication on your Gmail account</li>
+                <li>Generate an App Password: <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color: #FF6B35;">Google App Passwords</a></li>
+                <li>Use your Gmail address and the generated App Password below</li>
+              </ol>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+              <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Gmail Address:</label>
+                <input type="email" id="gmailAddress" placeholder="your-email@gmail.com" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px;">
+              </div>
+              <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Gmail App Password:</label>
+                <input type="password" id="gmailAppPassword" placeholder="16-character app password" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px;">
+                <small style="color: #666; font-size: 12px;">⚠️ Use App Password, not your regular Gmail password</small>
+              </div>
+              <div style="display: flex; gap: 10px;">
+                <button onclick="configureGmail()" class="btn btn-primary" style="flex: 1;">
+                  🔧 Configure Gmail
+                </button>
+                <button onclick="testGmailConnection()" class="btn btn-warning" style="flex: 1;">
+                  🧪 Test Connection
+                </button>
+              </div>
+              <div style="margin-top: 10px;">
+                <button onclick="testEmailSending()" class="btn btn-success" style="width: 100%;">
+                  📧 Test Email Sending with Assignments
+                </button>
+                <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                  ⚠️ This will send a real test email to assigned recipients
+                </small>
+              </div>
+              <div id="gmailStatus" style="padding: 10px; border-radius: 8px; display: none;">
+                <!-- Status messages will appear here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Advanced SMTP Settings -->
+          <div>
+            <h3 style="margin-bottom: 15px; color: var(--text-primary);">⚙️ Advanced SMTP Settings</h3>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+              <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">SMTP Server:</label>
+                <input type="text" id="smtpServer" value="smtp.gmail.com" readonly style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; background: #f5f5f5;">
+              </div>
+              <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">SMTP Port:</label>
+                <input type="number" id="smtpPort" value="587" readonly style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; background: #f5f5f5;">
+              </div>
+              <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">From Email:</label>
+                <input type="email" id="fromEmail" placeholder="Will be set automatically" readonly style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; background: #f5f5f5;">
+              </div>
+              <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">From Name:</label>
+                <input type="text" id="fromName" value="BCP Securities Services - Reporting System" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px;">
+              </div>
+            </div>
+          </div>
+
+          <!-- System Settings -->
+          <div>
+            <h3 style="margin-bottom: 15px; color: var(--text-primary);">🔧 System Settings</h3>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+              <div>
+                <label style="display: flex; align-items: center; gap: 10px; font-weight: 600;">
+                  <input type="checkbox" id="emailEnabled" style="transform: scale(1.2);">
+                  Enable Email Notifications
+                </label>
+              </div>
+              <div>
+                <label style="display: flex; align-items: center; gap: 10px; font-weight: 600;">
+                  <input type="checkbox" id="emailSubmissions" style="transform: scale(1.2);">
+                  Enable Email Submissions
+                </label>
+              </div>
+              <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Reply-To Email:</label>
+                <input type="email" id="replyToEmail" placeholder="reporting-submissions@bcpsecurities.com" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px;">
+              </div>
+              <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Dashboard URL:</label>
+                <input type="url" id="dashboardUrl" placeholder="https://dashboard.bcpsecurities.com" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Global variables
+    let emailNotificationSystem = null;
+    let emailSubmissionHandler = null;
+
+    // Initialize admin interface
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🚀 Initializing Email Admin Interface...');
+
+      // Make functions available globally for console access
+      window.testDataLoadingConsole = testDataLoading;
+      window.clearAllAssignmentsConsole = clearAllAssignments;
+      window.forceReloadAssignmentsConsole = forceReloadAssignments;
+
+      // Add nuclear option to completely reset everything
+      window.nuclearResetConsole = async function() {
+        console.log('💥 NUCLEAR RESET - Completely clearing everything...');
+
+        // Clear all localStorage
+        localStorage.removeItem('reportingAssignments');
+        localStorage.removeItem('emailAssignments');
+        localStorage.removeItem('emailNotificationConfig');
+        localStorage.removeItem('emailNotificationHistory');
+
+        // Clear assignments in memory
+        if (window.emailNotificationSystem) {
+          window.emailNotificationSystem.assignments = {};
+        }
+
+        // Force reload page to restart everything
+        console.log('🔄 Reloading page to restart all systems...');
+        window.location.reload();
+      };
+
+      // Add simple diagnostic function
+      window.diagnoseCategoryIssue = async function() {
+        console.log('🔍 DIAGNOSING CATEGORY ISSUE...');
+        console.log('='.repeat(50));
+
+        if (!window.reportingDataManager) {
+          console.log('❌ reportingDataManager not available');
+          return;
+        }
+
+        try {
+          // Load raw data
+          await window.reportingDataManager.loadReportingData();
+          console.log('✅ Data loaded');
+
+          // Check raw JSON structure
+          const rawData = window.reportingDataManager.reportingsData;
+          console.log('📊 Raw categories in JSON:', Object.keys(rawData.categories));
+
+          // Check each category
+          Object.keys(rawData.categories).forEach(catKey => {
+            const catData = rawData.categories[catKey];
+            const reportingKeys = Object.keys(catData.reportings || {});
+            console.log(`📋 Category ${catKey}: ${reportingKeys.length} reportings`);
+
+            // Check first reporting in each category
+            if (reportingKeys.length > 0) {
+              const firstReporting = catData.reportings[reportingKeys[0]];
+              console.log(`   First reporting category field: "${firstReporting.category}"`);
+            }
+          });
+
+          // Test getReportingsArray
+          const allReportings = await window.reportingDataManager.getReportingsArray();
+          console.log(`📊 getReportingsArray returned: ${allReportings.length} reportings`);
+
+          // Check category distribution
+          const categoryCount = {};
+          allReportings.forEach(r => {
+            categoryCount[r.category] = (categoryCount[r.category] || 0) + 1;
+          });
+          console.log('📊 Category distribution from getReportingsArray:', categoryCount);
+
+          // Check first few reportings
+          console.log('📋 First 5 reportings:');
+          allReportings.slice(0, 5).forEach((r, i) => {
+            console.log(`   ${i+1}. ${r.name} - Category: "${r.category}"`);
+          });
+
+          alert(`Diagnosis complete! Check console for details.\n\nCategory distribution:\nI: ${categoryCount.I || 0}\nII: ${categoryCount.II || 0}\nIII: ${categoryCount.III || 0}`);
+
+        } catch (error) {
+          console.error('❌ Error during diagnosis:', error);
+        }
+      };
+
+      console.log('🔧 Global console functions available:');
+      console.log('   - testDataLoadingConsole()');
+      console.log('   - clearAllAssignmentsConsole()');
+      console.log('   - forceReloadAssignmentsConsole()');
+      console.log('   - diagnoseCategoryIssue() ← NEW DIAGNOSTIC TOOL');
+      console.log('   - nuclearResetConsole() ← NUCLEAR OPTION - CLEARS EVERYTHING');
+
+      // Load email notification system
+      loadEmailSystems();
+
+      // Load initial data
+      setTimeout(() => {
+        loadOverviewData();
+        loadSettings();
+      }, 1000);
+    });
+
+    // Load email notification systems
+    function loadEmailSystems() {
+      // First load the centralized reporting data manager
+      const reportingDataScript = document.createElement('script');
+      reportingDataScript.src = 'reporting-data-manager.js';
+      reportingDataScript.onload = function() {
+        console.log('✅ Centralized reporting data manager loaded');
+
+        // Use the singleton instance created by the script (don't create new instance)
+        console.log('📊 Using singleton reporting data manager:', !!window.reportingDataManager);
+
+        // Load email notification system after data manager is ready
+        loadEmailNotificationSystem();
+      };
+      document.head.appendChild(reportingDataScript);
+
+      // Also load data integration manager for comprehensive data
+      const dataManagerScript = document.createElement('script');
+      dataManagerScript.src = 'data-integration-manager.js';
+      document.head.appendChild(dataManagerScript);
+    }
+
+    function loadEmailNotificationSystem() {
+      // Create script elements to load the email systems
+      const emailSystemScript = document.createElement('script');
+      emailSystemScript.src = 'email-notification-system.js';
+      emailSystemScript.onload = function() {
+        console.log('✅ Email notification system loaded');
+        emailNotificationSystem = new EmailNotificationSystem();
+        window.emailNotificationSystem = emailNotificationSystem;
+
+        // Initialize with centralized data
+        initializeWithCentralizedData();
+      };
+      document.head.appendChild(emailSystemScript);
+
+      const submissionScript = document.createElement('script');
+      submissionScript.src = 'email-submission-handler.js';
+      submissionScript.onload = function() {
+        console.log('✅ Email submission handler loaded');
+        emailSubmissionHandler = new EmailSubmissionHandler();
+        window.emailSubmissionHandler = emailSubmissionHandler;
+      };
+      document.head.appendChild(submissionScript);
+    }
+
+    // Initialize email system with centralized reporting data
+    async function initializeWithCentralizedData() {
+      console.log('🔄 Attempting to initialize with centralized data...');
+      console.log('📊 reportingDataManager available:', !!window.reportingDataManager);
+      console.log('📧 emailNotificationSystem available:', !!emailNotificationSystem);
+
+      if (window.reportingDataManager && emailNotificationSystem) {
+        console.log('✅ Both systems available, proceeding with initialization...');
+
+        try {
+          // Load centralized data first (don't clear assignments here)
+          console.log('📊 Loading centralized data...');
+          await window.reportingDataManager.loadReportingData();
+
+          // Get all reportings from centralized data
+          const allReportings = await window.reportingDataManager.getReportingsArray();
+          console.log(`📊 Found ${allReportings.length} reportings in centralized data`);
+          console.log('📋 Sample reporting:', allReportings[0]);
+
+          // Update email system with complete reporting data
+          const initResult = await emailNotificationSystem.initializeWithReportingData(allReportings);
+          console.log('🔧 Initialization result:', initResult);
+
+          // Update category filters with centralized data
+          await updateCategoryFilters();
+
+          // Check assignments after initialization
+          setTimeout(() => {
+            const assignmentCount = Object.keys(emailNotificationSystem.assignments).length;
+            console.log(`📊 Total assignments after initialization: ${assignmentCount}`);
+            console.log('📋 Sample assignment:', Object.values(emailNotificationSystem.assignments)[0]);
+
+            // Force update the assignment table
+            if (emailNotificationSystem.updateAssignmentTable) {
+              console.log('🔄 Forcing assignment table update...');
+              emailNotificationSystem.updateAssignmentTable();
+            }
+
+            // Force update the email schedule table
+            if (emailNotificationSystem.updateEmailScheduleTable) {
+              console.log('🔄 Forcing email schedule table update...');
+              emailNotificationSystem.updateEmailScheduleTable();
+            }
+
+            // Update status display
+            updateDataStatus(allReportings.length);
+          }, 500);
+
+        } catch (error) {
+          console.error('❌ Error during initialization:', error);
+        }
+
+      } else {
+        console.log('⏳ Systems not ready yet, retrying in 500ms...');
+        // Retry after a short delay
+        setTimeout(initializeWithCentralizedData, 500);
+      }
+    }
+
+    // Update category filters with centralized data
+    async function updateCategoryFilters() {
+      console.log('🔄 Updating category filters with regulator-based data...');
+
+      try {
+        // Get all reportings to calculate counts
+        const allReportings = await window.reportingDataManager.getReportingsArray();
+
+        // Calculate regulator and category counts
+        const regulatorCounts = {};
+        const categoryCounts = {};
+
+        allReportings.forEach(reporting => {
+          const regulator = reporting.regulator;
+          const category = reporting.category;
+
+          regulatorCounts[regulator] = (regulatorCounts[regulator] || 0) + 1;
+          categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+        });
+
+        console.log('📊 Regulator counts:', regulatorCounts);
+        console.log('📊 Category counts:', categoryCounts);
+
+        // Update all category filter dropdowns
+        const categoryFilters = [
+          'scheduleCategoryFilter',
+          'assignmentCategoryFilter'
+        ];
+
+        categoryFilters.forEach(filterId => {
+          const filterElement = document.getElementById(filterId);
+          if (filterElement) {
+            // Preserve existing structure but update counts
+            const options = filterElement.querySelectorAll('option[value!="all"]');
+            options.forEach(option => {
+              const categoryValue = option.value;
+              const count = categoryCounts[categoryValue] || 0;
+
+              // Update option text to include count
+              if (categoryValue === 'I') {
+                option.textContent = `BAM - I – Situation comptable (${count})`;
+              } else if (categoryValue === 'II') {
+                option.textContent = `BAM - II – Etats de synthèse (${count})`;
+              } else if (categoryValue === 'III') {
+                option.textContent = `BAM - III – Réglementation prudentielle (${count})`;
+              } else if (categoryValue === 'BCP') {
+                option.textContent = `AMMC - BCP (${count})`;
+              } else if (categoryValue === 'BCP2S') {
+                option.textContent = `AMMC - BCP2S (${count})`;
+              } else if (categoryValue === 'BANK_AL_YOUSR') {
+                option.textContent = `AMMC - BANK AL YOUSR (${count})`;
+              } else if (categoryValue === 'DGI') {
+                option.textContent = `DGI - All Categories (${count})`;
+              }
+            });
+          }
+        });
+
+        console.log('✅ Category filters updated with regulator-based data');
+
+      } catch (error) {
+        console.error('❌ Error updating category filters:', error);
+      }
+    }
+
+    // Update data status display
+    function updateDataStatus(reportingCount) {
+      // Update the total reportings count in status cards
+      const totalReportingsElement = document.getElementById('totalReportings');
+      if (totalReportingsElement) {
+        totalReportingsElement.textContent = reportingCount;
+      }
+
+      // Update assignment summary counts
+      updateAssignmentSummary();
+
+      console.log(`✅ Email admin initialized with ${reportingCount} reportings from centralized data`);
+    }
+
+    // Update assignment summary counts
+    function updateAssignmentSummary() {
+      if (emailNotificationSystem && emailNotificationSystem.assignments) {
+        const assignments = emailNotificationSystem.assignments;
+        const assignmentKeys = Object.keys(assignments);
+
+        let fullyAssignedCount = 0;
+        let partiallyAssignedCount = 0;
+        let unassignedCount = 0;
+
+        assignmentKeys.forEach(key => {
+          const assignment = assignments[key];
+          const hasOwner = assignment.owner && assignment.owner.email;
+          const hasManager = assignment.manager && assignment.manager.email;
+          const hasSenior = assignment.senior && assignment.senior.email;
+
+          const assignedLevels = [hasOwner, hasManager, hasSenior].filter(Boolean).length;
+
+          if (assignedLevels === 3) {
+            fullyAssignedCount++;
+          } else if (assignedLevels > 0) {
+            partiallyAssignedCount++;
+          } else {
+            unassignedCount++;
+          }
+        });
+
+        // Update assignment summary cards
+        const fullyAssignedElement = document.getElementById('fullyAssigned');
+        const partiallyAssignedElement = document.getElementById('partiallyAssigned');
+        const unassignedElement = document.getElementById('unassigned');
+
+        if (fullyAssignedElement) fullyAssignedElement.textContent = fullyAssignedCount;
+        if (partiallyAssignedElement) partiallyAssignedElement.textContent = partiallyAssignedCount;
+        if (unassignedElement) unassignedElement.textContent = unassignedCount;
+
+        console.log(`📊 Assignment Summary: ${fullyAssignedCount} fully assigned, ${partiallyAssignedCount} partially assigned, ${unassignedCount} unassigned`);
+      }
+    }
+
+    // Tab management
+    function openAdminTab(evt, tabName) {
+      var i, tabcontent, tablinks;
+
+      // Hide all tab content
+      tabcontent = document.getElementsByClassName("tab-content");
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].classList.remove("active");
+      }
+
+      // Remove active class from all tabs
+      tablinks = document.getElementsByClassName("admin-tab");
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].classList.remove("active");
+      }
+
+      // Show selected tab and mark button as active
+      document.getElementById(tabName).classList.add("active");
+      evt.currentTarget.classList.add("active");
+
+      // Load tab-specific data
+      loadTabData(tabName);
+    }
+
+    // Load data for specific tab
+    function loadTabData(tabName) {
+      switch(tabName) {
+        case 'overview':
+          loadOverviewData();
+          break;
+        case 'schedule':
+          loadScheduleData();
+          break;
+        case 'assignments':
+          loadAssignmentsData();
+          break;
+        case 'history':
+          loadHistoryData();
+          break;
+        case 'settings':
+          loadSettings();
+          break;
+      }
+    }
+
+    // Load overview data
+    function loadOverviewData() {
+      console.log('📊 Loading overview data...');
+
+      if (emailNotificationSystem) {
+        // Update status cards
+        const systemStatus = emailNotificationSystem.emailConfig.enabled ? 'Active' : 'Disabled';
+        document.getElementById('systemStatus').textContent = systemStatus;
+        document.getElementById('systemStatus').style.color = emailNotificationSystem.emailConfig.enabled ? '#28A745' : '#DC3545';
+
+        // Get pending notifications
+        const today = new Date();
+        const notifications = emailNotificationSystem.generateNotificationSchedule(today);
+        const pendingNotifications = notifications.filter(n =>
+          emailNotificationSystem.shouldSendNotification(n, today)
+        );
+        document.getElementById('pendingCount').textContent = pendingNotifications.length;
+
+        // Get emails sent today
+        const todayEmails = emailNotificationSystem.emailHistory.filter(entry => {
+          const entryDate = new Date(entry.sendDate);
+          return entryDate.toDateString() === today.toDateString() && entry.status === 'sent';
+        });
+        document.getElementById('sentTodayCount').textContent = todayEmails.length;
+
+        // Get overdue reports
+        const overdueReports = emailNotificationSystem.getOverdueReports();
+        document.getElementById('overdueCount').textContent = overdueReports.length;
+
+        // Load data source information
+        loadDataSourceInfo();
+
+        // Load recent activity
+        loadRecentActivity();
+      } else {
+        setTimeout(loadOverviewData, 1000);
+      }
+    }
+
+    // Load data source information
+    async function loadDataSourceInfo() {
+      const dataSourceDiv = document.getElementById('dataSourceInfo');
+
+      if (window.reportingDataManager && emailNotificationSystem) {
+        try {
+          // Ensure data is loaded
+          await window.reportingDataManager.ensureLoaded();
+
+          const allReportings = await window.reportingDataManager.getReportingsArray();
+          const categoriesMetadata = await window.reportingDataManager.getAllCategoriesMetadata();
+
+          let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">';
+
+          // Calculate regulator breakdown
+          const regulatorCounts = {};
+          allReportings.forEach(reporting => {
+            const regulator = reporting.regulator;
+            regulatorCounts[regulator] = (regulatorCounts[regulator] || 0) + 1;
+          });
+
+          // Data source status
+          html += `
+            <div style="padding: 15px; background: #E8F5E8; border-radius: 8px; border-left: 4px solid #28A745;">
+              <h4 style="margin: 0 0 10px 0; color: #155724;">✅ Centralized Data Active</h4>
+              <div style="font-size: 14px; color: #155724;">
+                <strong>Source:</strong> ALL_REPORTINGS.json<br>
+                <strong>Total Reportings:</strong> ${allReportings.length}<br>
+                <strong>Last Updated:</strong> ${new Date().toLocaleString()}
+              </div>
+            </div>
+          `;
+
+          // Regulator breakdown
+          html += `
+            <div style="padding: 15px; background: #E3F2FD; border-radius: 8px; border-left: 4px solid #2196F3;">
+              <h4 style="margin: 0 0 10px 0; color: #1976D2;">🏛️ Regulator Breakdown</h4>
+              <div style="font-size: 14px; color: #1976D2;">
+                <strong>🏦 BAM:</strong> ${regulatorCounts.BAM || 0} reportings<br>
+                <strong>📈 AMMC:</strong> ${regulatorCounts.AMMC || 0} reportings<br>
+                <strong>🏛️ DGI:</strong> ${regulatorCounts.DGI || 0} reportings
+              </div>
+            </div>
+          `;
+
+          // Assignment status
+          const assignmentKeys = Object.keys(emailNotificationSystem.assignments || {});
+          html += `
+            <div style="padding: 15px; background: #FFF3E0; border-radius: 8px; border-left: 4px solid #FF9800;">
+              <h4 style="margin: 0 0 10px 0; color: #F57C00;">👥 Assignment Status</h4>
+              <div style="font-size: 14px; color: #F57C00;">
+                <strong>Assignments Created:</strong> ${assignmentKeys.length}<br>
+                <strong>Email System:</strong> ${emailNotificationSystem.emailConfig.enabled ? 'Enabled' : 'Disabled'}<br>
+                <strong>Data Integration:</strong> Active
+              </div>
+            </div>
+          `;
+
+          html += '</div>';
+          dataSourceDiv.innerHTML = html;
+
+        } catch (error) {
+          console.error('❌ Error loading data source info:', error);
+          dataSourceDiv.innerHTML = '<p style="text-align: center; color: #dc3545;">Error loading data source information</p>';
+        }
+      } else {
+        dataSourceDiv.innerHTML = '<p style="text-align: center; color: #666;">Loading data source information...</p>';
+      }
+    }
+
+    // Load recent activity
+    function loadRecentActivity() {
+      const recentActivityDiv = document.getElementById('recentActivity');
+
+      if (emailNotificationSystem) {
+        const recentHistory = emailNotificationSystem.emailHistory.slice(0, 10);
+
+        if (recentHistory.length === 0) {
+          recentActivityDiv.innerHTML = '<p style="text-align: center; color: #666;">No recent email activity</p>';
+          return;
+        }
+
+        let html = '<div style="display: flex; flex-direction: column; gap: 10px;">';
+
+        recentHistory.forEach(entry => {
+          const statusClass = entry.status === 'sent' ? 'status-sent' :
+                             entry.status === 'failed' ? 'status-failed' : 'status-pending';
+
+          html += `
+            <div style="padding: 15px; background: var(--background-color); border-radius: 8px; border-left: 4px solid var(--primary-color);">
+              <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 5px;">
+                <strong>${entry.reportName}</strong>
+                <span class="${statusClass}" style="font-size: 12px;">${entry.status.toUpperCase()}</span>
+              </div>
+              <div style="font-size: 14px; color: var(--text-secondary);">
+                ${entry.notificationType.replace('_', ' ')} • ${entry.category} • ${new Date(entry.sendDate).toLocaleString()}
+              </div>
+              <div style="font-size: 12px; color: var(--text-secondary); margin-top: 5px;">
+                Recipients: ${entry.recipients.length}
+              </div>
+            </div>
+          `;
+        });
+
+        html += '</div>';
+        recentActivityDiv.innerHTML = html;
+      }
+    }
+
+    // Load schedule data
+    function loadScheduleData() {
+      console.log('📅 Loading schedule data...');
+
+      if (emailNotificationSystem) {
+        emailNotificationSystem.updateEmailScheduleTable();
+      }
+    }
+
+    // Load assignments data
+    function loadAssignmentsData() {
+      console.log('👥 Loading assignments data...');
+
+      if (emailNotificationSystem) {
+        emailNotificationSystem.updateAssignmentTable();
+        // Update assignment summary counts
+        updateAssignmentSummary();
+      }
+    }
+
+    // Load history data
+    function loadHistoryData() {
+      console.log('📋 Loading history data...');
+
+      if (emailNotificationSystem) {
+        updateHistoryTable();
+      }
+    }
+
+    // Update history table
+    function updateHistoryTable() {
+      const tableBody = document.getElementById('historyTableBody');
+      if (!tableBody || !emailNotificationSystem) return;
+
+      const history = emailNotificationSystem.emailHistory;
+
+      if (history.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #666;">No email history found</td></tr>';
+        return;
+      }
+
+      let html = '';
+
+      history.slice(0, 50).forEach(entry => {
+        const statusClass = entry.status === 'sent' ? 'status-sent' :
+                           entry.status === 'failed' ? 'status-failed' : 'status-pending';
+
+        html += `
+          <tr>
+            <td>${new Date(entry.sendDate).toLocaleString()}</td>
+            <td>${entry.reportName}</td>
+            <td>${entry.category}</td>
+            <td><span class="notification-badge badge-${entry.notificationType.replace('_', '-')}">${entry.notificationType.replace('_', ' ')}</span></td>
+            <td>${entry.recipients.length} recipient(s)</td>
+            <td><span class="${statusClass}">${entry.status}</span></td>
+            <td>${entry.messageId || 'N/A'}</td>
+            <td>
+              <button onclick="viewEmailDetails('${entry.id}')" class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">View</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      tableBody.innerHTML = html;
+    }
+
+    // Load settings
+    function loadSettings() {
+      console.log('⚙️ Loading settings...');
+
+      if (emailNotificationSystem) {
+        const config = emailNotificationSystem.emailConfig;
+
+        // Load Gmail configuration fields
+        if (config.smtpAuth && config.smtpAuth.user) {
+          document.getElementById('gmailAddress').value = config.smtpAuth.user || '';
+          document.getElementById('gmailAppPassword').value = config.smtpAuth.pass || '';
+        }
+
+        // Load advanced SMTP settings
+        document.getElementById('smtpServer').value = config.smtpServer || '';
+        document.getElementById('smtpPort').value = config.smtpPort || '';
+        document.getElementById('fromEmail').value = config.fromEmail || '';
+        document.getElementById('fromName').value = config.fromName || '';
+
+        // Load system settings (check if elements exist)
+        const emailEnabledEl = document.getElementById('emailEnabled');
+        const emailSubmissionsEl = document.getElementById('emailSubmissions');
+        const replyToEmailEl = document.getElementById('replyToEmail');
+        const dashboardUrlEl = document.getElementById('dashboardUrl');
+
+        if (emailEnabledEl) emailEnabledEl.checked = config.enabled || false;
+        if (emailSubmissionsEl) emailSubmissionsEl.checked = config.enableEmailSubmissions || false;
+        if (replyToEmailEl) replyToEmailEl.value = config.replyToEmail || '';
+        if (dashboardUrlEl) dashboardUrlEl.value = config.dashboardUrl || '';
+
+        // Show Gmail status if configured
+        if (config.gmailConfigured) {
+          showGmailStatus('✅ Gmail SMTP is configured and ready', 'success');
+        }
+
+        console.log('✅ Settings loaded successfully');
+      } else {
+        console.log('⚠️ Email notification system not available for loading settings');
+      }
+    }
+
+    // Action functions
+    async function refreshAllData() {
+      console.log('🔄 Refreshing all data...');
+
+      if (window.reportingDataManager && emailNotificationSystem) {
+        try {
+          // Reload centralized data (preserve assignments)
+          console.log('📊 Reloading centralized data...');
+          await window.reportingDataManager.loadReportingData();
+
+          // Get fresh reportings
+          const allReportings = await window.reportingDataManager.getReportingsArray();
+          console.log(`📊 Refreshing with ${allReportings.length} reportings`);
+
+          // Reinitialize assignments with fresh data
+          await emailNotificationSystem.initializeWithReportingData(allReportings);
+
+          // Update all UI components
+          loadOverviewData();
+          loadScheduleData();
+          loadAssignmentsData();
+          loadHistoryData();
+
+          alert('✅ Data refreshed successfully with correct categories!');
+
+        } catch (error) {
+          console.error('❌ Error refreshing data:', error);
+          alert('❌ Error refreshing data. Check console for details.');
+        }
+      } else {
+        // Fallback to simple refresh if systems not ready
+        loadOverviewData();
+        loadScheduleData();
+        loadAssignmentsData();
+        loadHistoryData();
+        alert('✅ Data refreshed successfully!');
+      }
+    }
+
+    function testEmailSystem() {
+      if (emailNotificationSystem) {
+        emailNotificationSystem.testEmailSystem();
+      } else {
+        alert('⚠️ Email notification system not available');
+      }
+    }
+
+    function sendPendingNotifications() {
+      if (emailNotificationSystem) {
+        emailNotificationSystem.processScheduledNotifications();
+        alert('📤 Pending notifications processed! Check the history for details.');
+        setTimeout(() => {
+          loadOverviewData();
+          loadHistoryData();
+        }, 1000);
+      } else {
+        alert('⚠️ Email notification system not available');
+      }
+    }
+
+    function viewSystemLogs() {
+      if (emailNotificationSystem) {
+        const logs = emailNotificationSystem.emailHistory;
+        console.log('📋 System Logs:', logs);
+        alert(`📋 System Logs\n\nTotal entries: ${logs.length}\nCheck browser console for detailed logs.`);
+      } else {
+        alert('⚠️ Email notification system not available');
+      }
+    }
+
+    function exportEmailData() {
+      if (emailNotificationSystem) {
+        const data = {
+          config: emailNotificationSystem.emailConfig,
+          assignments: emailNotificationSystem.assignments,
+          history: emailNotificationSystem.emailHistory
+        };
+
+        const dataStr = JSON.stringify(data, null, 2);
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        const url = URL.createObjectURL(dataBlob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `email-system-data-${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+
+        URL.revokeObjectURL(url);
+        alert('📊 Email system data exported successfully!');
+      } else {
+        alert('⚠️ Email notification system not available');
+      }
+    }
+
+    function simulateEmailSubmission() {
+      if (emailSubmissionHandler) {
+        const reportName = prompt('Enter report name for simulation:');
+        const category = prompt('Enter category (I, II, or III):');
+
+        if (reportName && category) {
+          window.simulateEmailSubmission(
+            reportName,
+            category,
+            'sample_report.xlsx',
+            'simulated file content'
+          );
+
+          alert('✅ Email submission simulated successfully!\nCheck the console for processing details.');
+          setTimeout(() => {
+            loadOverviewData();
+            loadHistoryData();
+          }, 1000);
+        }
+      } else {
+        alert('⚠️ Email submission handler not available');
+      }
+    }
+
+    function refreshRecentActivity() {
+      loadRecentActivity();
+    }
+
+    function refreshDataSource() {
+      loadDataSourceInfo();
+      updateAssignmentSummary();
+      alert('✅ Data source information refreshed!');
+    }
+
+    function refreshSchedule() {
+      loadScheduleData();
+    }
+
+    async function forceReloadAssignments() {
+      console.log('🔄 Force reloading assignments with centralized data...');
+
+      if (window.reportingDataManager && emailNotificationSystem) {
+        try {
+          // Reload centralized data
+          await window.reportingDataManager.loadReportingData();
+
+          // Validate data integrity first
+          const validation = await window.reportingDataManager.validateData();
+          console.log('📊 Data validation:', validation);
+
+          // Get fresh reporting data
+          const allReportings = await window.reportingDataManager.getReportingsArray();
+          console.log(`📊 Reloading with ${allReportings.length} reportings`);
+
+          // Clear existing assignments completely
+          console.log('🗑️ Clearing existing assignments...');
+          emailNotificationSystem.assignments = {};
+
+          // Force reinitialize with fresh data
+          console.log('🔄 Reinitializing with fresh data...');
+          await emailNotificationSystem.initializeWithReportingData(allReportings);
+
+          // Check assignment distribution
+          const assignmentRegulators = {};
+          const assignmentCategories = {};
+          Object.values(emailNotificationSystem.assignments).forEach(assignment => {
+            const regulator = assignment.regulator || 'BAM'; // Default to BAM for backward compatibility
+            const category = assignment.category;
+            assignmentRegulators[regulator] = (assignmentRegulators[regulator] || 0) + 1;
+            assignmentCategories[category] = (assignmentCategories[category] || 0) + 1;
+          });
+          console.log('📊 Assignment regulator distribution:', assignmentRegulators);
+          console.log('📊 Assignment category distribution:', assignmentCategories);
+
+          // Update UI
+          await updateCategoryFilters();
+          emailNotificationSystem.updateAssignmentTable();
+          updateAssignmentSummary();
+          loadDataSourceInfo();
+
+          alert(`✅ Assignments reloaded successfully!\n\nTotal reportings: ${allReportings.length}\nAssignments created: ${Object.keys(emailNotificationSystem.assignments).length}\n\nRegulator distribution:\n🏦 BAM: ${assignmentRegulators.BAM || 0}\n📈 AMMC: ${assignmentRegulators.AMMC || 0}\n🏛️ DGI: ${assignmentRegulators.DGI || 0}\n\nCategory distribution:\nI: ${assignmentCategories.I || 0}\nII: ${assignmentCategories.II || 0}\nIII: ${assignmentCategories.III || 0}\nBCP: ${assignmentCategories.BCP || 0}\nBCP2S: ${assignmentCategories.BCP2S || 0}\nBANK_AL_YOUSR: ${assignmentCategories.BANK_AL_YOUSR || 0}\nDGI: ${assignmentCategories.DGI || 0}`);
+
+        } catch (error) {
+          console.error('❌ Error force reloading assignments:', error);
+          alert('❌ Error reloading assignments. Check console for details.');
+        }
+      } else {
+        alert('⚠️ Systems not ready. Please wait and try again.');
+      }
+    }
+
+    function clearAllAssignments() {
+      if (confirm('⚠️ Are you sure you want to clear ALL assignments? This action cannot be undone.')) {
+        if (emailNotificationSystem) {
+          emailNotificationSystem.clearAllAssignments();
+          emailNotificationSystem.updateAssignmentTable();
+          updateAssignmentSummary();
+          loadDataSourceInfo();
+          alert('✅ All assignments cleared successfully!');
+        } else {
+          alert('⚠️ Email notification system not available');
+        }
+      }
+    }
+
+    async function testDataLoading() {
+      console.log('🧪 Testing data loading process...');
+
+      if (!window.reportingDataManager) {
+        alert('❌ Reporting data manager not available');
+        return;
+      }
+
+      try {
+        // Test data loading
+        await window.reportingDataManager.loadReportingData();
+        console.log('✅ Data loaded successfully');
+
+        // Test getReportingsArray
+        const allReportings = await window.reportingDataManager.getReportingsArray();
+        console.log(`📊 Total reportings: ${allReportings.length}`);
+
+        // Check category distribution
+        const categoryDistribution = {};
+        allReportings.forEach(reporting => {
+          categoryDistribution[reporting.category] = (categoryDistribution[reporting.category] || 0) + 1;
+        });
+        console.log('📊 Category distribution:', categoryDistribution);
+
+        // Test individual categories
+        for (const cat of ['I', 'II', 'III']) {
+          const catReportings = await window.reportingDataManager.getReportingsArray(cat);
+          console.log(`📋 Category ${cat}: ${catReportings.length} reportings`);
+          if (catReportings.length > 0) {
+            console.log(`   Sample: ${catReportings[0].name} (Category: ${catReportings[0].category})`);
+          }
+        }
+
+        // Test validation
+        const validation = await window.reportingDataManager.validateData();
+        console.log('📊 Data validation:', validation);
+
+        alert(`🧪 Data Loading Test Results:\n\nTotal: ${allReportings.length} reportings\nCategory I: ${categoryDistribution.I || 0}\nCategory II: ${categoryDistribution.II || 0}\nCategory III: ${categoryDistribution.III || 0}\n\nValidation: ${validation.isValid ? 'PASSED' : 'FAILED'}\n\nCheck console for detailed logs.`);
+
+      } catch (error) {
+        console.error('❌ Error testing data loading:', error);
+        alert('❌ Error testing data loading. Check console for details.');
+      }
+    }
+
+    function debugEmailSystem() {
+      console.log('🔍 DEBUG: Email System State');
+      console.log('='.repeat(50));
+
+      // Check system availability
+      console.log('📊 reportingDataManager:', !!window.reportingDataManager);
+      console.log('📧 emailNotificationSystem:', !!emailNotificationSystem);
+
+      if (window.reportingDataManager) {
+        const allReportings = window.reportingDataManager.getAllReportings();
+        console.log(`📊 Centralized reportings count: ${allReportings.length}`);
+        console.log('📋 First 3 reportings:', allReportings.slice(0, 3));
+      }
+
+      if (emailNotificationSystem) {
+        const assignmentCount = Object.keys(emailNotificationSystem.assignments).length;
+        console.log(`📧 Email assignments count: ${assignmentCount}`);
+        console.log('📋 First 3 assignments:', Object.entries(emailNotificationSystem.assignments).slice(0, 3));
+        console.log('⚙️ Email config:', emailNotificationSystem.emailConfig);
+      }
+
+      // Check DOM elements
+      const tableBody = document.getElementById('assignmentTableBody');
+      console.log('🏗️ Assignment table body exists:', !!tableBody);
+      if (tableBody) {
+        console.log('📄 Table body content length:', tableBody.innerHTML.length);
+        console.log('📄 Table body content preview:', tableBody.innerHTML.substring(0, 200));
+      }
+
+      alert('🔍 Debug information logged to console. Check browser console (F12) for details.');
+    }
+
+    function forceReloadAssignments() {
+      console.log('🔄 Force reloading assignments...');
+
+      if (window.reportingDataManager && emailNotificationSystem) {
+        // Clear existing assignments
+        emailNotificationSystem.assignments = {};
+
+        // Reinitialize with centralized data
+        const allReportings = window.reportingDataManager.getAllReportings();
+        emailNotificationSystem.initializeWithReportingData(allReportings);
+
+        // Force UI update
+        setTimeout(() => {
+          emailNotificationSystem.updateAssignmentTable();
+          updateAssignmentSummary();
+          loadDataSourceInfo();
+        }, 500);
+
+        alert('✅ Assignments reloaded! Check the assignments tab.');
+      } else {
+        alert('❌ Systems not available for reload.');
+      }
+    }
+
+    function addManualNotification() {
+      alert('➕ Add Manual Notification - Coming Soon!\n\nThis will open a modal to:\n- Select report and recipients\n- Set custom send date\n- Choose notification type\n- Add custom message');
+    }
+
+    function importAssignments() {
+      alert('📥 Import Assignments - Coming Soon!\n\nThis will allow you to:\n- Upload CSV file with assignments\n- Map columns to assignment fields\n- Validate and preview changes\n- Bulk import assignments');
+    }
+
+    function exportAssignments() {
+      if (emailNotificationSystem) {
+        const assignments = emailNotificationSystem.assignments;
+
+        // Convert to CSV format
+        let csvContent = 'Report Name,Category,Owner Name,Owner Email,Manager Name,Manager Email,Senior Name,Senior Email,Email Enabled\n';
+
+        Object.values(assignments).forEach(assignment => {
+          csvContent += `"${assignment.reportName}","${assignment.category}","${assignment.owner.name}","${assignment.owner.email}","${assignment.manager.name}","${assignment.manager.email}","${assignment.senior.name}","${assignment.senior.email}","${assignment.emailEnabled}"\n`;
+        });
+
+        const csvBlob = new Blob([csvContent], {type: 'text/csv'});
+        const url = URL.createObjectURL(csvBlob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `email-assignments-${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+
+        URL.revokeObjectURL(url);
+        alert('📤 Assignments exported successfully!');
+      } else {
+        alert('⚠️ Email notification system not available');
+      }
+    }
+
+    function bulkAssignModal() {
+      alert('📋 Bulk Assignment Modal - Coming Soon!\n\nThis will open a modal to:\n- Assign multiple reports to users\n- Set default assignments by category\n- Manage user roles and permissions\n- Apply templates to multiple reports');
+    }
+
+    function clearHistory() {
+      if (confirm('🗑️ Are you sure you want to clear all email history?\n\nThis action cannot be undone.')) {
+        if (emailNotificationSystem) {
+          emailNotificationSystem.emailHistory = [];
+          emailNotificationSystem.saveEmailHistory();
+          loadHistoryData();
+          loadOverviewData();
+          alert('✅ Email history cleared successfully!');
+        }
+      }
+    }
+
+    function exportHistory() {
+      if (emailNotificationSystem) {
+        const history = emailNotificationSystem.emailHistory;
+
+        const dataStr = JSON.stringify(history, null, 2);
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        const url = URL.createObjectURL(dataBlob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `email-history-${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+
+        URL.revokeObjectURL(url);
+        alert('📊 Email history exported successfully!');
+      } else {
+        alert('⚠️ Email notification system not available');
+      }
+    }
+
+    function saveSettings() {
+      if (emailNotificationSystem) {
+        const config = emailNotificationSystem.emailConfig;
+
+        config.smtpServer = document.getElementById('smtpServer').value;
+        config.smtpPort = parseInt(document.getElementById('smtpPort').value) || 587;
+        config.fromEmail = document.getElementById('fromEmail').value;
+        config.fromName = document.getElementById('fromName').value;
+        config.enabled = document.getElementById('emailEnabled').checked;
+        config.enableEmailSubmissions = document.getElementById('emailSubmissions').checked;
+        config.replyToEmail = document.getElementById('replyToEmail').value;
+        config.dashboardUrl = document.getElementById('dashboardUrl').value;
+
+        emailNotificationSystem.saveEmailConfig();
+
+        alert('💾 Settings saved successfully!');
+        loadOverviewData();
+      } else {
+        alert('⚠️ Email notification system not available');
+      }
+    }
+
+    function viewEmailDetails(entryId) {
+      if (emailNotificationSystem) {
+        const entry = emailNotificationSystem.emailHistory.find(e => e.id === entryId);
+
+        if (entry) {
+          let details = `📧 Email Details\n\n`;
+          details += `Report: ${entry.reportName}\n`;
+          details += `Category: ${entry.category}\n`;
+          details += `Type: ${entry.notificationType}\n`;
+          details += `Status: ${entry.status}\n`;
+          details += `Sent: ${new Date(entry.sendDate).toLocaleString()}\n`;
+          details += `Message ID: ${entry.messageId || 'N/A'}\n`;
+          details += `Recipients: ${entry.recipients.length}\n\n`;
+
+          if (entry.recipients.length > 0) {
+            details += `Recipients:\n`;
+            entry.recipients.forEach(r => {
+              details += `- ${r.name} (${r.email}) - ${r.role}\n`;
+            });
+          }
+
+          if (entry.error) {
+            details += `\nError: ${entry.error}`;
+          }
+
+          alert(details);
+        } else {
+          alert('Email details not found');
+        }
+      }
+    }
+
+    // Filter functions
+    function filterSchedule() {
+      const regulatorFilter = document.getElementById('scheduleRegulatorFilter').value;
+      const typeFilter = document.getElementById('scheduleTypeFilter').value;
+      const categoryFilter = document.getElementById('scheduleCategoryFilter').value;
+      const searchInput = document.getElementById('scheduleSearchInput').value.toLowerCase();
+
+      console.log('🔍 Filtering schedule:', {
+        regulator: regulatorFilter,
+        type: typeFilter,
+        category: categoryFilter,
+        search: searchInput
+      });
+
+      if (emailNotificationSystem) {
+        emailNotificationSystem.updateEmailScheduleTable(typeFilter, categoryFilter, searchInput, regulatorFilter);
+      }
+    }
+
+    function filterAssignments() {
+      const regulatorFilter = document.getElementById('assignmentRegulatorFilter').value;
+      const categoryFilter = document.getElementById('assignmentCategoryFilter').value;
+      const statusFilter = document.getElementById('assignmentStatusFilter').value;
+      const searchInput = document.getElementById('assignmentSearchInput').value.toLowerCase();
+
+      console.log('🔍 Filtering assignments:', {
+        regulator: regulatorFilter,
+        category: categoryFilter,
+        status: statusFilter,
+        search: searchInput
+      });
+
+      if (emailNotificationSystem) {
+        emailNotificationSystem.updateAssignmentTable(categoryFilter, searchInput, regulatorFilter);
+      }
+    }
+
+    // Enhanced assignment management functions
+    function enableQuickEdit(cellId, assignmentKey, level, field) {
+      // Hide display div and show edit div
+      const displayDiv = document.querySelector(`#${cellId.replace(/[^a-zA-Z0-9_]/g, '\\$&')}`).parentElement.querySelector('div:first-child');
+      const editDiv = document.getElementById(`${cellId}_edit`);
+
+      if (displayDiv && editDiv) {
+        displayDiv.style.display = 'none';
+        editDiv.style.display = 'block';
+
+        // Focus on input
+        const input = editDiv.querySelector('input');
+        if (input) {
+          input.focus();
+          input.select();
+        }
+      }
+    }
+
+    function handleQuickEditKeypress(event, cellId, assignmentKey, level, field) {
+      if (event.key === 'Enter') {
+        saveQuickEdit(cellId, assignmentKey, level, field);
+      } else if (event.key === 'Escape') {
+        cancelQuickEdit(cellId);
+      }
+    }
+
+    function saveQuickEdit(cellId, assignmentKey, level, field) {
+      const editDiv = document.getElementById(`${cellId}_edit`);
+      const input = editDiv.querySelector('input');
+      const newValue = input.value.trim();
+
+      if (emailNotificationSystem && emailNotificationSystem.assignments[assignmentKey]) {
+        // Update the assignment
+        emailNotificationSystem.assignments[assignmentKey][level][field] = newValue;
+        emailNotificationSystem.assignments[assignmentKey].lastModified = new Date().toISOString();
+        emailNotificationSystem.saveAssignments();
+
+        // Refresh the table and summary
+        emailNotificationSystem.updateAssignmentTable();
+        updateAssignmentSummary();
+
+        console.log(`✅ Updated ${level} ${field} for ${assignmentKey}: ${newValue}`);
+      }
+    }
+
+    function cancelQuickEdit(cellId) {
+      const displayDiv = document.querySelector(`#${cellId.replace(/[^a-zA-Z0-9_]/g, '\\$&')}`).parentElement.querySelector('div:first-child');
+      const editDiv = document.getElementById(`${cellId}_edit`);
+
+      if (displayDiv && editDiv) {
+        displayDiv.style.display = 'block';
+        editDiv.style.display = 'none';
+      }
+    }
+
+    function editAssignmentDetailed(assignmentKey) {
+      if (emailNotificationSystem) {
+        const assignment = emailNotificationSystem.assignments[assignmentKey];
+        if (assignment) {
+          // Create detailed edit modal
+          const modalContent = `
+            <div style="max-width: 600px; margin: 20px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+              <h2 style="color: var(--primary-color); margin-bottom: 20px;">📝 Edit Assignment: ${assignment.reportName}</h2>
+              <p style="color: var(--text-secondary); margin-bottom: 25px;">Category: ${emailNotificationSystem.formatCategoryDisplay(assignment.category)}</p>
+
+              <div style="display: grid; gap: 20px;">
+                <!-- Report Owner -->
+                <div style="padding: 15px; background: #E3F2FD; border-radius: 8px; border-left: 4px solid #2196F3;">
+                  <h3 style="margin: 0 0 10px 0; color: #1976D2;">📧 Report Owner (Level 1)</h3>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <input type="text" placeholder="Full Name" value="${assignment.owner.name || ''}" id="edit_owner_name" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <input type="email" placeholder="email@company.com" value="${assignment.owner.email || ''}" id="edit_owner_email" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                  </div>
+                  <small style="color: #666; margin-top: 5px; display: block;">Receives 30d and 7d reminder notifications</small>
+                </div>
+
+                <!-- Manager -->
+                <div style="padding: 15px; background: #FFF3E0; border-radius: 8px; border-left: 4px solid #FF9800;">
+                  <h3 style="margin: 0 0 10px 0; color: #F57C00;">👔 Manager (Level 2)</h3>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <input type="text" placeholder="Full Name" value="${assignment.manager.name || ''}" id="edit_manager_name" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <input type="email" placeholder="email@company.com" value="${assignment.manager.email || ''}" id="edit_manager_email" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                  </div>
+                  <small style="color: #666; margin-top: 5px; display: block;">Receives 7d, 2d warnings and overdue notifications</small>
+                </div>
+
+                <!-- Senior Management -->
+                <div style="padding: 15px; background: #FFEBEE; border-radius: 8px; border-left: 4px solid #F44336;">
+                  <h3 style="margin: 0 0 10px 0; color: #D32F2F;">🏢 Senior Management (Level 3)</h3>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <input type="text" placeholder="Full Name" value="${assignment.senior.name || ''}" id="edit_senior_name" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <input type="email" placeholder="email@company.com" value="${assignment.senior.email || ''}" id="edit_senior_email" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                  </div>
+                  <small style="color: #666; margin-top: 5px; display: block;">Receives 2d warnings and overdue notifications</small>
+                </div>
+              </div>
+
+              <div style="margin-top: 25px; text-align: center;">
+                <button onclick="saveDetailedAssignment('${assignmentKey}')" style="background: var(--success-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; margin-right: 10px; cursor: pointer;">💾 Save Changes</button>
+                <button onclick="closeDetailedEdit()" style="background: var(--danger-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">❌ Cancel</button>
+              </div>
+            </div>
+          `;
+
+          // Create modal overlay
+          const overlay = document.createElement('div');
+          overlay.id = 'editAssignmentModal';
+          overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;';
+          overlay.innerHTML = modalContent;
+
+          document.body.appendChild(overlay);
+
+          // Close on overlay click
+          overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) {
+              closeDetailedEdit();
+            }
+          });
+        }
+      }
+    }
+
+    function saveDetailedAssignment(assignmentKey) {
+      if (emailNotificationSystem && emailNotificationSystem.assignments[assignmentKey]) {
+        const assignment = emailNotificationSystem.assignments[assignmentKey];
+
+        // Get values from form
+        assignment.owner.name = document.getElementById('edit_owner_name').value.trim();
+        assignment.owner.email = document.getElementById('edit_owner_email').value.trim();
+        assignment.manager.name = document.getElementById('edit_manager_name').value.trim();
+        assignment.manager.email = document.getElementById('edit_manager_email').value.trim();
+        assignment.senior.name = document.getElementById('edit_senior_name').value.trim();
+        assignment.senior.email = document.getElementById('edit_senior_email').value.trim();
+        assignment.lastModified = new Date().toISOString();
+
+        // Save and refresh
+        emailNotificationSystem.saveAssignments();
+        emailNotificationSystem.updateAssignmentTable();
+
+        // Update assignment summary counts
+        updateAssignmentSummary();
+
+        closeDetailedEdit();
+
+        alert('✅ Assignment updated successfully!');
+        console.log(`✅ Updated detailed assignment for ${assignmentKey}`);
+      }
+    }
+
+    function closeDetailedEdit() {
+      const modal = document.getElementById('editAssignmentModal');
+      if (modal) {
+        modal.remove();
+      }
+    }
+
+    function copyAssignment(assignmentKey) {
+      if (emailNotificationSystem) {
+        const assignment = emailNotificationSystem.assignments[assignmentKey];
+        if (assignment) {
+          // Store in clipboard data
+          window.copiedAssignment = {
+            owner: { ...assignment.owner },
+            manager: { ...assignment.manager },
+            senior: { ...assignment.senior }
+          };
+
+          alert(`📋 Assignment copied for ${assignment.reportName}!\n\nYou can now paste this assignment to other reports using the Bulk Assign feature.`);
+          console.log('📋 Assignment copied:', window.copiedAssignment);
+        }
+      }
+    }
+
+    function clearAssignment(assignmentKey) {
+      if (confirm('🗑️ Are you sure you want to clear all assignments for this reporting?\n\nThis will remove all assigned persons from all three escalation levels.')) {
+        if (emailNotificationSystem && emailNotificationSystem.assignments[assignmentKey]) {
+          const assignment = emailNotificationSystem.assignments[assignmentKey];
+
+          // Clear all assignments
+          assignment.owner = { name: '', email: '', phone: '' };
+          assignment.manager = { name: '', email: '', phone: '' };
+          assignment.senior = { name: '', email: '', phone: '' };
+          assignment.lastModified = new Date().toISOString();
+
+          // Save and refresh
+          emailNotificationSystem.saveAssignments();
+          emailNotificationSystem.updateAssignmentTable();
+
+          // Update assignment summary counts
+          updateAssignmentSummary();
+
+          alert('✅ Assignment cleared successfully!');
+          console.log(`🗑️ Cleared assignment for ${assignmentKey}`);
+        }
+      }
+    }
+
+    function filterHistory() {
+      // Implementation for history filtering
+      console.log('🔍 Filtering history...');
+    }
+
+    // Global functions for assignment management
+    function toggleEmailEnabled(assignmentKey, enabled) {
+      if (emailNotificationSystem) {
+        const assignment = emailNotificationSystem.assignments[assignmentKey];
+        if (assignment) {
+          assignment.emailEnabled = enabled;
+          emailNotificationSystem.saveAssignments();
+          console.log(`📧 Email notifications ${enabled ? 'enabled' : 'disabled'} for ${assignment.reportName}`);
+        }
+      }
+    }
+
+    function editAssignment(assignmentKey) {
+      if (emailNotificationSystem) {
+        const assignment = emailNotificationSystem.assignments[assignmentKey];
+        if (assignment) {
+          let editText = `📝 Edit Assignment: ${assignment.reportName}\n\n`;
+          editText += `Current assignments:\n`;
+          editText += `Owner: ${assignment.owner.name || 'Not set'} (${assignment.owner.email || 'No email'})\n`;
+          editText += `Manager: ${assignment.manager.name || 'Not set'} (${assignment.manager.email || 'No email'})\n`;
+          editText += `Senior: ${assignment.senior.name || 'Not set'} (${assignment.senior.email || 'No email'})\n\n`;
+          editText += `This will open a detailed assignment editor in the full implementation.`;
+
+          alert(editText);
+        }
+      }
+    }
+
+    function viewNotificationDetails(notificationId) {
+      if (emailNotificationSystem) {
+        const history = emailNotificationSystem.emailHistory;
+        const notification = history.find(n => n.notificationId === notificationId);
+
+        if (notification) {
+          let details = `📧 Notification Details\n\n`;
+          details += `Report: ${notification.reportName}\n`;
+          details += `Category: ${notification.category}\n`;
+          details += `Type: ${notification.notificationType}\n`;
+          details += `Status: ${notification.status}\n`;
+          details += `Sent: ${new Date(notification.sendDate).toLocaleString()}\n`;
+          details += `Recipients: ${notification.recipients.length}\n\n`;
+
+          if (notification.recipients.length > 0) {
+            details += `Recipients:\n`;
+            notification.recipients.forEach(r => {
+              details += `- ${r.name} (${r.email}) - ${r.role}\n`;
+            });
+          }
+
+          alert(details);
+        } else {
+          alert('Notification details not found');
+        }
+      }
+    }
+
+    // Test email sending with assignments
+    async function testEmailSending() {
+      console.log('📧 TESTING EMAIL SENDING WITH ASSIGNMENTS...');
+      console.log('='.repeat(50));
+
+      if (!emailNotificationSystem) {
+        console.log('❌ Email system not available');
+        alert('❌ Email system not available');
+        return;
+      }
+
+      try {
+        // Find an assignment with email data
+        const assignments = emailNotificationSystem.assignments;
+        const assignmentWithEmails = Object.values(assignments).find(a =>
+          (a.owner && a.owner.email) ||
+          (a.manager && a.manager.email) ||
+          (a.senior && a.senior.email)
+        );
+
+        if (!assignmentWithEmails) {
+          console.log('❌ No assignments with email addresses found');
+          alert('❌ No assignments with email addresses found.\n\nPlease add email addresses to some assignments first in the Assignments tab.');
+          return;
+        }
+
+        console.log('📋 Testing with assignment:', assignmentWithEmails.reportName);
+        console.log('📧 Available emails:', {
+          owner: assignmentWithEmails.owner?.email || 'none',
+          manager: assignmentWithEmails.manager?.email || 'none',
+          senior: assignmentWithEmails.senior?.email || 'none'
+        });
+
+        // Create a test notification
+        const testNotification = {
+          id: `test_${Date.now()}`,
+          reportName: assignmentWithEmails.reportName,
+          category: assignmentWithEmails.category,
+          deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+          sendDate: new Date(),
+          notificationType: '7d_reminder',
+          escalationLevel: ['owner', 'manager', 'senior'],
+          assignment: assignmentWithEmails,
+          status: 'test'
+        };
+
+        // Get recipients
+        const recipients = emailNotificationSystem.getNotificationRecipients(testNotification);
+        console.log('📧 Recipients:', recipients);
+
+        if (recipients.length === 0) {
+          console.log('❌ No valid recipients found');
+          alert('❌ No valid recipients found.\n\nPlease ensure email addresses are properly entered.');
+          return;
+        }
+
+        // Generate email content
+        const emailContent = emailNotificationSystem.generateEmailContent(testNotification);
+        console.log('📧 Email subject:', emailContent.subject);
+
+        // Send test email
+        console.log('📤 Sending test email...');
+        const result = await emailNotificationSystem.sendActualEmail(recipients, emailContent);
+
+        if (result.success) {
+          console.log('✅ Test email sent successfully!');
+          console.log('📧 Message ID:', result.messageId);
+          console.log('📧 Service:', result.service);
+          alert(`✅ Test email sent successfully!\n\nRecipients: ${recipients.length}\nSubject: ${emailContent.subject}\nService: ${result.service}\n\nCheck the Email History tab for details.`);
+        } else {
+          console.log('❌ Test email failed:', result.error);
+          alert(`❌ Test email failed: ${result.error}`);
+        }
+
+      } catch (error) {
+        console.error('❌ Error testing email sending:', error);
+        alert('❌ Error testing email sending: ' + error.message);
+      }
+
+      console.log('='.repeat(50));
+    }
+
+    // Make test function available globally
+    window.testEmailSendingConsole = testEmailSending;
+
+    // Force update email schedule
+    function forceUpdateEmailSchedule() {
+      console.log('🔄 FORCING EMAIL SCHEDULE UPDATE...');
+      console.log('='.repeat(50));
+
+      if (!emailNotificationSystem) {
+        console.log('❌ Email system not available');
+        alert('❌ Email system not available');
+        return;
+      }
+
+      try {
+        console.log('📊 Current assignments:', Object.keys(emailNotificationSystem.assignments).length);
+
+        // Check if assignments have email enabled
+        const enabledAssignments = Object.values(emailNotificationSystem.assignments).filter(a => a.emailEnabled);
+        console.log('📧 Email-enabled assignments:', enabledAssignments.length);
+
+        if (enabledAssignments.length === 0) {
+          console.log('⚠️ No assignments have email enabled');
+          alert('⚠️ No assignments have email enabled. All assignments have emailEnabled=true by default, but something might be wrong.');
+        }
+
+        // Force update the email schedule table
+        console.log('🔄 Calling updateEmailScheduleTable...');
+        emailNotificationSystem.updateEmailScheduleTable();
+
+        // Also update the entire UI
+        console.log('🔄 Calling updateEmailSystemUI...');
+        emailNotificationSystem.updateEmailSystemUI();
+
+        console.log('✅ Email schedule update completed');
+        alert('✅ Email schedule update completed! Check the Email Schedule tab.');
+
+      } catch (error) {
+        console.error('❌ Error updating email schedule:', error);
+        alert('❌ Error updating email schedule: ' + error.message);
+      }
+
+      console.log('='.repeat(50));
+    }
+
+    // Make function available globally
+    window.forceUpdateEmailScheduleConsole = forceUpdateEmailSchedule;
+
+    // Debug function to manually trigger email schedule update
+    window.debugEmailSchedule = function() {
+      console.log('🔧 DEBUG EMAIL SCHEDULE');
+      console.log('='.repeat(50));
+
+      if (!emailNotificationSystem) {
+        console.log('❌ Email notification system not available');
+        return;
+      }
+
+      console.log('📊 System status:');
+      console.log('  - Assignments:', Object.keys(emailNotificationSystem.assignments).length);
+      console.log('  - Email enabled assignments:', Object.values(emailNotificationSystem.assignments).filter(a => a.emailEnabled).length);
+
+      // Generate notifications
+      const today = new Date();
+      const notifications = emailNotificationSystem.generateNotificationSchedule(today);
+      console.log('📧 Generated notifications:', notifications.length);
+
+      // Show breakdown by type
+      const byType = {};
+      notifications.forEach(n => {
+        byType[n.notificationType] = (byType[n.notificationType] || 0) + 1;
+      });
+      console.log('📊 Breakdown by type:', byType);
+
+      // Force update table
+      console.log('🔄 Forcing table update...');
+      emailNotificationSystem.updateEmailScheduleTable();
+
+      console.log('✅ Debug complete');
+      console.log('='.repeat(50));
+    };
+
+    // Gmail Configuration Functions
+    function configureGmail() {
+      const gmailAddress = document.getElementById('gmailAddress').value.trim();
+      const gmailAppPassword = document.getElementById('gmailAppPassword').value.trim();
+      const statusDiv = document.getElementById('gmailStatus');
+
+      if (!gmailAddress || !gmailAppPassword) {
+        showGmailStatus('❌ Please enter both Gmail address and App Password', 'error');
+        return;
+      }
+
+      if (!gmailAddress.includes('@gmail.com')) {
+        showGmailStatus('❌ Please enter a valid Gmail address', 'error');
+        return;
+      }
+
+      if (gmailAppPassword.length !== 16) {
+        showGmailStatus('❌ App Password should be 16 characters long', 'error');
+        return;
+      }
+
+      try {
+        // Configure Gmail in the email system
+        if (emailNotificationSystem) {
+          const result = emailNotificationSystem.configureGmail(gmailAddress, gmailAppPassword);
+
+          if (result) {
+            // Update UI fields
+            document.getElementById('fromEmail').value = gmailAddress;
+            document.getElementById('replyToEmail').value = gmailAddress;
+
+            showGmailStatus('✅ Gmail SMTP configured successfully! You can now send real emails.', 'success');
+
+            // Save settings
+            saveSettings();
+          } else {
+            showGmailStatus('❌ Failed to configure Gmail SMTP', 'error');
+          }
+        } else {
+          showGmailStatus('❌ Email system not available', 'error');
+        }
+      } catch (error) {
+        console.error('Error configuring Gmail:', error);
+        showGmailStatus('❌ Error configuring Gmail: ' + error.message, 'error');
+      }
+    }
+
+    async function testGmailConnection() {
+      const statusDiv = document.getElementById('gmailStatus');
+
+      if (!emailNotificationSystem) {
+        showGmailStatus('❌ Email system not available', 'error');
+        return;
+      }
+
+      if (!emailNotificationSystem.emailConfig.gmailConfigured) {
+        showGmailStatus('❌ Please configure Gmail first', 'error');
+        return;
+      }
+
+      try {
+        showGmailStatus('🧪 Testing Gmail SMTP connection...', 'info');
+
+        const result = await emailNotificationSystem.testGmailConnection();
+
+        if (result.success) {
+          showGmailStatus(`✅ ${result.message}`, 'success');
+        } else {
+          showGmailStatus(`❌ Test failed: ${result.error}`, 'error');
+        }
+      } catch (error) {
+        console.error('Error testing Gmail connection:', error);
+        showGmailStatus('❌ Error testing connection: ' + error.message, 'error');
+      }
+    }
+
+    function showGmailStatus(message, type) {
+      const statusDiv = document.getElementById('gmailStatus');
+
+      // Set background color based on type
+      let backgroundColor, textColor;
+      switch (type) {
+        case 'success':
+          backgroundColor = '#D4EDDA';
+          textColor = '#155724';
+          break;
+        case 'error':
+          backgroundColor = '#F8D7DA';
+          textColor = '#721C24';
+          break;
+        case 'info':
+          backgroundColor = '#D1ECF1';
+          textColor = '#0C5460';
+          break;
+        default:
+          backgroundColor = '#F8F9FA';
+          textColor = '#495057';
+      }
+
+      statusDiv.style.backgroundColor = backgroundColor;
+      statusDiv.style.color = textColor;
+      statusDiv.style.border = `1px solid ${textColor}`;
+      statusDiv.style.display = 'block';
+      statusDiv.textContent = message;
+
+      // Auto-hide success messages after 5 seconds
+      if (type === 'success') {
+        setTimeout(() => {
+          statusDiv.style.display = 'none';
+        }, 5000);
+      }
+    }
+  </script>
+</body>
+</html>

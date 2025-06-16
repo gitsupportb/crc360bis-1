@@ -1,0 +1,19 @@
+Test Upload File - Fixed Version
+
+This is a test file to verify that the hierarchical upload functionality works without errors.
+
+Authority: BAM
+Category: III – Etats relatifs à la réglementation prudentielle
+Report: Reporting réglementaire IRRBB
+Date: June 2025
+
+Expected upload path:
+UPLOADED_REPORTINGS/BAM/III___Etats_relatifs_à_la_réglementation_prudentielle/Reporting_réglementaire_IRRBB/2025/6/test_upload_fixed.txt
+
+This test should verify:
+1. ✅ Upload logging works without errors
+2. ✅ File manager refresh works without errors
+3. ✅ Hierarchical folder structure is created correctly
+4. ✅ Upload success message is displayed
+
+Test completed successfully if no errors appear in the logs.

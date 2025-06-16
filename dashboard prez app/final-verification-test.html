@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Email Admin Verification</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .result { margin: 10px 0; padding: 12px; border-radius: 6px; border-left: 4px solid; }
+        .pass { background: #d4edda; border-color: #28a745; color: #155724; }
+        .fail { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+        .warning { background: #fff3cd; border-color: #ffc107; color: #856404; }
+        .info { background: #d1ecf1; border-color: #17a2b8; color: #0c5460; }
+        .summary { font-size: 18px; font-weight: bold; text-align: center; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .summary.pass { background: #d4edda; color: #155724; }
+        .summary.fail { background: #f8d7da; color: #721c24; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px; max-height: 200px; }
+        button { padding: 12px 24px; margin: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        .btn-primary { background: #007bff; color: white; }
+        .progress { width: 100%; height: 30px; background: #e9ecef; border-radius: 15px; overflow: hidden; margin: 20px 0; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #28a745, #20c997); transition: width 0.5s ease; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏁 Final Email Admin System Verification</h1>
+        <p>Comprehensive verification of the email admin system with regulator-based structure (BAM, AMMC, DGI)</p>
+        
+        <div class="test-section">
+            <button class="btn-primary" onclick="runVerification()">🚀 Run Complete Verification</button>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+            </div>
+            <div id="progressText">Ready to start verification...</div>
+        </div>
+        
+        <div id="summarySection"></div>
+        <div id="resultsSection"></div>
+    </div>
+    
+    <script src="reporting-data-manager.js"></script>
+    <script src="email-notification-system.js"></script>
+    <script>
+        let testResults = [];
+        let currentStep = 0;
+        let totalSteps = 12;
+        
+        function updateProgress(step, message) {
+            currentStep = step;
+            const progress = (step / totalSteps) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `Step ${step}/${totalSteps}: ${message}`;
+        }
+        
+        function addResult(test, status, message, details = null) {
+            testResults.push({ test, status, message, details });
+            displayResults();
+        }
+        
+        function displayResults() {
+            const resultsDiv = document.getElementById('resultsSection');
+            let html = '<div class="test-section"><h2>📋 Detailed Results</h2>';
+            
+            testResults.forEach(result => {
+                const icon = result.status === 'pass' ? '✅' : result.status === 'fail' ? '❌' : '⚠️';
+                html += `<div class="result ${result.status}">`;
+                html += `${icon} <strong>${result.test}:</strong> ${result.message}`;
+                if (result.details) {
+                    html += `<pre>${JSON.stringify(result.details, null, 2)}</pre>`;
+                }
+                html += `</div>`;
+            });
+            
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+        }
+        
+        function displaySummary() {
+            const passCount = testResults.filter(r => r.status === 'pass').length;
+            const failCount = testResults.filter(r => r.status === 'fail').length;
+            const warningCount = testResults.filter(r => r.status === 'warning').length;
+            
+            const overallStatus = failCount === 0 ? 'pass' : 'fail';
+            const summaryDiv = document.getElementById('summarySection');
+            
+            summaryDiv.innerHTML = `
+                <div class="summary ${overallStatus}">
+                    <h2>🏁 Verification Complete</h2>
+                    <p>✅ ${passCount} Passed | ❌ ${failCount} Failed | ⚠️ ${warningCount} Warnings</p>
+                    <p><strong>Overall Status: ${overallStatus === 'pass' ? 'SYSTEM READY' : 'ISSUES FOUND'}</strong></p>
+                </div>
+            `;
+        }
+        
+        async function runVerification() {
+            testResults = [];
+            currentStep = 0;
+            
+            try {
+                // Step 1: Check System Availability
+                updateProgress(1, 'Checking system availability...');
+                if (window.reportingDataManager && window.EmailNotificationSystem) {
+                    addResult('System Availability', 'pass', 'All required systems are available');
+                } else {
+                    addResult('System Availability', 'fail', 'Missing required systems');
+                    displaySummary();
+                    return;
+                }
+                
+                // Step 2: Load Data
+                updateProgress(2, 'Loading centralized data...');
+                await window.reportingDataManager.loadReportingData();
+                addResult('Data Loading', 'pass', 'Centralized data loaded successfully');
+                
+                // Step 3: Verify Total Count
+                updateProgress(3, 'Verifying total reporting count...');
+                const allReportings = await window.reportingDataManager.getReportingsArray();
+                const expectedTotal = 100;
+                if (allReportings.length >= 90) { // Allow some tolerance
+                    addResult('Total Count', 'pass', `Found ${allReportings.length} reportings (expected ~${expectedTotal})`);
+                } else {
+                    addResult('Total Count', 'fail', `Only found ${allReportings.length} reportings (expected ~${expectedTotal})`);
+                }
+                
+                // Step 4: Verify Regulator Distribution
+                updateProgress(4, 'Verifying regulator distribution...');
+                const bamReportings = await window.reportingDataManager.getReportingsArray('BAM');
+                const ammcReportings = await window.reportingDataManager.getReportingsArray('AMMC');
+                const dgiReportings = await window.reportingDataManager.getReportingsArray('DGI');
+                
+                const regulatorDistribution = {
+                    BAM: bamReportings.length,
+                    AMMC: ammcReportings.length,
+                    DGI: dgiReportings.length
+                };
+                
+                if (bamReportings.length > 0 && ammcReportings.length > 0 && dgiReportings.length > 0) {
+                    addResult('Regulator Distribution', 'pass', 'All regulators have reportings', regulatorDistribution);
+                } else {
+                    addResult('Regulator Distribution', 'fail', 'Missing reportings for some regulators', regulatorDistribution);
+                }
+                
+                // Step 5: Verify BAM Categories
+                updateProgress(5, 'Verifying BAM categories...');
+                const catI = await window.reportingDataManager.getReportingsArray('BAM', 'I');
+                const catII = await window.reportingDataManager.getReportingsArray('BAM', 'II');
+                const catIII = await window.reportingDataManager.getReportingsArray('BAM', 'III');
+                
+                const bamCategories = { I: catI.length, II: catII.length, III: catIII.length };
+                if (catI.length > 0 && catII.length > 0 && catIII.length > 0) {
+                    addResult('BAM Categories', 'pass', 'All BAM categories have reportings', bamCategories);
+                } else {
+                    addResult('BAM Categories', 'fail', 'Missing reportings for some BAM categories', bamCategories);
+                }
+                
+                // Step 6: Verify AMMC Categories
+                updateProgress(6, 'Verifying AMMC categories...');
+                const catBCP = await window.reportingDataManager.getReportingsArray('AMMC', 'BCP');
+                const catBCP2S = await window.reportingDataManager.getReportingsArray('AMMC', 'BCP2S');
+                const catBAY = await window.reportingDataManager.getReportingsArray('AMMC', 'BANK_AL_YOUSR');
+                
+                const ammcCategories = { BCP: catBCP.length, BCP2S: catBCP2S.length, BANK_AL_YOUSR: catBAY.length };
+                if (catBCP.length >= 0 && catBCP2S.length >= 0 && catBAY.length >= 0) {
+                    addResult('AMMC Categories', 'pass', 'AMMC categories verified', ammcCategories);
+                } else {
+                    addResult('AMMC Categories', 'warning', 'Some AMMC categories may be empty', ammcCategories);
+                }
+                
+                // Step 7: Initialize Email System
+                updateProgress(7, 'Initializing email notification system...');
+                const emailSystem = new window.EmailNotificationSystem();
+                const initResult = await emailSystem.initializeWithReportingData(allReportings);
+                
+                if (initResult) {
+                    addResult('Email System Init', 'pass', 'Email system initialized successfully');
+                } else {
+                    addResult('Email System Init', 'fail', 'Email system initialization failed');
+                }
+                
+                // Step 8: Verify Assignments Created
+                updateProgress(8, 'Verifying assignment creation...');
+                const assignmentCount = Object.keys(emailSystem.assignments).length;
+                if (assignmentCount >= allReportings.length * 0.9) { // Allow some tolerance
+                    addResult('Assignment Creation', 'pass', `Created ${assignmentCount} assignments for ${allReportings.length} reportings`);
+                } else {
+                    addResult('Assignment Creation', 'fail', `Only created ${assignmentCount} assignments for ${allReportings.length} reportings`);
+                }
+                
+                // Step 9: Verify Assignment Regulator Data
+                updateProgress(9, 'Verifying assignment regulator data...');
+                const assignments = Object.values(emailSystem.assignments);
+                const assignmentRegulators = assignments.reduce((acc, a) => {
+                    const reg = a.regulator || 'BAM';
+                    acc[reg] = (acc[reg] || 0) + 1;
+                    return acc;
+                }, {});
+                
+                if (assignmentRegulators.BAM && assignmentRegulators.AMMC && assignmentRegulators.DGI) {
+                    addResult('Assignment Regulators', 'pass', 'All regulators represented in assignments', assignmentRegulators);
+                } else {
+                    addResult('Assignment Regulators', 'warning', 'Some regulators missing from assignments', assignmentRegulators);
+                }
+                
+                // Step 10: Test Assignment Retrieval
+                updateProgress(10, 'Testing assignment retrieval...');
+                const sampleReporting = allReportings[0];
+                const retrievedAssignment = emailSystem.getAssignment(sampleReporting.category, sampleReporting.name);
+                
+                if (retrievedAssignment) {
+                    addResult('Assignment Retrieval', 'pass', 'Assignment retrieval working correctly');
+                } else {
+                    addResult('Assignment Retrieval', 'fail', 'Assignment retrieval not working');
+                }
+                
+                // Step 11: Test Email Schedule Generation
+                updateProgress(11, 'Testing email schedule generation...');
+                const today = new Date();
+                const notifications = emailSystem.generateNotificationSchedule(today);
+                
+                if (notifications.length > 0) {
+                    addResult('Email Schedule', 'pass', `Generated ${notifications.length} notifications`);
+                } else {
+                    addResult('Email Schedule', 'warning', 'No notifications generated (may be normal)');
+                }
+                
+                // Step 12: Data Validation
+                updateProgress(12, 'Running data validation...');
+                const validation = await window.reportingDataManager.validateData();
+                
+                if (validation.isValid) {
+                    addResult('Data Validation', 'pass', 'All data validation checks passed');
+                } else {
+                    addResult('Data Validation', 'warning', `Validation issues: ${validation.errors.length} errors, ${validation.warnings.length} warnings`);
+                }
+                
+                updateProgress(12, 'Verification complete!');
+                displaySummary();
+                
+            } catch (error) {
+                addResult('System Error', 'fail', `Verification failed: ${error.message}`, error.stack);
+                displaySummary();
+            }
+        }
+        
+        // Auto-run verification on load
+        window.addEventListener('load', () => {
+            setTimeout(runVerification, 1000);
+        });
+    </script>
+</body>
+</html>

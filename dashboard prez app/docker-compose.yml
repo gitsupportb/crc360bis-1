@@ -1,0 +1,114 @@
+# BCP Securities Services - Reporting Dashboard
+# Docker Compose Configuration for Development and Production
+#
+# This compose file orchestrates the BCP Securities Services reporting dashboard
+# with proper volume management, networking, and environment configuration.
+
+version: '3.8'
+
+services:
+  # ============================================================================
+  # BCP Reporting Dashboard Service
+  # ============================================================================
+  bcp-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args:
+        BUILD_DATE: ${BUILD_DATE:-$(date -u +'%Y-%m-%dT%H:%M:%SZ')}
+        VCS_REF: ${VCS_REF:-$(git rev-parse --short HEAD)}
+        VERSION: ${VERSION:-1.0.0}
+
+    container_name: bcp-securities-dashboard
+
+    # Port mapping
+    ports:
+      - "${HOST_PORT:-8000}:8000"
+
+    # Environment variables
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DASHBOARD_ENV=${DASHBOARD_ENV:-production}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - TZ=${TIMEZONE:-UTC}
+
+    # Volume mounts for persistent data
+    volumes:
+      # Direct bind mount for uploaded reportings (cross-platform compatible)
+      - ./UPLOADED_REPORTINGS:/app/UPLOADED_REPORTINGS
+
+      # Configuration and data files
+      - dashboard_data:/app/data
+
+      # Application logs
+      - dashboard_logs:/app/logs
+
+      # SSL certificates (for HTTPS support)
+      - ./certs:/app/certs:ro
+
+      # Bind mount for development (uncomment for development mode)
+      # - .:/app:ro
+
+      # Bind mount for centralized data file (ensures persistence)
+      - ./ALL_REPORTINGS.json:/app/ALL_REPORTINGS.json:ro
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Health check configuration
+    healthcheck:
+      test: ["CMD", "/app/healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # Network configuration
+    networks:
+      - bcp-network
+
+    # Labels for container management
+    labels:
+      - "com.bcpsecurities.service=dashboard"
+      - "com.bcpsecurities.environment=${DASHBOARD_ENV:-production}"
+      - "com.bcpsecurities.version=${VERSION:-1.0.0}"
+
+# ============================================================================
+# Named Volumes for Persistent Data
+# ============================================================================
+volumes:
+  # Volume for dashboard data and configuration
+  dashboard_data:
+    driver: local
+
+  # Volume for application logs
+  dashboard_logs:
+    driver: local
+
+# ============================================================================
+# Network Configuration
+# ============================================================================
+networks:
+  bcp-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

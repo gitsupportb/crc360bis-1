@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Admin System Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 12px; }
+        .test-result { margin: 5px 0; padding: 8px; border-radius: 3px; }
+        button { margin: 5px; padding: 8px 16px; border: none; border-radius: 3px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Email Admin System Comprehensive Test</h1>
+    
+    <div>
+        <button class="btn-primary" onclick="runAllTests()">🚀 Run All Tests</button>
+        <button class="btn-success" onclick="runDataTests()">📊 Data Tests Only</button>
+        <button class="btn-warning" onclick="runUITests()">🖥️ UI Tests Only</button>
+    </div>
+    
+    <div id="testResults"></div>
+    
+    <script src="reporting-data-manager.js"></script>
+    <script src="email-notification-system.js"></script>
+    <script>
+        let testResults = [];
+        
+        function addTestResult(category, test, status, message, details = null) {
+            testResults.push({
+                category,
+                test,
+                status, // 'success', 'error', 'warning', 'info'
+                message,
+                details,
+                timestamp: new Date().toISOString()
+            });
+        }
+        
+        function displayResults() {
+            const resultsDiv = document.getElementById('testResults');
+            let html = '';
+            
+            const categories = [...new Set(testResults.map(r => r.category))];
+            
+            categories.forEach(category => {
+                const categoryResults = testResults.filter(r => r.category === category);
+                const successCount = categoryResults.filter(r => r.status === 'success').length;
+                const errorCount = categoryResults.filter(r => r.status === 'error').length;
+                const warningCount = categoryResults.filter(r => r.status === 'warning').length;
+                
+                html += `<div class="test-section">`;
+                html += `<h3>${category} (✅ ${successCount} | ❌ ${errorCount} | ⚠️ ${warningCount})</h3>`;
+                
+                categoryResults.forEach(result => {
+                    const statusClass = result.status;
+                    const statusIcon = result.status === 'success' ? '✅' : 
+                                     result.status === 'error' ? '❌' : 
+                                     result.status === 'warning' ? '⚠️' : 'ℹ️';
+                    
+                    html += `<div class="test-result ${statusClass}">`;
+                    html += `${statusIcon} <strong>${result.test}:</strong> ${result.message}`;
+                    if (result.details) {
+                        html += `<pre>${JSON.stringify(result.details, null, 2)}</pre>`;
+                    }
+                    html += `</div>`;
+                });
+                
+                html += `</div>`;
+            });
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        async function runDataTests() {
+            testResults = [];
+            console.log('🔄 Starting data tests...');
+            
+            try {
+                // Test 1: Reporting Data Manager Initialization
+                addTestResult('Data Loading', 'Reporting Data Manager', 'info', 'Testing reporting data manager initialization...');
+                
+                const allReportings = await window.reportingDataManager.getReportingsArray();
+                if (allReportings.length > 0) {
+                    addTestResult('Data Loading', 'All Reportings', 'success', `Loaded ${allReportings.length} total reportings`);
+                } else {
+                    addTestResult('Data Loading', 'All Reportings', 'error', 'No reportings loaded');
+                }
+                
+                // Test 2: Regulator Distribution
+                const bamReportings = await window.reportingDataManager.getReportingsArray('BAM');
+                const ammcReportings = await window.reportingDataManager.getReportingsArray('AMMC');
+                const dgiReportings = await window.reportingDataManager.getReportingsArray('DGI');
+                
+                addTestResult('Data Loading', 'BAM Reportings', bamReportings.length > 0 ? 'success' : 'error', 
+                    `BAM: ${bamReportings.length} reportings (expected ~68)`);
+                addTestResult('Data Loading', 'AMMC Reportings', ammcReportings.length > 0 ? 'success' : 'error', 
+                    `AMMC: ${ammcReportings.length} reportings (expected ~17)`);
+                addTestResult('Data Loading', 'DGI Reportings', dgiReportings.length > 0 ? 'success' : 'error', 
+                    `DGI: ${dgiReportings.length} reportings (expected ~15)`);
+                
+                // Test 3: Category Distribution
+                const catI = await window.reportingDataManager.getReportingsArray('BAM', 'I');
+                const catII = await window.reportingDataManager.getReportingsArray('BAM', 'II');
+                const catIII = await window.reportingDataManager.getReportingsArray('BAM', 'III');
+                
+                addTestResult('Data Loading', 'BAM Category I', catI.length > 0 ? 'success' : 'error', 
+                    `Category I: ${catI.length} reportings (expected ~26)`);
+                addTestResult('Data Loading', 'BAM Category II', catII.length > 0 ? 'success' : 'error', 
+                    `Category II: ${catII.length} reportings (expected ~23)`);
+                addTestResult('Data Loading', 'BAM Category III', catIII.length > 0 ? 'success' : 'error', 
+                    `Category III: ${catIII.length} reportings (expected ~19)`);
+                
+                // Test 4: AMMC Categories
+                const catBCP = await window.reportingDataManager.getReportingsArray('AMMC', 'BCP');
+                const catBCP2S = await window.reportingDataManager.getReportingsArray('AMMC', 'BCP2S');
+                const catBAY = await window.reportingDataManager.getReportingsArray('AMMC', 'BANK_AL_YOUSR');
+                
+                addTestResult('Data Loading', 'AMMC BCP', catBCP.length > 0 ? 'success' : 'error', 
+                    `BCP: ${catBCP.length} reportings (expected ~8)`);
+                addTestResult('Data Loading', 'AMMC BCP2S', catBCP2S.length > 0 ? 'success' : 'error', 
+                    `BCP2S: ${catBCP2S.length} reportings (expected ~5)`);
+                addTestResult('Data Loading', 'AMMC BANK AL YOUSR', catBAY.length > 0 ? 'success' : 'error', 
+                    `BANK AL YOUSR: ${catBAY.length} reportings (expected ~4)`);
+                
+                // Test 5: Email Notification System
+                if (window.EmailNotificationSystem) {
+                    const emailSystem = new window.EmailNotificationSystem();
+                    const initResult = await emailSystem.initializeWithReportingData(allReportings);
+                    
+                    if (initResult) {
+                        addTestResult('Email System', 'Initialization', 'success', 
+                            `Email system initialized with ${Object.keys(emailSystem.assignments).length} assignments`);
+                        
+                        // Test assignment distribution
+                        const assignments = Object.values(emailSystem.assignments);
+                        const regulatorDist = {};
+                        assignments.forEach(a => {
+                            const reg = a.regulator || 'BAM';
+                            regulatorDist[reg] = (regulatorDist[reg] || 0) + 1;
+                        });
+                        
+                        addTestResult('Email System', 'Assignment Distribution', 'success', 
+                            'Assignment distribution by regulator', regulatorDist);
+                    } else {
+                        addTestResult('Email System', 'Initialization', 'error', 'Failed to initialize email system');
+                    }
+                } else {
+                    addTestResult('Email System', 'Availability', 'error', 'EmailNotificationSystem not available');
+                }
+                
+                // Test 6: Data Validation
+                const validation = await window.reportingDataManager.validateData();
+                if (validation.isValid) {
+                    addTestResult('Data Validation', 'Overall', 'success', 'Data validation passed');
+                } else {
+                    addTestResult('Data Validation', 'Overall', 'error', 'Data validation failed');
+                }
+                
+                if (validation.warnings.length > 0) {
+                    addTestResult('Data Validation', 'Warnings', 'warning', 
+                        `${validation.warnings.length} warnings found`, validation.warnings);
+                }
+                
+                if (validation.errors.length > 0) {
+                    addTestResult('Data Validation', 'Errors', 'error', 
+                        `${validation.errors.length} errors found`, validation.errors);
+                }
+                
+            } catch (error) {
+                addTestResult('Data Loading', 'Exception', 'error', `Test failed: ${error.message}`, error.stack);
+            }
+            
+            displayResults();
+        }
+        
+        async function runUITests() {
+            addTestResult('UI Tests', 'Placeholder', 'info', 'UI tests would require DOM manipulation and user interaction simulation');
+            displayResults();
+        }
+        
+        async function runAllTests() {
+            await runDataTests();
+            await runUITests();
+        }
+        
+        // Auto-run data tests on load
+        window.addEventListener('load', () => {
+            setTimeout(runDataTests, 1000);
+        });
+    </script>
+</body>
+</html>

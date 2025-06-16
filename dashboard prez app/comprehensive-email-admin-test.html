@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Email Admin Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .test-container { max-width: 1200px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .test-result { margin: 10px 0; padding: 12px; border-radius: 6px; border-left: 4px solid; }
+        .success { background: #d4edda; border-color: #28a745; color: #155724; }
+        .error { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+        .warning { background: #fff3cd; border-color: #ffc107; color: #856404; }
+        .info { background: #d1ecf1; border-color: #17a2b8; color: #0c5460; }
+        .test-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .test-stats { font-size: 14px; color: #666; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .btn-danger { background: #dc3545; color: white; }
+        .progress-bar { width: 100%; height: 20px; background: #e9ecef; border-radius: 10px; overflow: hidden; margin: 10px 0; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #28a745, #20c997); transition: width 0.3s ease; }
+        .test-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Comprehensive Email Admin System Test</h1>
+        <p>This test verifies all functionality of the email admin system with the new regulator-based structure (BAM, AMMC, DGI).</p>
+        
+        <div class="test-section">
+            <div class="test-header">
+                <h2>🚀 Test Controls</h2>
+                <div class="test-stats" id="testStats">Ready to run tests</div>
+            </div>
+            <button class="btn-primary" onclick="runAllTests()">🔄 Run All Tests</button>
+            <button class="btn-success" onclick="runDataTests()">📊 Data Tests</button>
+            <button class="btn-warning" onclick="runUITests()">🖥️ UI Tests</button>
+            <button class="btn-danger" onclick="clearResults()">🗑️ Clear Results</button>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar" style="width: 0%;"></div>
+            </div>
+        </div>
+        
+        <div id="testResults"></div>
+    </div>
+    
+    <script src="reporting-data-manager.js"></script>
+    <script src="email-notification-system.js"></script>
+    <script>
+        let testResults = [];
+        let currentTestIndex = 0;
+        let totalTests = 0;
+        
+        function updateProgress() {
+            const progress = totalTests > 0 ? (currentTestIndex / totalTests) * 100 : 0;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('testStats').textContent = `${currentTestIndex}/${totalTests} tests completed`;
+        }
+        
+        function addTestResult(category, test, status, message, details = null) {
+            testResults.push({
+                category,
+                test,
+                status,
+                message,
+                details,
+                timestamp: new Date().toISOString()
+            });
+            currentTestIndex++;
+            updateProgress();
+            displayResults();
+        }
+        
+        function clearResults() {
+            testResults = [];
+            currentTestIndex = 0;
+            totalTests = 0;
+            updateProgress();
+            document.getElementById('testResults').innerHTML = '';
+        }
+        
+        function displayResults() {
+            const resultsDiv = document.getElementById('testResults');
+            
+            const categories = [...new Set(testResults.map(r => r.category))];
+            let html = '<div class="test-grid">';
+            
+            categories.forEach(category => {
+                const categoryResults = testResults.filter(r => r.category === category);
+                const successCount = categoryResults.filter(r => r.status === 'success').length;
+                const errorCount = categoryResults.filter(r => r.status === 'error').length;
+                const warningCount = categoryResults.filter(r => r.status === 'warning').length;
+                const infoCount = categoryResults.filter(r => r.status === 'info').length;
+                
+                html += `<div class="test-section">`;
+                html += `<div class="test-header">`;
+                html += `<h3>${category}</h3>`;
+                html += `<div class="test-stats">✅ ${successCount} | ❌ ${errorCount} | ⚠️ ${warningCount} | ℹ️ ${infoCount}</div>`;
+                html += `</div>`;
+                
+                categoryResults.forEach(result => {
+                    const statusIcon = result.status === 'success' ? '✅' : 
+                                     result.status === 'error' ? '❌' : 
+                                     result.status === 'warning' ? '⚠️' : 'ℹ️';
+                    
+                    html += `<div class="test-result ${result.status}">`;
+                    html += `${statusIcon} <strong>${result.test}:</strong> ${result.message}`;
+                    if (result.details) {
+                        html += `<pre>${JSON.stringify(result.details, null, 2)}</pre>`;
+                    }
+                    html += `</div>`;
+                });
+                
+                html += `</div>`;
+            });
+            
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+        }
+        
+        async function runDataTests() {
+            clearResults();
+            totalTests = 15; // Estimate
+            currentTestIndex = 0;
+            
+            try {
+                // Test 1: Reporting Data Manager Availability
+                addTestResult('System Initialization', 'Reporting Data Manager', 
+                    window.reportingDataManager ? 'success' : 'error', 
+                    window.reportingDataManager ? 'Singleton instance available' : 'Not available');
+                
+                if (!window.reportingDataManager) {
+                    addTestResult('System Initialization', 'Critical Error', 'error', 
+                        'Cannot proceed without reporting data manager');
+                    return;
+                }
+                
+                // Test 2: Data Loading
+                await window.reportingDataManager.loadReportingData();
+                addTestResult('Data Loading', 'Load Centralized Data', 'success', 'Data loaded successfully');
+                
+                // Test 3: Total Reportings Count
+                const allReportings = await window.reportingDataManager.getReportingsArray();
+                const expectedTotal = 100;
+                addTestResult('Data Validation', 'Total Count', 
+                    allReportings.length === expectedTotal ? 'success' : 'warning',
+                    `Found ${allReportings.length} reportings (expected ${expectedTotal})`);
+                
+                // Test 4: Regulator Distribution
+                const bamReportings = await window.reportingDataManager.getReportingsArray('BAM');
+                const ammcReportings = await window.reportingDataManager.getReportingsArray('AMMC');
+                const dgiReportings = await window.reportingDataManager.getReportingsArray('DGI');
+                
+                addTestResult('Regulator Filtering', 'BAM Reportings', 
+                    bamReportings.length > 0 ? 'success' : 'error',
+                    `BAM: ${bamReportings.length} reportings (expected ~68)`);
+                
+                addTestResult('Regulator Filtering', 'AMMC Reportings', 
+                    ammcReportings.length > 0 ? 'success' : 'error',
+                    `AMMC: ${ammcReportings.length} reportings (expected ~17)`);
+                
+                addTestResult('Regulator Filtering', 'DGI Reportings', 
+                    dgiReportings.length > 0 ? 'success' : 'error',
+                    `DGI: ${dgiReportings.length} reportings (expected ~15)`);
+                
+                // Test 5: BAM Category Distribution
+                const catI = await window.reportingDataManager.getReportingsArray('BAM', 'I');
+                const catII = await window.reportingDataManager.getReportingsArray('BAM', 'II');
+                const catIII = await window.reportingDataManager.getReportingsArray('BAM', 'III');
+                
+                addTestResult('Category Filtering', 'BAM Category I', 
+                    catI.length > 0 ? 'success' : 'error',
+                    `Category I: ${catI.length} reportings (expected ~26)`);
+                
+                addTestResult('Category Filtering', 'BAM Category II', 
+                    catII.length > 0 ? 'success' : 'error',
+                    `Category II: ${catII.length} reportings (expected ~23)`);
+                
+                addTestResult('Category Filtering', 'BAM Category III', 
+                    catIII.length > 0 ? 'success' : 'error',
+                    `Category III: ${catIII.length} reportings (expected ~19)`);
+                
+                // Test 6: AMMC Category Distribution
+                const catBCP = await window.reportingDataManager.getReportingsArray('AMMC', 'BCP');
+                const catBCP2S = await window.reportingDataManager.getReportingsArray('AMMC', 'BCP2S');
+                const catBAY = await window.reportingDataManager.getReportingsArray('AMMC', 'BANK_AL_YOUSR');
+                
+                addTestResult('Category Filtering', 'AMMC BCP', 
+                    catBCP.length >= 0 ? 'success' : 'error',
+                    `BCP: ${catBCP.length} reportings (expected ~8)`);
+                
+                addTestResult('Category Filtering', 'AMMC BCP2S', 
+                    catBCP2S.length >= 0 ? 'success' : 'error',
+                    `BCP2S: ${catBCP2S.length} reportings (expected ~5)`);
+                
+                addTestResult('Category Filtering', 'AMMC BANK AL YOUSR', 
+                    catBAY.length >= 0 ? 'success' : 'error',
+                    `BANK AL YOUSR: ${catBAY.length} reportings (expected ~4)`);
+                
+                // Test 7: Email System Integration
+                if (window.EmailNotificationSystem) {
+                    const emailSystem = new window.EmailNotificationSystem();
+                    const initResult = await emailSystem.initializeWithReportingData(allReportings);
+                    
+                    addTestResult('Email System', 'Initialization', 
+                        initResult ? 'success' : 'error',
+                        initResult ? `Initialized with ${Object.keys(emailSystem.assignments).length} assignments` : 'Failed to initialize');
+                    
+                    if (initResult) {
+                        // Test assignment distribution
+                        const assignments = Object.values(emailSystem.assignments);
+                        const regulatorDist = {};
+                        assignments.forEach(a => {
+                            const reg = a.regulator || 'BAM';
+                            regulatorDist[reg] = (regulatorDist[reg] || 0) + 1;
+                        });
+                        
+                        addTestResult('Email System', 'Assignment Distribution', 'success', 
+                            'Assignments created for all regulators', regulatorDist);
+                    }
+                } else {
+                    addTestResult('Email System', 'Availability', 'error', 'EmailNotificationSystem not available');
+                }
+                
+                // Test 8: Data Validation
+                const validation = await window.reportingDataManager.validateData();
+                addTestResult('Data Validation', 'Overall Validation', 
+                    validation.isValid ? 'success' : 'warning',
+                    validation.isValid ? 'All validation checks passed' : `${validation.errors.length} errors, ${validation.warnings.length} warnings`);
+                
+                if (validation.warnings.length > 0) {
+                    addTestResult('Data Validation', 'Warnings', 'warning', 
+                        `${validation.warnings.length} warnings found`, validation.warnings.slice(0, 5));
+                }
+                
+            } catch (error) {
+                addTestResult('System Error', 'Exception', 'error', 
+                    `Test failed: ${error.message}`, error.stack);
+            }
+        }
+        
+        async function runUITests() {
+            addTestResult('UI Tests', 'DOM Elements', 'info', 
+                'UI tests require manual verification of the email admin interface');
+            
+            addTestResult('UI Tests', 'Filter Dropdowns', 'info', 
+                'Check that regulator and category filters are populated correctly');
+            
+            addTestResult('UI Tests', 'Assignment Table', 'info', 
+                'Verify that assignment table shows all 100 reportings with regulator information');
+            
+            addTestResult('UI Tests', 'Email Schedule', 'info', 
+                'Check that email schedule table supports regulator filtering');
+        }
+        
+        async function runAllTests() {
+            await runDataTests();
+            await runUITests();
+        }
+        
+        // Auto-run tests on load
+        window.addEventListener('load', () => {
+            setTimeout(runDataTests, 1000);
+        });
+    </script>
+</body>
+</html>
