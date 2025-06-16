@@ -50,14 +50,14 @@ CRC360 is a comprehensive risk management and compliance platform designed for B
 ## 📦 Installation
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 18+
 - npm or pnpm package manager
 
 ### Quick Start
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/CRC360.git
+   git clone https://github.com/gitsupportb/CRC360.git
    cd CRC360
    ```
 
@@ -185,8 +185,8 @@ CRC360 is developed for BCP Securities Services, providing comprehensive risk ma
 
 For support and questions:
 - Email: support@bcpsecurities.ma
-- Documentation: [Wiki](https://github.com/yourusername/CRC360/wiki)
-- Issues: [GitHub Issues](https://github.com/yourusername/CRC360/issues)
+- Documentation: [Wiki](https://github.com/gitsupportb/CRC360/wiki)
+- Issues: [GitHub Issues](https://github.com/gitsupportb/CRC360/issues)
 
 ---
 
