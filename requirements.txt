@@ -1,0 +1,38 @@
+# DOC Secure Python Dependencies
+# Core dependencies for the document management system
+
+# Database
+sqlite3  # Built-in with Python, no need to install
+
+# File handling and utilities
+pathlib  # Built-in with Python
+hashlib  # Built-in with Python
+mimetypes  # Built-in with Python
+shutil  # Built-in with Python
+
+# JSON handling
+json  # Built-in with Python
+
+# Date and time
+datetime  # Built-in with Python
+
+# Type hints
+typing  # Built-in with Python
+
+# Optional: For enhanced file type detection
+# python-magic==0.4.27
+
+# Optional: For PDF processing (if needed in the future)
+# PyPDF2==3.0.1
+# pdfplumber==0.9.0
+
+# Optional: For Office document processing (if needed in the future)
+# python-docx==0.8.11
+# openpyxl==3.1.2
+# python-pptx==0.6.21
+
+# Optional: For image processing (if needed in the future)
+# Pillow==10.0.0
+
+# Optional: For advanced text extraction (if needed in the future)
+# textract==1.6.5

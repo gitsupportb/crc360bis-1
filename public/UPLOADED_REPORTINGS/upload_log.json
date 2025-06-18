@@ -1,0 +1,27 @@
+{
+  "info": "Upload log for BCP Securities Services reporting files",
+  "created": "2025-06-12T14:45:54.877338",
+  "status": "active",
+  "uploads": [
+    {
+      "timestamp": "2025-06-12T14:45:46.312225",
+      "authority": "BAM",
+      "category": "III",
+      "report": "159_reporting_reglementaire_irrbb",
+      "year": 2025,
+      "month": 6,
+      "filename": "Copie de Reportings AMMC (003).xlsx",
+      "file_path": "/app/UPLOADED_REPORTINGS/BAM/III___Etats_relatifs_à_la_réglementation_prudentielle/Reporting_réglementaire_IRRBB/2025/6/Copie de Reportings AMMC (003).xlsx"
+    },
+    {
+      "timestamp": "2025-06-12T14:45:54.871547",
+      "authority": "BAM",
+      "category": "III",
+      "report": "159_reporting_reglementaire_irrbb",
+      "year": 2025,
+      "month": 6,
+      "filename": "Copie de Reportings AMMC (003).xlsx",
+      "file_path": "/app/UPLOADED_REPORTINGS/BAM/III___Etats_relatifs_à_la_réglementation_prudentielle/Reporting_réglementaire_IRRBB/2025/6/Copie de Reportings AMMC (003).xlsx"
+    }
+  ]
+}

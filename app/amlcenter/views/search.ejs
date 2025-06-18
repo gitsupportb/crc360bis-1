@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search Results - LBCFT Sanctions Matching Tool</title>
+  <link rel="stylesheet" href="/amlcenter/css/styles.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* RepWatch Theme Integration - Let CSS file handle all styling */
+    /* Minimal overrides only for specific search page elements */
+
+    .results-summary {
+      background: rgba(40, 167, 69, 0.1) !important;
+      color: #155724 !important;
+      padding: 15px 20px !important;
+      border-radius: 12px !important;
+      margin-bottom: 15px !important;
+      border: 1px solid var(--success-color) !important;
+    }
+
+    .match-field-badge {
+      background: #dcfce7 !important;
+      color: #166534 !important;
+      border-radius: 12px !important;
+      padding: 2px 6px !important;
+      font-size: 0.75rem !important;
+      font-weight: 500 !important;
+      margin-right: 4px !important;
+      margin-bottom: 2px !important;
+      display: inline-block !important;
+    }
+
+    .no-results {
+      text-align: center !important;
+      padding: 40px 20px !important;
+      color: var(--text-secondary) !important;
+    }
+
+    .no-results i {
+      font-size: 3rem !important;
+      margin-bottom: 1rem !important;
+      opacity: 0.5 !important;
+    }
+
+    /* Back to Main Menu button styling - RepWatch Style */
+    .btn-outline-light {
+      border-color: rgba(255, 255, 255, 0.3) !important;
+      color: white !important;
+      transition: all 0.3s ease !important;
+    }
+
+    .btn-outline-light:hover {
+      background-color: rgba(255, 255, 255, 0.2) !important;
+      border-color: rgba(255, 255, 255, 0.5) !important;
+      color: white !important;
+      transform: translateY(-1px) !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <!-- AML Center Header - RepWatch Style -->
+    <div class="header">
+      <div class="header-left">
+        <div class="logo-container">
+          <div class="logo">
+            <div class="logo-fallback">🛡️</div>
+          </div>
+          <div class="header-title">
+            <h1>Search Results</h1>
+            <div class="subtitle">Sanctions List Matching Tool</div>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <a href="/" class="back-to-dashboard-btn">
+          <span>←</span>
+          Back to Main Menu
+        </a>
+        <a href="/amlcenter" class="back-to-dashboard-btn">
+          <span>🏠</span>
+          Back to Home
+        </a>
+        <a href="/amlcenter/client-space" class="back-to-dashboard-btn">
+          <span>👥</span>
+          Client Space
+        </a>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Search Sanctions List</h5>
+      </div>
+      <div class="card-body">
+        <form action="/amlcenter/search" method="get">
+          <div class="row mb-3">
+            <div class="col-md-3">
+              <label for="idFilter" class="form-label">ID</label>
+              <input type="text" class="form-control" id="idFilter" name="idFilter" value="<%= locals.idFilter || '' %>" placeholder="Filter by ID...">
+            </div>
+            <div class="col-md-3">
+              <label for="nameFilter" class="form-label">Name</label>
+              <input type="text" class="form-control" id="nameFilter" name="nameFilter" value="<%= locals.nameFilter || '' %>" placeholder="Filter by name...">
+            </div>
+            <div class="col-md-3">
+              <label for="typeFilter" class="form-label">Type</label>
+              <select class="form-select" id="typeFilter" name="typeFilter">
+                <option value="" <%= !locals.typeFilter ? 'selected' : '' %>>All Types</option>
+                <option value="person" <%= locals.typeFilter === 'person' ? 'selected' : '' %>>Person</option>
+                <option value="entity" <%= locals.typeFilter === 'entity' ? 'selected' : '' %>>Entity</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label for="nationalityFilter" class="form-label">Nationality</label>
+              <input type="text" class="form-control" id="nationalityFilter" name="nationalityFilter" value="<%= locals.nationalityFilter || '' %>" placeholder="Filter by nationality...">
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-9">
+              <label for="query" class="form-label">General Search</label>
+              <input type="text" class="form-control" id="query" name="query" value="<%= query %>" placeholder="Search across all fields...">
+            </div>
+            <div class="col-md-3">
+              <label for="perPage" class="form-label">Results per page</label>
+              <select class="form-select" id="perPage" name="perPage">
+                <option value="20" <%= perPage === 20 ? 'selected' : '' %>>20 results</option>
+                <option value="50" <%= perPage === 50 ? 'selected' : '' %>>50 results</option>
+                <option value="100" <%= perPage === 100 ? 'selected' : '' %>>100 results</option>
+                <option value="-1" <%= perPage === -1 ? 'selected' : '' %>>All results</option>
+              </select>
+            </div>
+          </div>
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button class="action-btn btn-primary" type="submit">
+              <i class="fas fa-search me-2"></i>Search
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-list-alt me-2"></i>Search Results for "<%= query %>"</h5>
+      </div>
+      <div class="card-body p-0">
+        <% if (results.length === 0) { %>
+          <div class="no-results">
+            <i class="fas fa-search"></i>
+            <h4>No matches found</h4>
+            <p class="text-muted">Try adjusting your search criteria or use different keywords.</p>
+          </div>
+        <% } else { %>
+          <div class="results-summary">
+            <strong><i class="fas fa-check-circle me-2"></i>Found <%= results.length %> matches</strong>
+            <small class="d-block">Showing results for your search query</small>
+          </div>
+
+          <div class="table-responsive">
+            <table class="clean-table table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Nationality</th>
+                  <th>Listed On</th>
+                  <th>Match Score</th>
+                  <th>Matched Fields</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% results.forEach(entry => { %>
+                  <tr>
+                    <td><span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #6b7280;"><%= entry.id %></span></td>
+                    <td><strong><%= entry.name %></strong></td>
+                    <td>
+                      <span class="status-badge <%= entry.type === 'person' ? 'badge-person' : 'badge-entity' %>">
+                        <%= entry.type === 'person' ? 'Person' : 'Entity' %>
+                      </span>
+                    </td>
+                    <td><%= entry.nationality || '—' %></td>
+                    <td><%= entry.listedOn || '—' %></td>
+                    <td>
+                      <% if (entry.matchScore) { %>
+                        <span class="status-badge" style="background: <%= entry.matchScore > 10 ? '#ffebee' : entry.matchScore > 5 ? '#fff3e0' : '#e8f5e8' %>; color: <%= entry.matchScore > 10 ? '#c62828' : entry.matchScore > 5 ? '#ef6c00' : '#2e7d32' %>;">
+                          <%= entry.matchScore %>%
+                        </span>
+                      <% } else { %>
+                        —
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (entry.matchFields && entry.matchFields.length > 0) { %>
+                        <% entry.matchFields.forEach(field => { %>
+                          <span class="match-field-badge"><%= field %></span>
+                        <% }); %>
+                      <% } else { %>
+                        —
+                      <% } %>
+                    </td>
+                    <td>
+                      <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detailsModal<%= entry.id.replace(/\./g, '') %>" style="font-size: 11px; padding: 4px 8px; border-radius: 4px;">
+                        <i class="fas fa-eye me-1"></i>View
+                      </button>
+                    </td>
+                  </tr>
+                  
+                  <!-- Modal for details -->
+                  <div class="modal fade" id="detailsModal<%= entry.id.replace(/\./g, '') %>" tabindex="-1" aria-labelledby="detailsModalLabel<%= entry.id.replace(/\./g, '') %>" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                      <div class="modal-content">
+                        <div class="modal-header <%= entry.matchScore > 10 ? 'bg-danger text-white' : entry.matchScore > 5 ? 'bg-warning' : 'bg-primary text-white' %>">
+                          <h5 class="modal-title" id="detailsModalLabel<%= entry.id.replace(/\./g, '') %>"><%= entry.id %> - <%= entry.name %></h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <% if (entry.type === 'entity') { %>
+                            <!-- Entity Details -->
+                            <div class="row">
+                              <div class="col-md-6">
+                                <p><strong>ID:</strong> <%= entry.id %></p>
+                                <p><strong>Nom:</strong> <%= entry.name %></p>
+                                <% if (entry.otherNames && entry.otherNames.length > 0) { %>
+                                  <p><strong>Autre(s) nom(s) connu(s):</strong></p>
+                                  <ul>
+                                    <% entry.otherNames.forEach(name => { %>
+                                      <li><%= name %></li>
+                                    <% }); %>
+                                  </ul>
+                                <% } %>
+                                <% if (entry.previouslyKnownAs && entry.previouslyKnownAs.length > 0) { %>
+                                  <p><strong>Précédemment connu(e) sous le nom de:</strong></p>
+                                  <ul>
+                                    <% entry.previouslyKnownAs.forEach(name => { %>
+                                      <li><%= name %></li>
+                                    <% }); %>
+                                  </ul>
+                                <% } %>
+                              </div>
+                              <div class="col-md-6">
+                                <p><strong>Adresse:</strong> <%= entry.address || 'N/A' %></p>
+                                <p><strong>Date d'inscription:</strong> <%= entry.listedOn || 'N/A' %></p>
+                                <p><strong>Renseignements divers:</strong> 
+                                  <% if (entry.otherInfo) { %>
+                                    <% 
+                                      // Clean up any embedded IDs in the display
+                                      let displayInfo = entry.otherInfo;
+                                      const embeddedIdMatch = displayInfo.match(/\b([A-Z]{2,3})\.\d+\b/);
+                                      if (embeddedIdMatch) {
+                                        const embeddedIdPos = displayInfo.indexOf(embeddedIdMatch[0]);
+                                        const beforeId = displayInfo.substring(Math.max(0, embeddedIdPos - 30), embeddedIdPos).toLowerCase();
+                                        if (!beforeId.includes("associé") && !beforeId.includes("associée") && 
+                                            !beforeId.includes("référence") && !beforeId.includes("reference")) {
+                                          displayInfo = displayInfo.substring(0, embeddedIdPos).trim();
+                                        }
+                                      }
+                                    %>
+                                    <%= displayInfo %>
+                                  <% } else { %>
+                                    N/A
+                                  <% } %>
+                                </p>
+                                
+                                <% if (entry.notes) { %>
+                                  <p><strong>Notes supplémentaires:</strong> <%= entry.notes %></p>
+                                <% } %>
+                              </div>
+                            </div>
+                          <% } else { %>
+                            <!-- Person Details -->
+                            <div class="row">
+                              <div class="col-md-6">
+                                <p><strong>ID:</strong> <%= entry.id %></p>
+                                <p><strong>Nom:</strong> <%= entry.name %></p>
+                                <% if (entry.nameComponents && entry.nameComponents.length > 0) { %>
+                                  <p><strong>Composants du nom:</strong></p>
+                                  <ul>
+                                    <% entry.nameComponents.forEach(component => { %>
+                                      <li><%= component.number %>: <%= component.value %></li>
+                                    <% }); %>
+                                  </ul>
+                                <% } %>
+                                <% if (entry.originalScript) { %>
+                                  <p><strong>Nom (alphabet d'origine):</strong> <%= entry.originalScript %></p>
+                                <% } %>
+                                <p><strong>Titre:</strong> <%= entry.title || 'N/A' %></p>
+                                <p><strong>Désignation:</strong> <%= entry.designation || 'N/A' %></p>
+                                <p><strong>Date de naissance:</strong> <%= entry.dateOfBirth || 'N/A' %></p>
+                                <p><strong>Lieu de naissance:</strong> <%= entry.placeOfBirth || 'N/A' %></p>
+                                <% if (entry.reliableAlias && entry.reliableAlias.length > 0) { %>
+                                  <p><strong>Pseudonyme fiable:</strong></p>
+                                  <ul>
+                                    <% entry.reliableAlias.forEach(alias => { %>
+                                      <li><%= alias %></li>
+                                    <% }); %>
+                                  </ul>
+                                <% } %>
+                                <% if (entry.unreliableAlias && entry.unreliableAlias.length > 0) { %>
+                                  <p><strong>Pseudonyme peu fiable:</strong></p>
+                                  <ul>
+                                    <% entry.unreliableAlias.forEach(alias => { %>
+                                      <li><%= alias %></li>
+                                    <% }); %>
+                                  </ul>
+                                <% } %>
+                              </div>
+                              <div class="col-md-6">
+                                <% if (entry.gender) { %>
+                                  <p><strong>Genre:</strong> <%= entry.gender %></p>
+                                <% } %>
+                                <p><strong>Nationalité:</strong> <%= entry.nationality || 'N/A' %></p>
+                                <p><strong>Numéro de passeport:</strong> <%= entry.passportNo || 'N/A' %></p>
+                                <p><strong>Numéro national d'identification:</strong> <%= entry.nationalId || 'N/A' %></p>
+                                
+                                <% if (entry.documents && entry.documents.length > 0) { %>
+                                  <p><strong>Documents d'identification:</strong></p>
+                                  <ul class="list-group">
+                                    <% entry.documents.forEach((doc, index) => { %>
+                                      <li class="list-group-item">
+                                        <strong>Document <%= index + 1 %>:</strong>
+                                        <% if (doc.type || doc.type2) { %>
+                                          <div><strong>Type:</strong> <%= doc.type %><%= doc.type2 ? ', ' + doc.type2 : '' %></div>
+                                        <% } %>
+                                        <% if (doc.number) { %>
+                                          <div><strong>Numéro:</strong> <%= doc.number %></div>
+                                        <% } %>
+                                        <% if (doc.countryOfIssue) { %>
+                                          <div><strong>Pays d'émission:</strong> <%= doc.countryOfIssue %></div>
+                                        <% } %>
+                                        <% if (doc.dateOfIssue) { %>
+                                          <div><strong>Date d'émission:</strong> <%= doc.dateOfIssue %></div>
+                                        <% } %>
+                                        <% if (doc.cityOfIssue) { %>
+                                          <div><strong>Ville d'émission:</strong> <%= doc.cityOfIssue %></div>
+                                        <% } %>
+                                        <% if (doc.note) { %>
+                                          <div><strong>Note:</strong> <%= doc.note %></div>
+                                        <% } %>
+                                      </li>
+                                    <% }); %>
+                                  </ul>
+                                <% } %>
+                                
+                                <!-- Improved address display to handle array format -->
+                                <% if (entry.address) { %>
+                                  <% if (Array.isArray(entry.address) && entry.address.length > 0) { %>
+                                    <p><strong>Adresse:</strong></p>
+                                    <ul>
+                                      <% entry.address.forEach((addr, index) => { %>
+                                        <li><%= String.fromCharCode(97 + index) %>) <%= addr %></li>
+                                      <% }); %>
+                                    </ul>
+                                  <% } else if (typeof entry.address === 'string') { %>
+                                    <p><strong>Adresse:</strong> <%= entry.address %></p>
+                                  <% } else { %>
+                                    <p><strong>Adresse:</strong> N/A</p>
+                                  <% } %>
+                                <% } else { %>
+                                  <p><strong>Adresse:</strong> N/A</p>
+                                <% } %>
+                                
+                                <p><strong>Date d'inscription:</strong> <%= entry.listedOn || 'N/A' %></p>
+                                <% if (entry.lastUpdated) { %>
+                                  <p><strong>Dernière mise à jour:</strong> <%= entry.lastUpdated %></p>
+                                <% } %>
+                                <% if (entry.physicalDescription) { %>
+                                  <p><strong>Description physique:</strong> <%= entry.physicalDescription %></p>
+                                <% } %>
+                                <% if (entry.languages) { %>
+                                  <p><strong>Langues parlées:</strong> <%= entry.languages %></p>
+                                <% } %>
+                                <% if (entry.interpol) { %>
+                                  <p><strong>Notice INTERPOL:</strong> <%= entry.interpol %></p>
+                                <% } %>
+                                <% if (entry.resolution) { %>
+                                  <p><strong>Résolution:</strong> <%= entry.resolution %></p>
+                                <% } %>
+                                <p><strong>Renseignements divers:</strong> 
+                                  <% if (entry.otherInfo) { %>
+                                    <% 
+                                      // Clean up any embedded IDs in the display
+                                      let displayInfo = entry.otherInfo;
+                                      const embeddedIdMatch = displayInfo.match(/\b([A-Z]{2,3})\.\d+\b/);
+                                      if (embeddedIdMatch) {
+                                        const embeddedIdPos = displayInfo.indexOf(embeddedIdMatch[0]);
+                                        const beforeId = displayInfo.substring(Math.max(0, embeddedIdPos - 30), embeddedIdPos).toLowerCase();
+                                        if (!beforeId.includes("associé") && !beforeId.includes("associée") && 
+                                            !beforeId.includes("référence") && !beforeId.includes("reference")) {
+                                          displayInfo = displayInfo.substring(0, embeddedIdPos).trim();
+                                        }
+                                      }
+                                    %>
+                                    <%= displayInfo %>
+                                  <% } else { %>
+                                    N/A
+                                  <% } %>
+                                </p>
+                                
+                                <% if (entry.notes) { %>
+                                  <p><strong>Notes supplémentaires:</strong> <%= entry.notes %></p>
+                                <% } %>
+                              </div>
+                            </div>
+                          <% } %>
+                          
+                          <% if (entry.matchFields && entry.matchFields.length > 0) { %>
+                            <div class="alert alert-info mt-3">
+                              <h6>Matched on fields:</h6>
+                              <p>
+                                <% entry.matchFields.forEach(field => { %>
+                                  <span class="badge bg-info me-1"><%= field %></span>
+                                <% }); %>
+                              </p>
+                            </div>
+                          <% } %>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Enhanced search functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add loading states to search form
+      const searchForm = document.querySelector('form');
+      const searchBtn = document.querySelector('.btn-search');
+
+      if (searchForm && searchBtn) {
+        searchForm.addEventListener('submit', function() {
+          const originalText = searchBtn.innerHTML;
+          searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Searching...';
+          searchBtn.disabled = true;
+
+          // Re-enable after timeout as fallback
+          setTimeout(() => {
+            searchBtn.innerHTML = originalText;
+            searchBtn.disabled = false;
+          }, 10000);
+        });
+      }
+
+      // Add hover effects to table rows
+      const tableRows = document.querySelectorAll('tbody tr');
+      tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+          this.style.transform = 'scale(1.02)';
+          this.style.zIndex = '10';
+        });
+
+        row.addEventListener('mouseleave', function() {
+          this.style.transform = 'scale(1)';
+          this.style.zIndex = '1';
+        });
+      });
+
+      // Enhanced modal functionality
+      const detailButtons = document.querySelectorAll('.btn-details');
+      detailButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const originalText = this.innerHTML;
+          this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Loading...';
+
+          setTimeout(() => {
+            this.innerHTML = originalText;
+          }, 1000);
+        });
+      });
+
+      // Add search field enhancements
+      const searchInputs = document.querySelectorAll('input[type="text"]');
+      searchInputs.forEach(input => {
+        input.addEventListener('focus', function() {
+          this.parentElement.style.transform = 'scale(1.02)';
+        });
+
+        input.addEventListener('blur', function() {
+          this.parentElement.style.transform = 'scale(1)';
+        });
+      });
+
+      // Add keyboard shortcuts
+      document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + K to focus search
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+          e.preventDefault();
+          const queryInput = document.getElementById('query');
+          if (queryInput) {
+            queryInput.focus();
+            queryInput.select();
+          }
+        }
+
+        // Enter to submit form when focused on any input
+        if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+          const form = e.target.closest('form');
+          if (form) {
+            form.submit();
+          }
+        }
+      });
+
+      // Add smooth scrolling to results
+      const resultsCard = document.querySelector('.results-card');
+      if (resultsCard && window.location.search) {
+        setTimeout(() => {
+          resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 500);
+      }
+    });
+  </script>
+</body>
+</html>

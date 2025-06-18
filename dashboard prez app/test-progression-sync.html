@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progression Overview Synchronization Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background: #f5f7fa;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .test-result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .test-result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .test-result.warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        .test-result.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .dashboard-frame {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        .test-controls {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .test-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0 10px;
+            font-size: 14px;
+        }
+        .test-btn:hover {
+            background: #0056b3;
+        }
+        .test-btn.success {
+            background: #28a745;
+        }
+        .test-btn.danger {
+            background: #dc3545;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Progression Overview Synchronization Test</h1>
+        <p>This test verifies that the Progression Overview (2) tab updates in real-time when checkbox states change across all regulators (BAM, AMMC, DGI).</p>
+
+        <div class="test-controls">
+            <button class="test-btn" onclick="runBasicTests()">🧪 Run Basic Tests</button>
+            <button class="test-btn" onclick="runCheckboxTests()">☑️ Test Checkbox Sync</button>
+            <button class="test-btn" onclick="runProgressionTests()">📊 Test Progression Updates</button>
+            <button class="test-btn danger" onclick="clearResults()">🗑️ Clear Results</button>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+        <div id="progressText">Ready to run tests...</div>
+
+        <div id="testResults"></div>
+
+        <div class="test-section">
+            <h2>📋 Dashboard Integration</h2>
+            <p>The dashboard will be loaded below for direct testing:</p>
+            <iframe id="dashboardFrame" class="dashboard-frame" src="complete_dashboard.html"></iframe>
+        </div>
+    </div>
+
+    <script>
+        let testResults = [];
+        let currentStep = 0;
+        let totalSteps = 0;
+        let dashboardWindow = null;
+
+        function updateProgress(step, message) {
+            currentStep = step;
+            const progress = totalSteps > 0 ? (step / totalSteps) * 100 : 0;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `Step ${step}/${totalSteps}: ${message}`;
+        }
+
+        function addTestResult(category, test, status, message, details = null) {
+            testResults.push({
+                category,
+                test,
+                status,
+                message,
+                details,
+                timestamp: new Date().toISOString()
+            });
+            displayResults();
+        }
+
+        function displayResults() {
+            const resultsDiv = document.getElementById('testResults');
+            let html = '<div class="test-section"><h2>📊 Test Results</h2>';
+
+            const categories = [...new Set(testResults.map(r => r.category))];
+
+            categories.forEach(category => {
+                const categoryResults = testResults.filter(r => r.category === category);
+                html += `<h3>${category}</h3>`;
+
+                categoryResults.forEach(result => {
+                    const statusIcon = result.status === 'success' ? '✅' :
+                                     result.status === 'error' ? '❌' :
+                                     result.status === 'warning' ? '⚠️' : 'ℹ️';
+
+                    html += `<div class="test-result ${result.status}">`;
+                    html += `${statusIcon} <strong>${result.test}:</strong> ${result.message}`;
+                    if (result.details) {
+                        html += `<pre>${JSON.stringify(result.details, null, 2)}</pre>`;
+                    }
+                    html += `</div>`;
+                });
+            });
+
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+        }
+
+        function clearResults() {
+            testResults = [];
+            displayResults();
+            updateProgress(0, 'Ready to run tests...');
+        }
+
+        async function runBasicTests() {
+            clearResults();
+            totalSteps = 8;
+            currentStep = 0;
+
+            updateProgress(1, 'Loading dashboard...');
+
+            // Wait for dashboard to load
+            await new Promise(resolve => {
+                const iframe = document.getElementById('dashboardFrame');
+                iframe.onload = () => {
+                    dashboardWindow = iframe.contentWindow;
+                    resolve();
+                };
+                if (iframe.contentDocument && iframe.contentDocument.readyState === 'complete') {
+                    dashboardWindow = iframe.contentWindow;
+                    resolve();
+                }
+            });
+
+            updateProgress(2, 'Checking dashboard functions...');
+
+            // Test if required functions exist
+            if (dashboardWindow.getAllComprehensiveEvents) {
+                addTestResult('Basic Tests', 'getAllComprehensiveEvents', 'success', 'Function found in dashboard');
+
+                // Test the function
+                try {
+                    const events = dashboardWindow.getAllComprehensiveEvents();
+                    addTestResult('Basic Tests', 'Event Collection', 'success',
+                        `Collected ${events.length} events`,
+                        {
+                            total: events.length,
+                            BAM: events.filter(e => e.regulator === 'BAM').length,
+                            AMMC: events.filter(e => e.regulator === 'AMMC').length,
+                            DGI: events.filter(e => e.regulator === 'DGI').length
+                        });
+                } catch (error) {
+                    addTestResult('Basic Tests', 'Event Collection', 'error',
+                        `Error calling getAllComprehensiveEvents: ${error.message}`);
+                }
+            } else {
+                addTestResult('Basic Tests', 'getAllComprehensiveEvents', 'error', 'Function not found in dashboard');
+            }
+
+            updateProgress(3, 'Checking progression update function...');
+
+            if (dashboardWindow.triggerProgressionUpdate) {
+                addTestResult('Basic Tests', 'triggerProgressionUpdate', 'success', 'Function found in dashboard');
+            } else {
+                addTestResult('Basic Tests', 'triggerProgressionUpdate', 'error', 'Function not found in dashboard');
+            }
+
+            updateProgress(4, 'Checking enhanced progression overview...');
+
+            if (dashboardWindow.updateEnhancedProgressOverview) {
+                addTestResult('Basic Tests', 'updateEnhancedProgressOverview', 'success', 'Function found in dashboard');
+            } else {
+                addTestResult('Basic Tests', 'updateEnhancedProgressOverview', 'error', 'Function not found in dashboard');
+            }
+
+            updateProgress(5, 'Testing completion status loading...');
+
+            // Test completion status loading for BAM
+            try {
+                const events = dashboardWindow.getAllComprehensiveEvents();
+                const bamEvents = events.filter(e => e.regulator === 'BAM');
+                const completedBAM = bamEvents.filter(e => e.completed || e.sent).length;
+
+                addTestResult('Basic Tests', 'BAM Completion Status', 'info',
+                    `BAM completion status loaded: ${completedBAM}/${bamEvents.length} completed`);
+
+                const ammcEvents = events.filter(e => e.regulator === 'AMMC');
+                const completedAMMC = ammcEvents.filter(e => e.completed || e.sent).length;
+
+                addTestResult('Basic Tests', 'AMMC Completion Status', 'info',
+                    `AMMC completion status loaded: ${completedAMMC}/${ammcEvents.length} completed`);
+
+                const dgiEvents = events.filter(e => e.regulator === 'DGI');
+                const completedDGI = dgiEvents.filter(e => e.completed || e.sent).length;
+
+                addTestResult('Basic Tests', 'DGI Completion Status', 'info',
+                    `DGI completion status loaded: ${completedDGI}/${dgiEvents.length} completed`);
+
+            } catch (error) {
+                addTestResult('Basic Tests', 'Completion Status Loading', 'error',
+                    `Error testing completion status: ${error.message}`);
+            }
+
+            updateProgress(8, 'Basic tests completed!');
+        }
+
+        async function runCheckboxTests() {
+            if (!dashboardWindow) {
+                addTestResult('Checkbox Tests', 'Dashboard Not Loaded', 'error', 'Please run basic tests first');
+                return;
+            }
+
+            totalSteps = 10;
+            currentStep = 0;
+
+            updateProgress(1, 'Testing debug functions...');
+
+            // Test debug function
+            if (dashboardWindow.debugCompletionStatus) {
+                try {
+                    const debugStats = dashboardWindow.debugCompletionStatus();
+                    addTestResult('Checkbox Tests', 'Debug Function', 'success',
+                        'Debug function works', debugStats);
+                } catch (error) {
+                    addTestResult('Checkbox Tests', 'Debug Function', 'error',
+                        `Debug function error: ${error.message}`);
+                }
+            } else {
+                addTestResult('Checkbox Tests', 'Debug Function', 'error', 'Debug function not found');
+            }
+
+            updateProgress(2, 'Testing checkbox simulation...');
+
+            // Test checkbox simulation function
+            if (dashboardWindow.testCheckboxSync) {
+                addTestResult('Checkbox Tests', 'Simulation Function', 'success', 'Checkbox simulation function found');
+
+                updateProgress(3, 'Getting initial state...');
+
+                // Get initial completion stats
+                const initialStats = dashboardWindow.debugCompletionStatus();
+
+                updateProgress(4, 'Testing BAM checkbox simulation...');
+
+                // Test BAM checkbox simulation
+                try {
+                    const events = dashboardWindow.getAllComprehensiveEvents();
+                    const bamEvents = events.filter(e => e.regulator === 'BAM' && e.category === 'I');
+
+                    if (bamEvents.length > 0) {
+                        const testEvent = bamEvents[0];
+                        const originalState = testEvent.completed;
+
+                        // Toggle the checkbox
+                        const result = dashboardWindow.testCheckboxSync('BAM', 'I', testEvent.event, !originalState);
+
+                        if (result) {
+                            addTestResult('Checkbox Tests', 'BAM Simulation', 'success',
+                                `Successfully toggled BAM event: ${testEvent.event}`);
+
+                            // Wait a moment for updates to propagate
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+
+                            // Check if the change was reflected
+                            const newStats = dashboardWindow.debugCompletionStatus();
+                            const statsChanged = JSON.stringify(initialStats.BAM) !== JSON.stringify(newStats.BAM);
+
+                            if (statsChanged) {
+                                addTestResult('Checkbox Tests', 'BAM State Change', 'success',
+                                    'BAM completion stats updated after checkbox change');
+                            } else {
+                                addTestResult('Checkbox Tests', 'BAM State Change', 'warning',
+                                    'BAM completion stats may not have updated');
+                            }
+
+                            // Restore original state
+                            dashboardWindow.testCheckboxSync('BAM', 'I', testEvent.event, originalState);
+                        } else {
+                            addTestResult('Checkbox Tests', 'BAM Simulation', 'error',
+                                'Failed to simulate BAM checkbox change');
+                        }
+                    } else {
+                        addTestResult('Checkbox Tests', 'BAM Simulation', 'warning',
+                            'No BAM Category I events found for testing');
+                    }
+                } catch (error) {
+                    addTestResult('Checkbox Tests', 'BAM Simulation', 'error',
+                        `BAM simulation error: ${error.message}`);
+                }
+
+                updateProgress(6, 'Testing AMMC checkbox simulation...');
+
+                // Test AMMC checkbox simulation
+                try {
+                    const events = dashboardWindow.getAllComprehensiveEvents();
+                    const ammcEvents = events.filter(e => e.regulator === 'AMMC');
+
+                    if (ammcEvents.length > 0) {
+                        const testEvent = ammcEvents[0];
+                        const originalState = testEvent.completed;
+
+                        // Toggle the checkbox
+                        const result = dashboardWindow.testCheckboxSync('AMMC', testEvent.category,
+                            testEvent.Appellation || testEvent.ReportingName, !originalState);
+
+                        if (result) {
+                            addTestResult('Checkbox Tests', 'AMMC Simulation', 'success',
+                                `Successfully toggled AMMC event: ${testEvent.Appellation || testEvent.ReportingName}`);
+
+                            // Restore original state
+                            dashboardWindow.testCheckboxSync('AMMC', testEvent.category,
+                                testEvent.Appellation || testEvent.ReportingName, originalState);
+                        } else {
+                            addTestResult('Checkbox Tests', 'AMMC Simulation', 'error',
+                                'Failed to simulate AMMC checkbox change');
+                        }
+                    } else {
+                        addTestResult('Checkbox Tests', 'AMMC Simulation', 'warning',
+                            'No AMMC events found for testing');
+                    }
+                } catch (error) {
+                    addTestResult('Checkbox Tests', 'AMMC Simulation', 'error',
+                        `AMMC simulation error: ${error.message}`);
+                }
+
+                updateProgress(8, 'Testing DGI checkbox simulation...');
+
+                // Test DGI checkbox simulation
+                try {
+                    const events = dashboardWindow.getAllComprehensiveEvents();
+                    const dgiEvents = events.filter(e => e.regulator === 'DGI');
+
+                    if (dgiEvents.length > 0) {
+                        const testEvent = dgiEvents[0];
+                        const originalState = testEvent.completed;
+
+                        // Toggle the checkbox
+                        const result = dashboardWindow.testCheckboxSync('DGI', testEvent.category,
+                            testEvent.Appellation || testEvent.ReportingName, !originalState);
+
+                        if (result) {
+                            addTestResult('Checkbox Tests', 'DGI Simulation', 'success',
+                                `Successfully toggled DGI event: ${testEvent.Appellation || testEvent.ReportingName}`);
+
+                            // Restore original state
+                            dashboardWindow.testCheckboxSync('DGI', testEvent.category,
+                                testEvent.Appellation || testEvent.ReportingName, originalState);
+                        } else {
+                            addTestResult('Checkbox Tests', 'DGI Simulation', 'error',
+                                'Failed to simulate DGI checkbox change');
+                        }
+                    } else {
+                        addTestResult('Checkbox Tests', 'DGI Simulation', 'warning',
+                            'No DGI events found for testing');
+                    }
+                } catch (error) {
+                    addTestResult('Checkbox Tests', 'DGI Simulation', 'error',
+                        `DGI simulation error: ${error.message}`);
+                }
+
+            } else {
+                addTestResult('Checkbox Tests', 'Simulation Function', 'error', 'Checkbox simulation function not found');
+            }
+
+            updateProgress(10, 'Checkbox tests completed!');
+        }
+
+        async function runProgressionTests() {
+            if (!dashboardWindow) {
+                addTestResult('Progression Tests', 'Dashboard Not Loaded', 'error', 'Please run basic tests first');
+                return;
+            }
+
+            totalSteps = 8;
+            currentStep = 0;
+
+            updateProgress(1, 'Testing progression overview update...');
+
+            try {
+                // Test calling the progression update function
+                dashboardWindow.triggerProgressionUpdate();
+                addTestResult('Progression Tests', 'Trigger Update', 'success', 'triggerProgressionUpdate() called successfully');
+
+                updateProgress(2, 'Testing enhanced progression overview...');
+
+                // Test calling the enhanced progression overview
+                await dashboardWindow.updateEnhancedProgressOverview();
+                addTestResult('Progression Tests', 'Enhanced Update', 'success', 'updateEnhancedProgressOverview() called successfully');
+
+                updateProgress(3, 'Testing real-time synchronization...');
+
+                // Test real-time synchronization by making a change and checking if progression updates
+                const initialStats = dashboardWindow.debugCompletionStatus();
+
+                // Find a BAM event to test with
+                const events = dashboardWindow.getAllComprehensiveEvents();
+                const bamEvents = events.filter(e => e.regulator === 'BAM' && e.category === 'I');
+
+                if (bamEvents.length > 0) {
+                    const testEvent = bamEvents[0];
+                    const originalState = testEvent.completed;
+
+                    updateProgress(4, 'Making test checkbox change...');
+
+                    // Make a change
+                    const changeResult = dashboardWindow.testCheckboxSync('BAM', 'I', testEvent.event, !originalState);
+
+                    if (changeResult) {
+                        updateProgress(5, 'Waiting for updates to propagate...');
+
+                        // Wait for debounced updates
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+
+                        updateProgress(6, 'Checking if progression overview updated...');
+
+                        // Check if the progression overview was updated
+                        const newStats = dashboardWindow.debugCompletionStatus();
+                        const statsChanged = JSON.stringify(initialStats) !== JSON.stringify(newStats);
+
+                        if (statsChanged) {
+                            addTestResult('Progression Tests', 'Real-time Sync', 'success',
+                                'Progression overview updated after checkbox change',
+                                {
+                                    before: initialStats,
+                                    after: newStats
+                                });
+                        } else {
+                            addTestResult('Progression Tests', 'Real-time Sync', 'warning',
+                                'Progression overview may not have updated or change was not significant');
+                        }
+
+                        updateProgress(7, 'Restoring original state...');
+
+                        // Restore original state
+                        dashboardWindow.testCheckboxSync('BAM', 'I', testEvent.event, originalState);
+
+                        // Wait for restore to complete
+                        await new Promise(resolve => setTimeout(resolve, 500));
+
+                        addTestResult('Progression Tests', 'State Restoration', 'success',
+                            'Original state restored successfully');
+                    } else {
+                        addTestResult('Progression Tests', 'Real-time Sync', 'error',
+                            'Could not make test checkbox change');
+                    }
+                } else {
+                    addTestResult('Progression Tests', 'Real-time Sync', 'warning',
+                        'No BAM events available for testing real-time sync');
+                }
+
+            } catch (error) {
+                addTestResult('Progression Tests', 'Update Functions', 'error',
+                    `Error during progression tests: ${error.message}`);
+            }
+
+            updateProgress(8, 'Progression tests completed!');
+        }
+
+        // Auto-run basic tests on load
+        window.addEventListener('load', () => {
+            setTimeout(runBasicTests, 2000);
+        });
+    </script>
+</body>
+</html>

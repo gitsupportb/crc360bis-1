@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Espace Client - BCP Securities Services</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <%- include('partials/header') %>
+  <div class="container mt-4">
+    <h1 class="mb-4 text-center">Espace Client - Évaluation des risques BC/FT</h1>
+    
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Importer un fichier Excel d'évaluation des risques</h5>
+          </div>
+          <div class="card-body">
+            <% if (!clientData) { %>
+              <form action="/upload-risk-assessment" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                  <label for="excelFile" class="form-label">Sélectionner un fichier Excel d'évaluation des risques</label>
+                  <input type="file" class="form-control" id="excelFile" name="excelFile" accept=".xlsx,.xls" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Importer et Analyser</button>
+              </form>
+            <% } else { %>
+              <div class="alert alert-success">
+                <p><strong>Données d'évaluation des risques traitées avec succès!</strong></p>
+                <p>Trouvé <%= clientCount %> clients dans le fichier Excel.</p>
+              </div>
+              <form action="/upload-risk-assessment" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                  <label for="excelFile" class="form-label">Mettre à jour le fichier Excel</label>
+                  <input type="file" class="form-control" id="excelFile" name="excelFile" accept=".xlsx,.xls" required>
+                </div>
+                <button type="submit" class="btn btn-warning">Mettre à jour</button>
+              </form>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <% if (clientData && clientData.length > 0) { %>
+      <div class="card mb-4">
+        <div class="card-header bg-dark text-white">
+          <h5 class="mb-0">Évaluation des risques par client</h5>
+        </div>
+        <div class="card-body">
+          <ul class="nav nav-tabs mb-3" id="clientTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="true">Récapitulatif</button>
+            </li>
+            <% clientData.forEach((client, index) => { %>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="client-<%= index %>-tab" data-bs-toggle="tab" data-bs-target="#client-<%= index %>" type="button" role="tab" aria-controls="client-<%= index %>" aria-selected="false"><%= client.name %></button>
+              </li>
+            <% }); %>
+          </ul>
+          
+          <div class="tab-content" id="clientTabsContent">
+            <!-- Summary Tab -->
+            <div class="tab-pane fade show active" id="summary" role="tabpanel" aria-labelledby="summary-tab">
+              <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                  <thead>
+                    <tr>
+                      <th>Client</th>
+                      <th>Niveau de risque</th>
+                      <th>Date de MAJ</th>
+                      <th>Date d'EER</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% clientData.forEach(client => { %>
+                      <tr>
+                        <td><%= client.name %></td>
+                        <td>
+                          <span class="badge <%= client.riskLevel === 'Faible' ? 'bg-success' : client.riskLevel === 'Moyen' ? 'bg-warning' : 'bg-danger' %>">
+                            <%= client.riskLevel %>
+                          </span>
+                        </td>
+                        <td><%= typeof client.updateDate === 'string' && client.updateDate.includes('-') ? new Date(client.updateDate).toLocaleDateString('fr-FR') : typeof client.updateDate === 'number' ? new Date(Math.round((client.updateDate - 25569) * 86400 * 1000)).toLocaleDateString('fr-FR') : client.updateDate %></td>
+                        <td><%= typeof client.assessmentDate === 'string' && client.assessmentDate.includes('-') ? new Date(client.assessmentDate).toLocaleDateString('fr-FR') : typeof client.assessmentDate === 'number' ? new Date(Math.round((client.assessmentDate - 25569) * 86400 * 1000)).toLocaleDateString('fr-FR') : client.assessmentDate %></td>
+                      </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <!-- Individual Client Tabs -->
+            <% clientData.forEach((client, index) => { %>
+              <div class="tab-pane fade" id="client-<%= index %>" role="tabpanel" aria-labelledby="client-<%= index %>-tab">
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <div class="card">
+                      <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">Informations générales</h6>
+                      </div>
+                      <div class="card-body">
+                        <table class="table table-bordered">
+                          <tbody>
+                            <tr>
+                              <th>Nom du client</th>
+                              <td><%= client.name %></td>
+                            </tr>
+                            <tr>
+                              <th>Niveau de risque</th>
+                              <td>
+                                <span class="badge <%= client.riskLevel === 'Faible' ? 'bg-success' : client.riskLevel === 'Moyen' ? 'bg-warning' : 'bg-danger' %>">
+                                  <%= client.riskLevel %>
+                                </span>
+                              </td>
+                            </tr>
+                            <tr>
+                              <th>Date de MAJ</th>
+                              <td><%= typeof client.updateDate === 'string' && client.updateDate.includes('-') ? new Date(client.updateDate).toLocaleDateString('fr-FR') : typeof client.updateDate === 'number' ? new Date(Math.round((client.updateDate - 25569) * 86400 * 1000)).toLocaleDateString('fr-FR') : client.updateDate %></td>
+                            </tr>
+                            <tr>
+                              <th>Date d'EER</th>
+                              <td><%= typeof client.assessmentDate === 'string' && client.assessmentDate.includes('-') ? new Date(client.assessmentDate).toLocaleDateString('fr-FR') : typeof client.assessmentDate === 'number' ? new Date(Math.round((client.assessmentDate - 25569) * 86400 * 1000)).toLocaleDateString('fr-FR') : client.assessmentDate %></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="card">
+                      <div class="card-header bg-success text-white">
+                        <h6 class="mb-0">Actions</h6>
+                      </div>
+                      <div class="card-body d-flex justify-content-center align-items-center" style="height: 100%;">
+                        <div>
+                          <button class="btn btn-primary mb-2 w-100">Exporter PDF</button>
+                          <button class="btn btn-secondary w-100">Historique des évaluations</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Risk Assessment Details -->
+                <div class="card">
+                  <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">Détails de l'évaluation des risques</h6>
+                  </div>
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table class="table table-bordered">
+                        <!-- Header with BCP Logo and Title -->
+                        <tr>
+                          <td colspan="2" class="text-center" style="width: 25%;">
+                            <img src="/img/bcp-logo.jpg" alt="BCP Securities Services" style="max-height: 60px;">
+                            <div>SECURITIES SERVICES</div>
+                          </td>
+                          <td colspan="5" class="text-center bg-light" style="background-color: #FFEFD5;">
+                            <h4><%= client.name %></h4>
+                          </td>
+                          <td colspan="2" class="text-center">
+                            <div>Date de MAJ</div>
+                            <div><%= typeof client.updateDate === 'string' && client.updateDate.includes('-') ? new Date(client.updateDate).toLocaleDateString('fr-FR') : typeof client.updateDate === 'number' ? new Date(Math.round((client.updateDate - 25569) * 86400 * 1000)).toLocaleDateString('fr-FR') : client.updateDate %></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td colspan="7"></td>
+                          <td colspan="2" class="text-center">
+                            <div>Date d'EER</div>
+                            <div><%= typeof client.assessmentDate === 'string' && client.assessmentDate.includes('-') ? new Date(client.assessmentDate).toLocaleDateString('fr-FR') : typeof client.assessmentDate === 'number' ? new Date(Math.round((client.assessmentDate - 25569) * 86400 * 1000)).toLocaleDateString('fr-FR') : client.assessmentDate %></div>
+                          </td>
+                        </tr>
+                        
+                        <!-- Main Title -->
+                        <tr>
+                          <td colspan="9" class="text-center text-white" style="background-color: #8B4513;">
+                            <h5 class="mb-0">Evaluation des risques BC/FT</h5>
+                          </td>
+                        </tr>
+                        
+                        <!-- Subtitle -->
+                        <tr>
+                          <td colspan="9" class="text-center text-white" style="background-color: #E97451;">
+                            <h6 class="mb-0">Identification des risques BC/FT</h6>
+                          </td>
+                        </tr>
+                        
+                        <!-- Table Headers -->
+                        <tr>
+                          <td colspan="2" class="text-center"><strong>Facteurs de risques</strong></td>
+                          <td colspan="6" class="text-center"><strong>Profil de risques</strong></td>
+                          <td class="text-center"><strong>Notation de risque</strong></td>
+                        </tr>
+                        
+                        <!-- Debug information - only shown in development mode -->
+                        <% if (process.env.NODE_ENV === 'development' && typeof client.processedRiskTable !== 'undefined') { %>
+                        <tr>
+                          <td colspan="9" class="text-center text-muted">
+                            <small>Debug: processedRiskTable <%= client.processedRiskTable ? `found with ${client.processedRiskTable.length} categories` : 'not found' %></small>
+                          </td>
+                        </tr>
+                        <% } %>
+                        
+                        <!-- Display processed risk table data -->
+                        <% if (client.processedRiskTable && client.processedRiskTable.length > 0) { %>
+                          <% client.processedRiskTable.forEach(category => { %>
+                            <!-- Category Header -->
+                            <tr class="table-secondary">
+                              <td colspan="2"><strong><%= category.name %></strong></td>
+                              <td colspan="6"></td>
+                              <td class="text-center">
+                                <% if (category.rating === 'Élevé' || category.rating === 'Elevé') { %>
+                                  <span class="badge bg-danger"><%= category.rating %></span>
+                                <% } else if (category.rating === 'Moyen') { %>
+                                  <span class="badge bg-warning text-dark"><%= category.rating %></span>
+                                <% } else { %>
+                                  <span class="badge bg-success"><%= category.rating %></span>
+                                <% } %>
+                              </td>
+                            </tr>
+                            
+                            <!-- Risk Factors for this Category -->
+                            <% if (category.factors && category.factors.length > 0) { %>
+                              <% category.factors.forEach(factor => { %>
+                                <tr>
+                                  <td colspan="2"><%= factor.name %></td>
+                                  <td colspan="6"><%= factor.profile %></td>
+                                  <td class="text-center">
+                                    <% if (factor.rating === 'Élevé' || factor.rating === 'Elevé') { %>
+                                      <span class="badge bg-danger"><%= factor.rating %></span>
+                                    <% } else if (factor.rating === 'Moyen') { %>
+                                      <span class="badge bg-warning text-dark"><%= factor.rating %></span>
+                                    <% } else { %>
+                                      <span class="badge bg-success"><%= factor.rating %></span>
+                                    <% } %>
+                                  </td>
+                                </tr>
+                              <% }); %>
+                            <% } else { %>
+                              <!-- Display a message if no factors are found for this category -->
+                              <tr>
+                                <td colspan="9" class="text-center text-muted">Non spécifié</td>
+                              </tr>
+                            <% } %>
+                          <% }); %>
+                        <% } else if (client.riskFactors && client.riskFactors.length > 0) { %>
+                          <% client.riskFactors.forEach(categoryGroup => { %>
+                            <!-- Category Header -->
+                            <tr class="table-secondary">
+                              <td colspan="2"><strong><%= categoryGroup.category %></strong></td>
+                              <td colspan="6"></td>
+                              <td class="text-center">
+                                <% if (categoryGroup.rating === 'Élevé' || categoryGroup.rating === 'Elevé') { %>
+                                  <span class="badge bg-danger"><%= categoryGroup.rating %></span>
+                                <% } else if (categoryGroup.rating === 'Moyen') { %>
+                                  <span class="badge bg-warning text-dark"><%= categoryGroup.rating %></span>
+                                <% } else { %>
+                                  <span class="badge bg-success"><%= categoryGroup.rating %></span>
+                                <% } %>
+                              </td>
+                            </tr>
+                            
+                            <!-- Risk Factors in this Category -->
+                            <% if (categoryGroup.factors && Array.isArray(categoryGroup.factors)) { %>
+                              <% categoryGroup.factors.forEach(factor => { %>
+                                <tr>
+                                  <td colspan="2"><%= factor.name %></td>
+                                  <td colspan="6"><%= factor.profile || 'Non spécifié' %></td>
+                                  <td class="text-center">
+                                    <% if (factor.rating === 'Élevé' || factor.rating === 'Elevé') { %>
+                                      <span class="badge bg-danger"><%= factor.rating %></span>
+                                    <% } else if (factor.rating === 'Moyen') { %>
+                                      <span class="badge bg-warning text-dark"><%= factor.rating %></span>
+                                    <% } else { %>
+                                      <span class="badge bg-success"><%= factor.rating %></span>
+                                    <% } %>
+                                  </td>
+                                </tr>
+                              <% }); %>
+                            <% } else { %>
+                              <!-- Display a message if no factors are found for this category -->
+                              <tr>
+                                <td colspan="9" class="text-center text-muted">Aucun facteur de risque trouvé pour cette catégorie</td>
+                              </tr>
+                            <% } %>
+                          <% }); %>
+                        <% } else if (client.extractedRiskData && client.extractedRiskData.length > 0) { %>
+                          <!-- Fallback to display raw extracted data if processed data is not available -->
+                          <% 
+                          // Use categories from the client data if available, otherwise use default
+                          const knownCategories = client.knownCategories || [
+                            'Zone géographique',
+                            'Caractéristiques du client',
+                            'Réputation du client',
+                            'Nature produits/opérations',
+                            'Canal de distribution'
+                          ];
+                          
+                          let currentCategory = null;
+                          client.extractedRiskData.forEach(row => {
+                          %>
+                            <% if (row.isCategory) { %>
+                              <!-- Category Header -->
+                              <tr class="table-secondary">
+                                <td colspan="2"><strong><%= row.A %></strong></td>
+                                <td colspan="6"></td>
+                                <td class="text-center">
+                                  <% if (row.rating === 'Élevé' || row.rating === 'Elevé') { %>
+                                    <span class="badge bg-danger"><%= row.rating %></span>
+                                  <% } else if (row.rating === 'Moyen') { %>
+                                    <span class="badge bg-warning text-dark"><%= row.rating %></span>
+                                  <% } else { %>
+                                    <span class="badge bg-success"><%= row.rating %></span>
+                                  <% } %>
+                                </td>
+                              </tr>
+                              <% currentCategory = row.A; %>
+                            <% } else if (row.A) { %>
+                              <!-- Risk Factor -->
+                              <tr>
+                                <td colspan="2"><%= row.A %></td>
+                                <td colspan="6"><%= [row.B, row.C, row.D].filter(Boolean).join(' ') || 'Non spécifié' %></td>
+                                <td class="text-center">
+                                  <% if (row.rating === 'Élevé' || row.rating === 'Elevé') { %>
+                                    <span class="badge bg-danger"><%= row.rating %></span>
+                                  <% } else if (row.rating === 'Moyen') { %>
+                                    <span class="badge bg-warning text-dark"><%= row.rating %></span>
+                                  <% } else { %>
+                                    <span class="badge bg-success"><%= row.rating %></span>
+                                  <% } %>
+                                </td>
+                              </tr>
+                            <% } %>
+                          <% }); %>
+                        <% } %>
+                        
+                        <!-- Risk Level Summary -->
+                        <tr>
+                          <td colspan="2" class="text-center"><strong>Niveau risque</strong></td>
+                          <td colspan="7" class="text-center" style="background-color: <%= client.riskLevel === 'Faible' ? '#90EE90' : client.riskLevel === 'Moyen' ? '#FFD700' : '#FF6347' %>;"><strong><%= client.riskLevel %></strong></td>
+                        </tr>
+                        
+                        <!-- Action Buttons -->
+                        <tr>
+                          <td colspan="9" class="text-center">
+                            <button class="btn btn-primary mx-2">Calculer</button>
+                            <button class="btn btn-secondary mx-2">Initialiser</button>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+      </div>
+    <% } %>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

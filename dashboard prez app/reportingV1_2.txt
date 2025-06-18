@@ -1,0 +1,886 @@
+%%html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Reporting Dashboard – File Upload & Auto‑Validation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    /* Top‑level tabs */
+    .top-tabs {
+      overflow: hidden;
+      border-bottom: 1px solid #ccc;
+      background-color: #eee;
+      margin-bottom: 20px;
+    }
+    .top-tablinks {
+      background-color: inherit;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 12px 16px;
+      transition: background-color 0.3s;
+      font-size: 16px;
+    }
+    .top-tablinks:hover {
+      background-color: #ddd;
+    }
+    .top-tablinks.active {
+      background-color: #ccc;
+    }
+    .top-tabcontent {
+      display: none;
+      padding: 10px 15px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    /* Nested (sub‑) tabs */
+    .sub-tabs {
+      overflow: hidden;
+      border-bottom: 1px solid #ccc;
+      background-color: #f1f1f1;
+      margin-bottom: 10px;
+    }
+    .sub-tablinks {
+      background-color: inherit;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 10px 14px;
+      transition: background-color 0.3s;
+      font-size: 14px;
+    }
+    .sub-tablinks:hover {
+      background-color: #ddd;
+    }
+    .sub-tablinks.active {
+      background-color: #ccc;
+    }
+    .sub-tabcontent {
+      display: none;
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      margin-bottom: 10px;
+    }
+    /* Table styling */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #eee;
+    }
+    .toggle-checkbox {
+      transform: scale(1.2);
+    }
+    /* Plotly container */
+    .progress-chart {
+      width: 100%;
+      height: 400px;
+      margin-bottom: 20px;
+    }
+    /* Module d’upload */
+    #uploadSection {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin: 20px auto;
+      max-width: 600px;
+      background: #fff;
+    }
+  </style>
+  <!-- Include Plotly.js -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+  <h1>Reporting Dashboard</h1>
+  
+  <!-- Sélecteur d'année -->
+  <div style="text-align: center; margin-bottom: 20px;">
+    <label for="yearSelector">Select Year: </label>
+    <select id="yearSelector">
+      <option value="2020">2020</option>
+      <option value="2021">2021</option>
+      <option value="2022">2022</option>
+      <option value="2023">2023</option>
+      <option value="2024">2024</option>
+      <option value="2025" selected>2025</option>
+      <option value="2026">2026</option>
+      <option value="2027">2027</option>
+      <option value="2028">2028</option>
+      <option value="2029">2029</option>
+    </select>
+    <button id="updateYearButton">Update Year</button>
+  </div>
+  
+  <!-- Module d'upload -->
+  <div id="uploadSection">
+    <h2>Upload Reporting File</h2>
+    <label for="reportSelect">Select Report: </label>
+    <select id="reportSelect">
+      <!-- Options ajoutées dynamiquement -->
+    </select>
+    <br><br>
+    <label for="fileInput">Select File: </label>
+    <input type="file" id="fileInput">
+    <br><br>
+    <button id="uploadButton">Upload File</button>
+    <span id="uploadStatus"></span>
+  </div>
+  
+  <!-- Onglets principaux -->
+  <div class="top-tabs">
+    <button class="top-tablinks" onclick="openTopTab(event, 'cat1')" id="defaultTopTab">I – Situation comptable et états annexes</button>
+    <button class="top-tablinks" onclick="openTopTab(event, 'cat2')">II – Etats de synthèse et documents qui leur sont complémentaires</button>
+    <button class="top-tablinks" onclick="openTopTab(event, 'cat3')">III – Etats relatifs à la réglementation prudentielle</button>
+    <button class="top-tablinks" onclick="openTopTab(event, 'progressAll')">Progression Overview</button>
+  </div>
+  
+  <!-- CATEGORY I -->
+  <div id="cat1" class="top-tabcontent">
+    <div class="sub-tabs">
+      <button class="sub-tablinks" onclick="openSubTab(event, 'cat1_upcoming')" id="defaultSubTab_cat1">Upcoming Events</button>
+      <button class="sub-tablinks" onclick="openSubTab(event, 'cat1_reports')">All Reports</button>
+    </div>
+    <div id="cat1_upcoming" class="sub-tabcontent">
+      <h2>Upcoming Events – Situation comptable et états annexes</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Appellation</th>
+            <th>Frequency</th>
+            <th>Transmission</th>
+            <th>Deadline Rule</th>
+            <th>Date d’arrêté</th>
+            <th>Deadline</th>
+            <th>Days Remaining</th>
+          </tr>
+        </thead>
+        <tbody id="upcoming-table-cat1">
+          <!-- Lignes générées dynamiquement -->
+        </tbody>
+      </table>
+    </div>
+    <div id="cat1_reports" class="sub-tabcontent">
+      <h2>All Reports – Situation comptable et états annexes</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Appellation</th>
+            <th>Frequency</th>
+            <th>Transmission</th>
+            <th>Deadline Rule</th>
+            <th>Date d’arrêté</th>
+            <th>Deadline</th>
+            <th>Days Remaining</th>
+            <th>Toggle</th>
+            <th>Progress (%)</th>
+          </tr>
+        </thead>
+        <tbody id="reports-table-cat1">
+          <!-- Lignes générées dynamiquement -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- CATEGORY II -->
+  <div id="cat2" class="top-tabcontent">
+    <div class="sub-tabs">
+      <button class="sub-tablinks" onclick="openSubTab(event, 'cat2_upcoming')" id="defaultSubTab_cat2">Upcoming Events</button>
+      <button class="sub-tablinks" onclick="openSubTab(event, 'cat2_reports')">All Reports</button>
+    </div>
+    <div id="cat2_upcoming" class="sub-tabcontent">
+      <h2>Upcoming Events – Etats de synthèse et documents complémentaires</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Appellation</th>
+            <th>Frequency</th>
+            <th>Transmission</th>
+            <th>Deadline Rule</th>
+            <th>Date d’arrêté</th>
+            <th>Deadline</th>
+            <th>Days Remaining</th>
+          </tr>
+        </thead>
+        <tbody id="upcoming-table-cat2">
+          <!-- Lignes générées dynamiquement -->
+        </tbody>
+      </table>
+    </div>
+    <div id="cat2_reports" class="sub-tabcontent">
+      <h2>All Reports – Etats de synthèse et documents complémentaires</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Appellation</th>
+            <th>Frequency</th>
+            <th>Transmission</th>
+            <th>Deadline Rule</th>
+            <th>Date d’arrêté</th>
+            <th>Deadline</th>
+            <th>Days Remaining</th>
+            <th>Toggle</th>
+            <th>Progress (%)</th>
+          </tr>
+        </thead>
+        <tbody id="reports-table-cat2">
+          <!-- Lignes générées dynamiquement -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- CATEGORY III -->
+  <div id="cat3" class="top-tabcontent">
+    <div class="sub-tabs">
+      <button class="sub-tablinks" onclick="openSubTab(event, 'cat3_upcoming')" id="defaultSubTab_cat3">Upcoming Events</button>
+      <button class="sub-tablinks" onclick="openSubTab(event, 'cat3_reports')">All Reports</button>
+    </div>
+    <div id="cat3_upcoming" class="sub-tabcontent">
+      <h2>Upcoming Events – Etats relatifs à la réglementation prudentielle</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Reporting Name</th>
+            <th>Frequency</th>
+            <th>Submission Method</th>
+            <th>Deadline Rule</th>
+            <th>Date d’arrêté</th>
+            <th>Deadline</th>
+            <th>Days Remaining</th>
+          </tr>
+        </thead>
+        <tbody id="upcoming-table-cat3">
+          <!-- Lignes générées dynamiquement -->
+        </tbody>
+      </table>
+    </div>
+    <div id="cat3_reports" class="sub-tabcontent">
+      <h2>All Reports – Etats relatifs à la réglementation prudentielle</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Reporting Name</th>
+            <th>Frequency</th>
+            <th>Submission Method</th>
+            <th>Deadline Rule</th>
+            <th>Date d’arrêté</th>
+            <th>Deadline</th>
+            <th>Days Remaining</th>
+            <th>Toggle</th>
+            <th>Progress (%)</th>
+          </tr>
+        </thead>
+        <tbody id="reports-table-cat3">
+          <!-- Lignes générées dynamiquement -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- PROGRESSION OVERVIEW -->
+  <div id="progressAll" class="top-tabcontent">
+    <h2>Progression Overview (Yearly Completion %)</h2>
+    <div id="progress-bars-cat1" class="progress-chart"></div>
+    <div id="progress-bars-cat2" class="progress-chart"></div>
+    <div id="progress-bars-cat3" class="progress-chart"></div>
+  </div>
+  
+  <!-- JavaScript Code -->
+  <script>
+    /* ---------- Fonctions d'onglets ---------- */
+    function openTopTab(evt, tabName) {
+      var contents = document.getElementsByClassName("top-tabcontent");
+      for (var i = 0; i < contents.length; i++) { contents[i].style.display = "none"; }
+      var links = document.getElementsByClassName("top-tablinks");
+      for (var i = 0; i < links.length; i++) { links[i].className = links[i].className.replace(" active", ""); }
+      document.getElementById(tabName).style.display = "block";
+      evt.currentTarget.className += " active";
+    }
+    function openSubTab(evt, subTabName) {
+      var container = evt.currentTarget.parentNode.parentNode;
+      var contents = container.getElementsByClassName("sub-tabcontent");
+      for (var i = 0; i < contents.length; i++) { contents[i].style.display = "none"; }
+      var links = container.getElementsByClassName("sub-tablinks");
+      for (var i = 0; i < links.length; i++) { links[i].className = links[i].className.replace(" active", ""); }
+      document.getElementById(subTabName).style.display = "block";
+      evt.currentTarget.className += " active";
+    }
+    document.getElementById("defaultTopTab").click();
+    
+    /* ---------- Fonctions utilitaires ---------- */
+    function addDays(date, days) {
+      var result = new Date(date);
+      result.setDate(result.getDate() + days);
+      return result;
+    }
+    function getLastDayOfMonth(year, month) { return new Date(year, month, 0); }
+    function monthNameToNumber(monthName) {
+      monthName = monthName.toLowerCase();
+      var months = { 'janvier': 0, 'février': 1, 'fevrier': 1, 'mars': 2, 'avril': 3, 'mai': 4, 'juin': 5, 'juillet': 6, 'août': 7, 'aout': 7, 'septembre': 8, 'octobre': 9, 'novembre': 10, 'décembre': 11, 'decembre': 11 };
+      return months[monthName];
+    }
+    function parseFixedDeadline(rule, repDate) {
+      var matches = [];
+      var regex = /(?:(\d{1,2})|fin)\s*(janvier|février|fevrier|mars|avril|mai|juin|juillet|août|aout|septembre|octobre|novembre|décembre|decembre)/gi;
+      var m;
+      while ((m = regex.exec(rule)) !== null) {
+        var day;
+        var monthNumber = monthNameToNumber(m[2]);
+        if (m[1]) { day = parseInt(m[1]); } 
+        else { day = new Date(repDate.getFullYear(), monthNumber + 1, 0).getDate(); }
+        var candidate = new Date(repDate.getFullYear(), monthNumber, day);
+        if (candidate < repDate) { candidate = new Date(repDate.getFullYear() + 1, monthNumber, day); }
+        matches.push(candidate);
+      }
+      if (matches.length === 0) return null;
+      matches.sort(function(a, b){ return a - b; });
+      for (var i = 0; i < matches.length; i++){
+        if (matches[i] >= repDate) return matches[i];
+      }
+      return matches[0];
+    }
+    function calculateDeadline(repDate, rule) {
+      rule = rule.toLowerCase();
+      if (rule.includes("fin du mois suivant")) {
+        var nextMonth = repDate.getMonth() + 1;
+        var year = repDate.getFullYear();
+        if (nextMonth > 11) { nextMonth = 0; year++; }
+        return new Date(year, nextMonth + 1, 0);
+      }
+      if (rule.includes("un mois")) return addDays(repDate, 30);
+      if (rule.includes("15 jours")) return addDays(repDate, 15);
+      if (rule.includes("12 jours")) return addDays(repDate, 12);
+      if (rule.includes("21 jours")) return addDays(repDate, 21);
+      if (rule.includes("30 jours")) return addDays(repDate, 30);
+      var fixed = parseFixedDeadline(rule, repDate);
+      if (fixed) return fixed;
+      return null;
+    }
+    function formatDate(date) {
+      if (!(date instanceof Date)) return "N/A";
+      var day = ("0" + date.getDate()).slice(-2);
+      var month = ("0" + (date.getMonth() + 1)).slice(-2);
+      var year = date.getFullYear();
+      return day + "/" + month + "/" + year;
+    }
+    
+    /* ---------- Données ---------- */
+    const dataCat1 = [
+      { Code: "001", Appellation: "Situation Comptable provisoire", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "001", Appellation: "Situation Comptable définitive (*)", Frequency: "Trimestrielle", Transmission: "Télétransmission", DeadlineRule: "15 mars pour le provisoire, 30 avril pour le définitif à fin décembre\n31 mai pour l'état arrêté à fin mars\n30 août pour le définitif à fin juin\n30 novembre pour l'état arrêté à fin septembre" },
+      { Code: "005", Appellation: "Ventilation, en fonction de la résidence et par catégorie de contrepartie, des opérations de trésorerie et des créances sur les établissements de crédit et assimilés", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "006", Appellation: "Ventilation, en fonction de la résidence et par catégorie de contrepartie, des opérations de trésorerie et des dettes envers les établissements de crédit et assimilés", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "007", Appellation: "Ventilation, en fonction de la résidence et par catégorie de contrepartie, des créances sur la clientèle financière", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "008", Appellation: "Ventilation, en fonction de la résidence et par catégorie de contrepartie, des dettes envers la clientèle financière", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "009", Appellation: "Ventilation, en fonction de la résidence et par catégorie d'agent économique, des créances sur la clientèle non financière", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "010", Appellation: "Ventilation, en fonction de la résidence et par catégorie d'agent économique, des dettes envers la clientèle non financière", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "011", Appellation: "Ventilation, par sections et sous sections d'activité, des créances sur la clientèle", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "012", Appellation: "Ventilation, en fonction du support, des valeurs reçues ou données en pension", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "013", Appellation: "Ventilation, en fonction de la résidence de l'émetteur et par catégorie de contrepartie, des titres en portefeuille", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "014", Appellation: "Ventilation des éléments d'actif , de passif et d'hors bilan concernant les apparentés", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "015", Appellation: "Ventilation , en fonction de la durée initiale, des emplois et des ressources", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "016", Appellation: "Ventilation , en fonction de la durée résiduelle, des emplois, des ressources et des engagements de hors bilan", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "018", Appellation: "Détails des autres actifs et passifs", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "026", Appellation: "Ventilation, en fonction de leur terme, des dettes en devises envers les banques étrangères et organismes assimilés", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "028", Appellation: "Ventilation des titres par émetteur", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "029", Appellation: "Ventilation, par catégorie de contrepartie, des opérations de trésorerie et des créances sur les établissements de crédit assimilés", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "030", Appellation: "Ventilation, par catégorie de contrepartie, des opérations de trésorerie et des dettes envers les établissements de crédit assimilés", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "031", Appellation: "Ventilation, par catégorie de détenteurs et par durée initiale des titres de dettes", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "032", Appellation: "Ventilation, par catégorie d'agent économique des autres actifs et passifs", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "165", Appellation: "Ventilation, par agent économique, de l'actif net des OPCVM", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "166", Appellation: "Ventilation, par agent économique, de l'actif net des OPCVM autres que monétaires", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "167", Appellation: "Ventilation, en fonction de la durée résiduelle, de l'endettement des banques en devises", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "080", Appellation: "Ventilation par guichet des dépôts et crédits par décaissement", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "155", Appellation: "Etat d'exposition sur les contreparties étrangères", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" }
+    ];
+    
+    const dataCat2 = [
+      { Code: "040", Appellation: "Bilan", Frequency: "Semestrielle", Transmission: "Télétransmission", DeadlineRule: "15 mars pour le provisoire, 30 avril pour le définitif à fin décembre et 30 Août pour le définitif à fin juin" },
+      { Code: "041", Appellation: "Compte de produits et charges", Frequency: "Semestrielle", Transmission: "Télétransmission", DeadlineRule: "15 mars pour le provisoire, 30 avril pour le définitif à fin décembre et 30 Août pour le définitif à fin juin" },
+      { Code: "042", Appellation: "Etat des soldes de gestion", Frequency: "Semestrielle", Transmission: "Télétransmission", DeadlineRule: "15 mars pour le provisoire, 30 avril pour le définitif à fin décembre et 30 Août pour le définitif à fin juin" },
+      { Code: "043", Appellation: "Tableau des flux de trésorerie", Frequency: "Semestrielle", Transmission: "Télétransmission", DeadlineRule: "31 mars pour l'état arrêté à fin décembre et 15 septembre pour l'état arrêté à fin juin" },
+      { Code: "050", Appellation: "Compte de produits et charges détaillé", Frequency: "Semestrielle", Transmission: "Télétransmission", DeadlineRule: "15 mars pour le provisoire, 30 avril pour le définitif à fin décembre et 31 Août pour le définitif à fin juin" },
+      { Code: "051", Appellation: "Immobilisations incorporelles et corporelles", Frequency: "Semestrielle", Transmission: "Télétransmission", DeadlineRule: "31 mars pour l'état arrêté à fin décembre et 15 septembre pour l'état arrêté à fin juin" },
+      { Code: "052", Appellation: "Cession des immobilisations incorporelles et corporelles", Frequency: "Semestrielle", Transmission: "Télétransmission", DeadlineRule: "31 mars pour l'état arrêté à fin décembre et 15 septembre pour l'état arrêté à fin juin" },
+      { Code: "054", Appellation: "Détail des titres de placement (titres de propriété)", Frequency: "Semestrielle", Transmission: "Télétransmission", DeadlineRule: "31 mars pour l'état arrêté à fin décembre et 15 septembre pour l'état arrêté à fin juin" },
+      { Code: "055", Appellation: "Détail des titres de participation et emplois assimilés", Frequency: "Semestrielle", Transmission: "Télétransmission", DeadlineRule: "31 mars pour l'état arrêté à fin décembre et 15 septembre pour l'état arrêté à fin juin" },
+      { Code: "056", Appellation: "Cession des titres de placement, des titres d'investissement, des titres de participation et emplois assimilés", Frequency: "Semestrielle", Transmission: "Télétransmission", DeadlineRule: "31 mars pour l'état arrêté à fin décembre et 15 septembre pour l'état arrêté à fin juin" },
+      { Code: "057", Appellation: "Valeur du portefeuille titres suivant différentes méthodes d'évaluation de ces titres", Frequency: "Semestrielle", Transmission: "Télétransmission", DeadlineRule: "31 mars pour l'état arrêté à fin décembre et 15 septembre pour l'état arrêté à fin juin" },
+      { Code: "063", Appellation: "Détail des provisions", Frequency: "Semestrielle", Transmission: "Télétransmission", DeadlineRule: "31 mars pour l'état arrêté à fin décembre et 15 septembre pour l'état arrêté à fin juin" },
+      { Code: "064", Appellation: "Répartition du capital social", Frequency: "Annuelle ou changement", Transmission: "Télétransmission", DeadlineRule: "31 janvier" },
+      { Code: "090", Appellation: "Répartition, par classe, nationalité, sexe et âge, du personnel", Frequency: "Annuelle", Transmission: "Télétransmission", DeadlineRule: "31 janvier" },
+      { Code: "092", Appellation: "Composition du conseil de surveillance", Frequency: "Annuelle", Transmission: "Télétransmission", DeadlineRule: "31 janvier" },
+      { Code: "093", Appellation: "Liste des membres et des agents de direction", Frequency: "Annuelle", Transmission: "Télétransmission", DeadlineRule: "31 janvier" },
+      { Code: "094", Appellation: "Liste des membres du directoire", Frequency: "Annuelle", Transmission: "Télétransmission", DeadlineRule: "31 janvier" },
+      { Code: "095", Appellation: "Liste des apparentés", Frequency: "Annuelle", Transmission: "Télétransmission", DeadlineRule: "31 janvier" },
+      { Code: "174", Appellation: "Evolution des valeurs mobilières conservées pour le compte de la clientèle par catégories d’agents économiques et d’instruments financiers", Frequency: "Semestrielle", Transmission: "Sur fichier", DeadlineRule: "fin janvier pour l’arrêté de décembre et fin juillet pour l’arrêté de juin" },
+      { Code: "175", Appellation: "Ventilation des valeurs mobilières conservées pour le compte de la clientèle", Frequency: "Semestrielle", Transmission: "Sur fichier", DeadlineRule: "fin janvier pour l’arrêté de décembre et fin juillet pour l’arrêté de juin" },
+      { Code: "176", Appellation: "Ventilation de l'encours des dépôts dirhams éligibles par nombre, catégorie de déposants et par tranche de montant", Frequency: "Trimestrielle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "177", Appellation: "Ventilation de l'encours des dépôts devises éligibles par nombre, catégorie de déposants et par tranche de montant", Frequency: "Trimestrielle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+      { Code: "178", Appellation: "Ventilation par montant de l'encours des dépôts éligibles et non éligibles", Frequency: "Trimestrielle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" }
+    ];
+    
+    const dataCat3 = [
+      { ID: 159, ReportingName: "Reporting réglementaire IRRBB", Frequency: "Trimestrielle", SubmissionMethod: "Télétransmission et Excel", DeadlineRule: "Un mois après la date l'arrêté" },
+      { ID: 331, ReportingName: "Etat LCR", Frequency: "Mensuelle", SubmissionMethod: "Excel", DeadlineRule: "15 jours après la date d'arrêté" },
+      { ID: 333, ReportingName: "Etat de calcul du ratio de levier sur base individuelle", Frequency: "Semestrielle", SubmissionMethod: "Télétransmission", DeadlineRule: "Fin mars pour l'état arrêté à fin décembre et fin septembre pour l'état arrêté à fin juin" },
+      { ID: 335, ReportingName: "Risques encourus sur un même bénéficiaire égaux ou supérieurs à 5% des fonds propres, déclarés sur base individuelle", Frequency: "Trimestrielle", SubmissionMethod: "Télétransmission", DeadlineRule: "21 jours après la date d'arrêté" },
+      { ID: 337, ReportingName: "Détail des risques sur les clients individuels au sein des groupes (base individuelle)", Frequency: "Trimestrielle", SubmissionMethod: "Télétransmission", DeadlineRule: "21 jours après la date d'arrêté" },
+      { ID: 339, ReportingName: "Calcul des seuils de 5 % et 20 % des fonds propres", Frequency: "Trimestrielle", SubmissionMethod: "Télétransmission", DeadlineRule: "30 jours après la date d'arrêté" },
+      { ID: 700, ReportingName: "Statistiques sur le nombre des DS transmises à l'UTRF par ligne de métiers et typologie d'infraction sous-jacente sur la période 2018-2019", Frequency: "Annuelle", SubmissionMethod: "Télétransmission", DeadlineRule: "Fin Mars" },
+      { ID: 703, ReportingName: "Risque inhérent 'Banque de l'entreprise et de financement'", Frequency: "Annuelle", SubmissionMethod: "Télétransmission", DeadlineRule: "Fin Mars" },
+      { ID: 1, ReportingName: "Reporting COREP individuel et Etats des fonds propres", Frequency: "Semestrielle", SubmissionMethod: "Sur fichier", DeadlineRule: "Fin mars pour l'état arrêté à fin décembre et fin septembre pour l'état arrêté à fin juin" },
+      { ID: 2, ReportingName: "Reporting sur le risque du marché", Frequency: "Trimestrielle", SubmissionMethod: "Sur Fichier", DeadlineRule: "12 jours après la date d'arrêté" },
+      { ID: 3, ReportingName: "Stress tests au titre du risque de liquidité", Frequency: "Mensuelle", SubmissionMethod: "Sur fichier", DeadlineRule: "Fin du mois suivant" },
+      { ID: 4, ReportingName: "Stress tests au titre du risque de crédit", Frequency: "Semestrielle", SubmissionMethod: "Sur fichier", DeadlineRule: "Fin mars pour l'état arrêté à fin décembre et fin septembre pour l'état arrêté à fin juin" },
+      { ID: 5, ReportingName: "Stress tests au titre du risque de concentration", Frequency: "Semestrielle", SubmissionMethod: "Sur fichier", DeadlineRule: "Fin mars pour l'état arrêté à fin décembre et fin septembre pour l'état arrêté à fin juin" },
+      { ID: 6, ReportingName: "Stress tests au titre du risque de marché", Frequency: "Semestrielle", SubmissionMethod: "Sur fichier", DeadlineRule: "Fin mars pour l'état arrêté à fin décembre et fin septembre pour l'état arrêté à fin juin" },
+      { ID: 7, ReportingName: "Stress tests au titre du risque pays", Frequency: "Semestrielle", SubmissionMethod: "Sur fichier", DeadlineRule: "Fin mars pour l'état arrêté à fin décembre et fin septembre pour l'état arrêté à fin juin" },
+      { ID: 9, ReportingName: "Choc sur le marché immobilier", Frequency: "Semestrielle", SubmissionMethod: "Sur fichier", DeadlineRule: "Fin mars pour l'état arrêté à fin décembre et fin septembre pour l'état arrêté à fin juin" },
+      { ID: 10, ReportingName: "Déterioration des conditions macroéconomiques", Frequency: "Mensuelle", SubmissionMethod: "Sur Fichier", DeadlineRule: "Fin mars suivant pour l'arrêté de décembre et fin septembre pour l'état arrêté à fin juin" },
+      { ID: 11, ReportingName: "Reporting sur les reports d'échéances des crédits (Global, Zoom Tourisme et Moratoires 2022)", Frequency: "Mensuelle", SubmissionMethod: "Sur Fichier", DeadlineRule: "12 jours après la date d'arrêté" },
+      { ID: 12, ReportingName: "Expositions par segment (TPE, PME, ETI, GE)", Frequency: "Mensuelle", SubmissionMethod: "Sur Fichier", DeadlineRule: "12 jours après la date d'arrêté" }
+    ];
+    
+    function generateEventsForItem(item, isCat3) {
+      var events = [];
+      var freq = item.Frequency.toLowerCase().trim();
+      var rule = item.DeadlineRule.toLowerCase().trim();
+      function pushEvent(repDate, deadline) {
+        events.push({
+          code: isCat3 ? item.ID : item.Code,
+          event: isCat3 ? item.ReportingName : item.Appellation,
+          Frequency: item.Frequency,
+          Support: isCat3 ? item.SubmissionMethod : item.Transmission,
+          DeadlineRule: item.DeadlineRule,
+          DateArrete: repDate,
+          Deadline: deadline,
+          completed: false,
+          progress: 0,
+          Category: item.Category
+        });
+      }
+      if (freq === "trimestrielle") {
+        if ( rule.includes("15 mars") && rule.includes("31 mai") &&
+             rule.includes("30 août") && rule.includes("30 novembre") ) {
+          var rep1 = new Date(currentYear - 1, 11, 31);
+          var rep2 = new Date(currentYear, 2, 31);
+          var rep3 = new Date(currentYear, 5, 30);
+          var rep4 = new Date(currentYear, 8, 30);
+          var dead1 = new Date(currentYear, 2, 15);
+          var dead2 = new Date(currentYear, 4, 31);
+          var dead3 = rule.includes("31 août") ? new Date(currentYear, 7, 31) : new Date(currentYear, 7, 30);
+          var dead4 = new Date(currentYear, 10, 30);
+          pushEvent(rep1, dead1);
+          pushEvent(rep2, dead2);
+          pushEvent(rep3, dead3);
+          pushEvent(rep4, dead4);
+        } else if ( rule.includes("12 jours après") ) {
+          var periods = !isCat3 ? [
+            { year: currentYear - 1, month: 12, day: 31 },
+            { year: currentYear,     month: 6,  day: 30 },
+            { year: currentYear,     month: 9,  day: 30 }
+          ] : [
+            { year: currentYear - 1, month: 12, day: 31 },
+            { year: currentYear,     month: 3,  day: 31 },
+            { year: currentYear,     month: 6,  day: 30 },
+            { year: currentYear,     month: 9,  day: 30 }
+          ];
+          periods.forEach(p => {
+            var rep = new Date(p.year, p.month - 1, p.day);
+            var dead = addDays(rep, 12);
+            pushEvent(rep, dead);
+          });
+        } else if ( rule.includes("un mois après") ) {
+          var periods = !isCat3 ? [
+            { year: currentYear - 1, month: 12, day: 31 },
+            { year: currentYear,     month: 6,  day: 30 },
+            { year: currentYear,     month: 9,  day: 30 }
+          ] : [
+            { year: currentYear - 1, month: 12, day: 31 },
+            { year: currentYear,     month: 3,  day: 31 },
+            { year: currentYear,     month: 6,  day: 30 },
+            { year: currentYear,     month: 9,  day: 30 }
+          ];
+          periods.forEach(p => {
+            var rep = new Date(p.year, p.month - 1, p.day);
+            var dead = new Date(rep.getFullYear(), rep.getMonth() + 2, 0);
+            pushEvent(rep, dead);
+          });
+        } else if ( rule.includes("21 jours après") ) {
+          var periods = !isCat3 ? [
+            { year: currentYear - 1, month: 12, day: 31 },
+            { year: currentYear,     month: 6,  day: 30 },
+            { year: currentYear,     month: 9,  day: 30 }
+          ] : [
+            { year: currentYear - 1, month: 12, day: 31 },
+            { year: currentYear,     month: 3,  day: 31 },
+            { year: currentYear,     month: 6,  day: 30 },
+            { year: currentYear,     month: 9,  day: 30 }
+          ];
+          periods.forEach(p => {
+            var rep = new Date(p.year, p.month - 1, p.day);
+            var dead = addDays(rep, 21);
+            pushEvent(rep, dead);
+          });
+        } else if ( rule.includes("30 jours après") ) {
+          var periods = !isCat3 ? [
+            { year: currentYear - 1, month: 12, day: 31 },
+            { year: currentYear,     month: 6,  day: 30 },
+            { year: currentYear,     month: 9,  day: 30 }
+          ] : [
+            { year: currentYear - 1, month: 12, day: 31 },
+            { year: currentYear,     month: 3,  day: 31 },
+            { year: currentYear,     month: 6,  day: 30 },
+            { year: currentYear,     month: 9,  day: 30 }
+          ];
+          periods.forEach(p => {
+            var rep = new Date(p.year, p.month - 1, p.day);
+            var dead = addDays(rep, 30);
+            pushEvent(rep, dead);
+          });
+        }
+      } else if (freq === "mensuelle") {
+        for (var m = 1; m <= 12; m++) {
+          var rep = new Date(currentYear, m, 0);
+          if ( rule.includes("12 jours après") ) {
+             pushEvent(rep, addDays(rep, 12));
+          } else if ( rule.includes("15 jours après") ) {
+             pushEvent(rep, addDays(rep, 15));
+          } else if ( rule.includes("fin du mois suivant") ) {
+             var nextMonth = rep.getMonth() + 1;
+             var nextYear = rep.getFullYear();
+             if (nextMonth > 11) { nextMonth = 0; nextYear++; }
+             pushEvent(rep, new Date(nextYear, nextMonth + 1, 0));
+          }
+        }
+      } else if (freq === "semestrielle") {
+        var repDec = new Date(currentYear - 1, 11, 31);
+        var repJun = new Date(currentYear, 5, 30);
+        if ( rule.includes("15 mars pour le provisoire") && rule.includes("30 avril") ) {
+          var tempDeadDec = new Date(currentYear, 2, 15);
+          var defDeadDec  = new Date(currentYear, 3, 30);
+          pushEvent(repDec, tempDeadDec);
+          pushEvent(repDec, defDeadDec);
+          if ( rule.includes("31 août") ) {
+            pushEvent(repJun, new Date(currentYear, 7, 31));
+          } else if ( rule.includes("30 août") ) {
+            pushEvent(repJun, new Date(currentYear, 7, 30));
+          } else {
+            pushEvent(repJun, new Date(currentYear, 7, 30));
+          }
+        } else if ( rule.includes("fin mars") && rule.includes("fin septembre") ) {
+          var deadDec = new Date(currentYear, 3, 0);
+          var deadJun = new Date(currentYear, 10, 0);
+          pushEvent(repDec, deadDec);
+          pushEvent(repJun, deadJun);
+        } else if ( rule.replace(/\s/g, "").includes("31mars") && rule.replace(/\s/g, "").includes("15septembre") ) {
+          var deadDec = new Date(currentYear, 2, 31);
+          var deadJun = new Date(currentYear, 8, 15);
+          pushEvent(repDec, deadDec);
+          pushEvent(repJun, deadJun);
+        } else if ( rule.includes("fin janvier") && rule.includes("fin juillet") ) {
+          var deadDec = new Date(currentYear, 1, 0);
+          var deadJun = new Date(currentYear, 7, 0);
+          pushEvent(repDec, deadDec);
+          pushEvent(repJun, deadJun);
+        } else if ( rule.includes("fin mars suivant") ) {
+          var deadDec = new Date(currentYear, 3, 0);
+          var deadJun = new Date(currentYear, 10, 0);
+          pushEvent(repDec, deadDec);
+          pushEvent(repJun, deadJun);
+        }
+      } else if (freq === "annuelle" || freq === "annuelle ou changement") {
+        var repAnn = new Date(currentYear - 1, 11, 31);
+        if ( rule.includes("31 janvier") ) {
+          pushEvent(repAnn, new Date(currentYear, 0, 31));
+        } else if ( rule.includes("fin mars") ) {
+          pushEvent(repAnn, new Date(currentYear, 3, 0));
+        }
+      }
+      return events;
+    }
+    
+    /* ---------- Fonctions de stockage local ---------- */
+    function saveProgressForCategory(key, eventsArray) {
+      localStorage.setItem(key, JSON.stringify(eventsArray.map(e => ({ completed: e.completed, progress: e.progress }))));
+    }
+    function loadProgressForCategory(key, eventsArray) {
+      var saved = localStorage.getItem(key);
+      if (saved) {
+        try {
+          var arr = JSON.parse(saved);
+          if (arr.length === eventsArray.length) {
+            arr.forEach(function(state, i) {
+              eventsArray[i].completed = state.completed;
+              eventsArray[i].progress = state.progress;
+            });
+          }
+        } catch(e) { console.error("Error loading progress:", e); }
+      }
+    }
+    
+    /* ---------- Mise à jour des tableaux ---------- */
+    function updateUpcomingTable(tableId, eventsArray) {
+      var tbody = document.getElementById(tableId);
+      tbody.innerHTML = "";
+      var now = new Date();
+      var filtered = eventsArray.filter(function(e) { return (e.Deadline instanceof Date && e.Deadline > now && e.Deadline <= addDays(now, 30)); });
+      filtered.sort(function(a, b) { return a.Deadline - b.Deadline; });
+      filtered.forEach(function(e) {
+        var tr = document.createElement("tr");
+        ["code", "event", "Frequency", "Support", "DeadlineRule"].forEach(function(prop) {
+          var td = document.createElement("td");
+          td.textContent = e[prop];
+          tr.appendChild(td);
+        });
+        var tdArrete = document.createElement("td");
+        tdArrete.textContent = formatDate(e.DateArrete);
+        tr.appendChild(tdArrete);
+        var tdDeadline = document.createElement("td");
+        tdDeadline.textContent = e.Deadline ? formatDate(e.Deadline) : "N/A";
+        tr.appendChild(tdDeadline);
+        var tdDays = document.createElement("td");
+        if (e.Deadline instanceof Date)
+          tdDays.textContent = Math.ceil((e.Deadline - now) / (1000 * 60 * 60 * 24));
+        else
+          tdDays.textContent = "N/A";
+        tr.appendChild(tdDays);
+        tbody.appendChild(tr);
+      });
+    }
+    
+    function updateReportsTable(tableId, eventsArray, storageKey) {
+      var tbody = document.getElementById(tableId);
+      tbody.innerHTML = "";
+      var now = new Date();
+      var sorted = eventsArray.slice().sort(function(a, b) {
+        var aDays = (a.Deadline instanceof Date) ? (a.Deadline - now) : Infinity;
+        var bDays = (b.Deadline instanceof Date) ? (b.Deadline - now) : Infinity;
+        return aDays - bDays;
+      });
+      sorted.forEach(function(e) {
+        var tr = document.createElement("tr");
+        var tdCode = document.createElement("td");
+        tdCode.textContent = e.code;
+        tr.appendChild(tdCode);
+        var tdEvent = document.createElement("td");
+        tdEvent.textContent = e.event;
+        tr.appendChild(tdEvent);
+        var tdFreq = document.createElement("td");
+        tdFreq.textContent = e.Frequency;
+        tr.appendChild(tdFreq);
+        var tdSupport = document.createElement("td");
+        tdSupport.textContent = e.Support;
+        tr.appendChild(tdSupport);
+        var tdRule = document.createElement("td");
+        tdRule.textContent = e.DeadlineRule;
+        tr.appendChild(tdRule);
+        var tdArrete = document.createElement("td");
+        tdArrete.textContent = formatDate(e.DateArrete);
+        tr.appendChild(tdArrete);
+        var tdDeadline = document.createElement("td");
+        tdDeadline.textContent = e.Deadline ? formatDate(e.Deadline) : "N/A";
+        tr.appendChild(tdDeadline);
+        var tdDays = document.createElement("td");
+        if (e.Deadline instanceof Date)
+          tdDays.textContent = Math.ceil((e.Deadline - now) / (1000 * 60 * 60 * 24));
+        else
+          tdDays.textContent = "N/A";
+        tr.appendChild(tdDays);
+        var tdToggle = document.createElement("td");
+        var checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "toggle-checkbox";
+        checkbox.checked = e.completed;
+        checkbox.addEventListener("change", function() {
+          e.completed = checkbox.checked;
+          e.progress = checkbox.checked ? 100 : 0;
+          saveProgressForCategory(storageKey, eventsArray);
+          updateReportsTable(tableId, eventsArray, storageKey);
+          updateProgressOverview();
+        });
+        tdToggle.appendChild(checkbox);
+        tr.appendChild(tdToggle);
+        var tdProgress = document.createElement("td");
+        tdProgress.textContent = e.progress + "%";
+        tr.appendChild(tdProgress);
+        tbody.appendChild(tr);
+      });
+    }
+    
+    function updateProgressOverview() {
+      function plotCategoryProgress(categoryName, eventsArray, containerId, color) {
+        var group = {};
+        eventsArray.forEach(function(e) {
+          if (!group[e.event]) { group[e.event] = { total: 0, completed: 0 }; }
+          group[e.event].total++;
+          if (e.completed) group[e.event].completed++;
+        });
+        var reportingNames = [], percentages = [];
+        for (var rep in group) {
+          reportingNames.push(rep);
+          percentages.push((group[rep].completed / group[rep].total) * 100);
+        }
+        var data = [{
+          type: 'bar',
+          x: percentages,
+          y: reportingNames,
+          orientation: 'h',
+          marker: { color: color }
+        }];
+        var layout = { title: categoryName + " Progression Overview (Yearly Completion %)", margin: { l: 200, r: 50, t: 50, b: 50 } };
+        Plotly.newPlot(containerId, data, layout);
+      }
+      plotCategoryProgress("I – Situation comptable et états annexes", eventsCat1, "progress-bars-cat1", "rgba(55,128,191,0.6)");
+      plotCategoryProgress("II – Etats de synthèse et documents qui leur sont complémentaires", eventsCat2, "progress-bars-cat2", "rgba(50,171,96,0.6)");
+      plotCategoryProgress("III – Etats relatifs à la réglementation prudentielle", eventsCat3, "progress-bars-cat3", "rgba(219,64,82,0.6)");
+    }
+    
+    /* ---------- Variables globales et updateAll() ---------- */
+    var currentYear = parseInt(document.getElementById("yearSelector").value);
+    var eventsCat1 = [];
+    var eventsCat2 = [];
+    var eventsCat3 = [];
+    function updateAll() {
+      currentYear = parseInt(document.getElementById("yearSelector").value);
+      eventsCat1 = [];
+      dataCat1.forEach(function(item) {
+        item.Category = "I – Situation comptable et états annexes";
+        eventsCat1 = eventsCat1.concat(generateEventsForItem(item, false));
+      });
+      eventsCat2 = [];
+      dataCat2.forEach(function(item) {
+        item.Category = "II – Etats de synthèse et documents qui leur sont complémentaires";
+        eventsCat2 = eventsCat2.concat(generateEventsForItem(item, false));
+      });
+      eventsCat3 = [];
+      dataCat3.forEach(function(item) {
+        item.Category = "III – Etats relatifs à la réglementation prudentielle";
+        eventsCat3 = eventsCat3.concat(generateEventsForItem(item, true));
+      });
+      loadProgressForCategory("progressCat1_" + currentYear, eventsCat1);
+      loadProgressForCategory("progressCat2_" + currentYear, eventsCat2);
+      loadProgressForCategory("progressCat3_" + currentYear, eventsCat3);
+      updateUpcomingTable("upcoming-table-cat1", eventsCat1);
+      updateReportsTable("reports-table-cat1", eventsCat1, "progressCat1_" + currentYear);
+      updateUpcomingTable("upcoming-table-cat2", eventsCat2);
+      updateReportsTable("reports-table-cat2", eventsCat2, "progressCat2_" + currentYear);
+      updateUpcomingTable("upcoming-table-cat3", eventsCat3);
+      updateReportsTable("reports-table-cat3", eventsCat3, "progressCat3_" + currentYear);
+      updateProgressOverview();
+      populateReportSelect();
+    }
+    
+    /* ---------- Remplissage du select de rapports ---------- */
+    function populateReportSelect() {
+      var select = document.getElementById("reportSelect");
+      select.innerHTML = "";
+      var reports = {};
+      [eventsCat1, eventsCat2, eventsCat3].forEach(function(arr) {
+        arr.forEach(function(e) { reports[e.event] = true; });
+      });
+      for (var rep in reports) {
+        var option = document.createElement("option");
+        option.value = rep;
+        option.textContent = rep;
+        select.appendChild(option);
+      }
+    }
+    
+    /* ---------- Marquer un report comme déposé ---------- */
+    function markReportUploaded(reportName) {
+      var now = new Date();
+      var month = now.getMonth(); // 0-indexé
+      var marked = false;
+      [eventsCat1, eventsCat2, eventsCat3].forEach(function(arr) {
+        arr.forEach(function(e) {
+          if (e.event === reportName && e.Deadline instanceof Date &&
+              e.Deadline.getMonth() === month && e.Deadline.getFullYear() === currentYear) {
+            e.completed = true;
+            e.progress = 100;
+            marked = true;
+          }
+        });
+      });
+      if (marked) {
+        // Sauvegarder l'état modifié
+        saveProgressForCategory("progressCat1_" + currentYear, eventsCat1);
+        saveProgressForCategory("progressCat2_" + currentYear, eventsCat2);
+        saveProgressForCategory("progressCat3_" + currentYear, eventsCat3);
+        updateAll();
+      }
+    }
+    
+    /* ---------- Upload de fichier ---------- */
+    document.getElementById("uploadButton").addEventListener("click", function() {
+      var reportSelect = document.getElementById("reportSelect");
+      var selectedReport = reportSelect.value;
+      var fileInput = document.getElementById("fileInput");
+      var file = fileInput.files[0];
+      if (!file) {
+        document.getElementById("uploadStatus").textContent = "Please select a file.";
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var base64Data = e.target.result;
+        var currentMonth = new Date().getMonth() + 1;
+        google.colab.kernel.invokeFunction('upload_file', [selectedReport, currentYear, currentMonth, file.name, base64Data], {})
+          .then(function(result) {
+            document.getElementById("uploadStatus").textContent = result.data;
+            markReportUploaded(selectedReport);
+          })
+          .catch(function(err) {
+            document.getElementById("uploadStatus").textContent = "Upload failed.";
+            console.error(err);
+          });
+      };
+      reader.readAsDataURL(file);
+    });
+    
+    /* ---------- Initialisation ---------- */
+    document.getElementById("updateYearButton").addEventListener("click", updateAll);
+    updateAll();
+    document.getElementById("defaultSubTab_cat1").click();
+    document.getElementById("defaultSubTab_cat2").click();
+    document.getElementById("defaultSubTab_cat3").click();
+    
+    setInterval(function() {
+      updateUpcomingTable("upcoming-table-cat1", eventsCat1);
+      updateReportsTable("reports-table-cat1", eventsCat1, "progressCat1_" + currentYear);
+      updateUpcomingTable("upcoming-table-cat2", eventsCat2);
+      updateReportsTable("reports-table-cat2", eventsCat2, "progressCat2_" + currentYear);
+      updateUpcomingTable("upcoming-table-cat3", eventsCat3);
+      updateReportsTable("reports-table-cat3", eventsCat3, "progressCat3_" + currentYear);
+      updateProgressOverview();
+    }, 60000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+version: '3.8'
+
+services:
+  # Main Dashboard (Next.js) - Port 3000
+  main-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.main
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - .:/app
+      - /app/node_modules
+    # depends_on:
+    #   - rep-watch
+    #   - aml-service
+    #   - docs-service
+    #   - calculs-service
+    networks:
+      - bcp-network
+
+  # Rep Watch Dashboard (Next.js) - Port 3010
+  rep-watch:
+    build:
+      context: ./app/dashboard/bcp2s-risk-platform
+      dockerfile: Dockerfile
+    ports:
+      - "3010:3010"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./app/dashboard/bcp2s-risk-platform:/app
+      - /app/node_modules
+    networks:
+      - bcp-network
+
+  # Documents Service (Next.js) - Port 3003
+  docs-service:
+    build:
+      context: ./app/documents/bcp-docs-platforme
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./app/documents/bcp-docs-platforme:/app
+      - /app/node_modules
+    networks:
+      - bcp-network
+
+  # Calculs Service (Next.js) - Port 3005
+  calculs-service:
+    build:
+      context: ./app/calculs/bcp2s-risk-platform
+      dockerfile: Dockerfile
+    ports:
+      - "3005:3005"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./app/calculs/bcp2s-risk-platform:/app
+      - /app/node_modules
+    networks:
+      - bcp-network
+
+  # AML Service (Node.js/Express) - Port 5000
+  aml-service:
+    build:
+      context: ./app/aml/LBCFT WEBAPP (1)/LBCFT WEBAPP
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - "./app/aml/LBCFT WEBAPP (1)/LBCFT WEBAPP:/app"
+      - /app/node_modules
+      - "./app/aml/LBCFT WEBAPP (1)/LBCFT WEBAPP/uploads:/app/uploads"
+    networks:
+      - bcp-network
+
+  # AMMC Django Service - Port 8080
+  ammc-service:
+    build:
+      context: ./app/dashboard/bcp2s-risk-platform/AMMC
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - DJANGO_SETTINGS_MODULE=AMMC.settings
+      - DEBUG=1
+    volumes:
+      - ./app/dashboard/bcp2s-risk-platform/AMMC:/app
+      - ./app/dashboard/bcp2s-risk-platform/AMMC/db.sqlite3:/app/db.sqlite3
+    networks:
+      - bcp-network
+
+  # BAM Django Service - Port 8000
+  bam-service:
+    build:
+      context: ./app/dashboard/bcp2s-risk-platform/components/myfirstproject
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=myfirstproject.settings
+      - DEBUG=1
+    volumes:
+      - ./app/dashboard/bcp2s-risk-platform/components/myfirstproject:/app
+      - ./app/dashboard/bcp2s-risk-platform/components/myfirstproject/db.sqlite3:/app/db.sqlite3
+      - ./app/dashboard/bcp2s-risk-platform/components/myfirstproject/media:/app/media
+    networks:
+      - bcp-network
+
+networks:
+  bcp-network:
+    driver: bridge
+
+volumes:
+  node_modules_main:
+  node_modules_rep:
+  node_modules_docs:
+  node_modules_calculs:
+  node_modules_aml:

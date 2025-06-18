@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BCP Securities Services - Centralized Data Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .test-section {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .success { border-left: 4px solid #4CAF50; background-color: #f1f8e9; }
+        .error { border-left: 4px solid #f44336; background-color: #ffebee; }
+        .info { border-left: 4px solid #2196F3; background-color: #e3f2fd; }
+        .warning { border-left: 4px solid #ff9800; background-color: #fff3e0; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ff6b35;
+        }
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        
+        button {
+            background: #ff6b35;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #e55a2b;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏦 BCP Securities Services</h1>
+        <h2>Centralized Reporting Data Test Suite</h2>
+        <p>Testing the new ALL_REPORTINGS.json centralized data source</p>
+    </div>
+
+    <div class="container">
+        <h3>🧪 Test Results</h3>
+        <div id="testResults">
+            <div class="loading">Loading tests...</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h3>📊 Data Statistics</h3>
+        <div id="statisticsResults">
+            <div class="loading">Loading statistics...</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h3>🔍 Interactive Tests</h3>
+        <div>
+            <button onclick="testSearch()">Test Search</button>
+            <button onclick="testFrequencyFilter()">Test Frequency Filter</button>
+            <button onclick="testCategoryAccess()">Test Category Access</button>
+            <button onclick="testValidation()">Test Validation</button>
+            <button onclick="runAllTests()">Run All Tests</button>
+        </div>
+        <div id="interactiveResults"></div>
+    </div>
+
+    <script src="./reporting-data-manager.js"></script>
+    <script>
+        let testResults = [];
+        
+        // Test functions
+        async function runAllTests() {
+            console.log('🚀 Starting comprehensive test suite...');
+            testResults = [];
+            
+            try {
+                await testDataLoading();
+                await testDataIntegrity();
+                await testCategoryAccess();
+                await testSearchFunctionality();
+                await testFrequencyFiltering();
+                await testValidation();
+                await testStatistics();
+                await testBackwardCompatibility();
+                
+                displayTestResults();
+                displayStatistics();
+                
+            } catch (error) {
+                console.error('❌ Test suite failed:', error);
+                addTestResult('Test Suite', false, `Failed to run tests: ${error.message}`);
+                displayTestResults();
+            }
+        }
+        
+        async function testDataLoading() {
+            try {
+                await reportingDataManager.loadReportingData();
+                addTestResult('Data Loading', true, 'Successfully loaded ALL_REPORTINGS.json');
+            } catch (error) {
+                addTestResult('Data Loading', false, `Failed to load data: ${error.message}`);
+            }
+        }
+        
+        async function testDataIntegrity() {
+            try {
+                const validation = await reportingDataManager.validateData();
+                if (validation.isValid) {
+                    addTestResult('Data Integrity', true, 'All data validation checks passed');
+                } else {
+                    addTestResult('Data Integrity', false, `Validation errors: ${validation.errors.join(', ')}`);
+                }
+            } catch (error) {
+                addTestResult('Data Integrity', false, `Validation failed: ${error.message}`);
+            }
+        }
+        
+        async function testCategoryAccess() {
+            try {
+                const catI = await reportingDataManager.getCategoryReportings('I');
+                const catII = await reportingDataManager.getCategoryReportings('II');
+                const catIII = await reportingDataManager.getCategoryReportings('III');
+                
+                const countI = Object.keys(catI).length;
+                const countII = Object.keys(catII).length;
+                const countIII = Object.keys(catIII).length;
+                
+                if (countI === 26 && countII === 23 && countIII === 19) {
+                    addTestResult('Category Access', true, `Correct counts: I(${countI}), II(${countII}), III(${countIII})`);
+                } else {
+                    addTestResult('Category Access', false, `Incorrect counts: I(${countI}), II(${countII}), III(${countIII})`);
+                }
+            } catch (error) {
+                addTestResult('Category Access', false, `Failed: ${error.message}`);
+            }
+        }
+        
+        async function testSearchFunctionality() {
+            try {
+                const searchResults = await reportingDataManager.searchReportings('LCR');
+                if (searchResults.length > 0) {
+                    addTestResult('Search Functionality', true, `Found ${searchResults.length} results for 'LCR'`);
+                } else {
+                    addTestResult('Search Functionality', false, 'No search results found for LCR');
+                }
+            } catch (error) {
+                addTestResult('Search Functionality', false, `Search failed: ${error.message}`);
+            }
+        }
+        
+        async function testFrequencyFiltering() {
+            try {
+                const monthly = await reportingDataManager.getReportingsByFrequency('Mensuelle');
+                const quarterly = await reportingDataManager.getReportingsByFrequency('Trimestrielle');
+                
+                if (monthly.length > 0 && quarterly.length > 0) {
+                    addTestResult('Frequency Filtering', true, `Monthly: ${monthly.length}, Quarterly: ${quarterly.length}`);
+                } else {
+                    addTestResult('Frequency Filtering', false, 'No results for frequency filtering');
+                }
+            } catch (error) {
+                addTestResult('Frequency Filtering', false, `Failed: ${error.message}`);
+            }
+        }
+        
+        async function testValidation() {
+            try {
+                const validation = await reportingDataManager.validateData();
+                const message = `Valid: ${validation.isValid}, Errors: ${validation.errors.length}, Warnings: ${validation.warnings.length}`;
+                addTestResult('Data Validation', validation.isValid, message);
+            } catch (error) {
+                addTestResult('Data Validation', false, `Validation failed: ${error.message}`);
+            }
+        }
+        
+        async function testStatistics() {
+            try {
+                const stats = await reportingDataManager.getStatistics();
+                if (stats.total === 68) {
+                    addTestResult('Statistics', true, `Total reportings: ${stats.total}`);
+                } else {
+                    addTestResult('Statistics', false, `Expected 68 reportings, got ${stats.total}`);
+                }
+            } catch (error) {
+                addTestResult('Statistics', false, `Statistics failed: ${error.message}`);
+            }
+        }
+        
+        async function testBackwardCompatibility() {
+            try {
+                const legacyI = await reportingDataManager.getLegacyFormat('I');
+                const legacyII = await reportingDataManager.getLegacyFormat('II');
+                const legacyIII = await reportingDataManager.getLegacyFormat('III');
+                
+                if (legacyI.length === 26 && legacyII.length === 23 && legacyIII.length === 19) {
+                    addTestResult('Backward Compatibility', true, 'Legacy format conversion successful');
+                } else {
+                    addTestResult('Backward Compatibility', false, 'Legacy format counts incorrect');
+                }
+            } catch (error) {
+                addTestResult('Backward Compatibility', false, `Legacy format failed: ${error.message}`);
+            }
+        }
+        
+        function addTestResult(testName, success, message) {
+            testResults.push({ testName, success, message });
+        }
+        
+        function displayTestResults() {
+            const container = document.getElementById('testResults');
+            let html = '';
+            
+            testResults.forEach(result => {
+                const cssClass = result.success ? 'success' : 'error';
+                const icon = result.success ? '✅' : '❌';
+                html += `
+                    <div class="test-section ${cssClass}">
+                        <strong>${icon} ${result.testName}</strong><br>
+                        ${result.message}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        async function displayStatistics() {
+            try {
+                const stats = await reportingDataManager.getStatistics();
+                const container = document.getElementById('statisticsResults');
+                
+                container.innerHTML = `
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.total}</div>
+                            <div class="stat-label">Total Reportings</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.byCategory.I.count}</div>
+                            <div class="stat-label">Category I</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.byCategory.II.count}</div>
+                            <div class="stat-label">Category II</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.byCategory.III.count}</div>
+                            <div class="stat-label">Category III</div>
+                        </div>
+                    </div>
+                    
+                    <div class="test-section info">
+                        <strong>📊 Detailed Statistics</strong>
+                        <pre>${JSON.stringify(stats, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('statisticsResults').innerHTML = `
+                    <div class="test-section error">
+                        <strong>❌ Statistics Error</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Individual test functions for interactive buttons
+        async function testSearch() {
+            const query = prompt('Enter search term:', 'LCR');
+            if (query) {
+                try {
+                    const results = await reportingDataManager.searchReportings(query);
+                    document.getElementById('interactiveResults').innerHTML = `
+                        <div class="test-section info">
+                            <strong>🔍 Search Results for "${query}"</strong><br>
+                            Found ${results.length} results<br>
+                            <pre>${JSON.stringify(results.map(r => r.name), null, 2)}</pre>
+                        </div>
+                    `;
+                } catch (error) {
+                    document.getElementById('interactiveResults').innerHTML = `
+                        <div class="test-section error">
+                            <strong>❌ Search Failed</strong><br>
+                            ${error.message}
+                        </div>
+                    `;
+                }
+            }
+        }
+        
+        // Initialize tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(runAllTests, 1000);
+        });
+    </script>
+</body>
+</html>

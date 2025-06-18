@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Reporting Data Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Reporting Data Manager Test</h1>
+    
+    <div id="testResults"></div>
+    
+    <script src="reporting-data-manager.js"></script>
+    <script>
+        async function runTests() {
+            const resultsDiv = document.getElementById('testResults');
+            let html = '';
+            
+            try {
+                console.log('🔄 Starting reporting data manager tests...');
+                
+                // Test 1: Load all reportings
+                html += '<div class="test-section">';
+                html += '<h3>Test 1: Load All Reportings</h3>';
+                
+                const allReportings = await window.reportingDataManager.getReportingsArray();
+                console.log('📊 All reportings loaded:', allReportings.length);
+                
+                if (allReportings.length > 0) {
+                    html += `<div class="success">✅ Successfully loaded ${allReportings.length} reportings</div>`;
+                    html += `<pre>Sample reporting: ${JSON.stringify(allReportings[0], null, 2)}</pre>`;
+                } else {
+                    html += '<div class="error">❌ No reportings loaded</div>';
+                }
+                html += '</div>';
+                
+                // Test 2: Test regulator filtering
+                html += '<div class="test-section">';
+                html += '<h3>Test 2: Regulator Filtering</h3>';
+                
+                const bamReportings = await window.reportingDataManager.getReportingsArray('BAM');
+                const ammcReportings = await window.reportingDataManager.getReportingsArray('AMMC');
+                const dgiReportings = await window.reportingDataManager.getReportingsArray('DGI');
+                
+                html += `<div class="success">🏦 BAM: ${bamReportings.length} reportings</div>`;
+                html += `<div class="success">📈 AMMC: ${ammcReportings.length} reportings</div>`;
+                html += `<div class="success">🏛️ DGI: ${dgiReportings.length} reportings</div>`;
+                html += `<div class="success">📊 Total: ${bamReportings.length + ammcReportings.length + dgiReportings.length} reportings</div>`;
+                html += '</div>';
+                
+                // Test 3: Test category filtering
+                html += '<div class="test-section">';
+                html += '<h3>Test 3: Category Filtering</h3>';
+                
+                const catI = await window.reportingDataManager.getReportingsArray('BAM', 'I');
+                const catII = await window.reportingDataManager.getReportingsArray('BAM', 'II');
+                const catIII = await window.reportingDataManager.getReportingsArray('BAM', 'III');
+                const catBCP = await window.reportingDataManager.getReportingsArray('AMMC', 'BCP');
+                const catBCP2S = await window.reportingDataManager.getReportingsArray('AMMC', 'BCP2S');
+                const catBAY = await window.reportingDataManager.getReportingsArray('AMMC', 'BANK_AL_YOUSR');
+                const catDGI = await window.reportingDataManager.getReportingsArray('DGI', 'DGI');
+                
+                html += `<div class="success">BAM Category I: ${catI.length} reportings</div>`;
+                html += `<div class="success">BAM Category II: ${catII.length} reportings</div>`;
+                html += `<div class="success">BAM Category III: ${catIII.length} reportings</div>`;
+                html += `<div class="success">AMMC BCP: ${catBCP.length} reportings</div>`;
+                html += `<div class="success">AMMC BCP2S: ${catBCP2S.length} reportings</div>`;
+                html += `<div class="success">AMMC BANK AL YOUSR: ${catBAY.length} reportings</div>`;
+                html += `<div class="success">DGI: ${catDGI.length} reportings</div>`;
+                html += '</div>';
+                
+                // Test 4: Validation
+                html += '<div class="test-section">';
+                html += '<h3>Test 4: Data Validation</h3>';
+                
+                const validation = await window.reportingDataManager.validateData();
+                
+                if (validation.isValid) {
+                    html += '<div class="success">✅ Data validation passed</div>';
+                } else {
+                    html += '<div class="error">❌ Data validation failed</div>';
+                }
+                
+                if (validation.errors.length > 0) {
+                    html += '<h4>Errors:</h4>';
+                    validation.errors.forEach(error => {
+                        html += `<div class="error">❌ ${error}</div>`;
+                    });
+                }
+                
+                if (validation.warnings.length > 0) {
+                    html += '<h4>Warnings:</h4>';
+                    validation.warnings.forEach(warning => {
+                        html += `<div class="warning">⚠️ ${warning}</div>`;
+                    });
+                }
+                html += '</div>';
+                
+                // Test 5: Statistics
+                html += '<div class="test-section">';
+                html += '<h3>Test 5: Statistics</h3>';
+                
+                const stats = await window.reportingDataManager.getStatistics();
+                html += `<pre>${JSON.stringify(stats, null, 2)}</pre>`;
+                html += '</div>';
+                
+            } catch (error) {
+                console.error('❌ Test error:', error);
+                html += `<div class="test-section error">`;
+                html += `<h3>❌ Test Failed</h3>`;
+                html += `<div>Error: ${error.message}</div>`;
+                html += `<pre>${error.stack}</pre>`;
+                html += `</div>`;
+            }
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        // Run tests when page loads
+        window.addEventListener('load', runTests);
+    </script>
+</body>
+</html>

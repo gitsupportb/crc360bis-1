@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BCP Securities - File Browser Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-results {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #17a2b8; }
+        .warning { color: #ffc107; }
+        
+        /* File browser styles */
+        .file-browser {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            background: white;
+        }
+        .category-section {
+            margin: 10px 0;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+        }
+        .category-header {
+            background: #f8f9fa;
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .category-content {
+            padding: 10px;
+        }
+        .report-section {
+            margin: 5px 0;
+            border-left: 3px solid #ff6b35;
+            padding-left: 10px;
+        }
+        .report-header {
+            font-weight: bold;
+            cursor: pointer;
+            padding: 5px;
+            background: #fff3e0;
+        }
+        .report-content {
+            padding: 10px;
+        }
+        .months-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .month-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+        }
+        .month-card.has-files {
+            background: #e8f5e8;
+            border-color: #28a745;
+        }
+        .month-card.empty {
+            background: #f8f9fa;
+            border-color: #dee2e6;
+        }
+        .file-item {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 5px;
+            margin: 2px 0;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏦 BCP Securities Services</h1>
+            <h2>File Browser Test & Diagnostics</h2>
+            <p>Testing file browser functionality and file detection</p>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 File System Tests</h3>
+            <button onclick="runAllTests()" style="background: #ff6b35; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                🧪 Run All Tests
+            </button>
+            <div id="test-results" class="test-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📁 File Browser</h3>
+            <button onclick="loadFileBrowser()" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                🔄 Load File Browser
+            </button>
+            <div id="file-browser-container"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Raw Data Inspection</h3>
+            <button onclick="inspectRawData()" style="background: #17a2b8; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                🔍 Inspect Raw Data
+            </button>
+            <div id="raw-data-container" class="test-results"></div>
+        </div>
+    </div>
+
+    <!-- Include required scripts -->
+    <script src="reporting-data-manager.js"></script>
+    <script src="file-manager.js"></script>
+
+    <script>
+        let testResults = '';
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type;
+            testResults += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            document.getElementById('test-results').innerHTML = testResults;
+        }
+
+        async function runAllTests() {
+            testResults = '';
+            log('🚀 Starting comprehensive file browser tests...', 'info');
+            
+            try {
+                // Test 1: Check if file listing JSON is accessible
+                log('📡 Test 1: Checking file listing JSON...', 'info');
+                const response = await fetch('./UPLOADED_REPORTINGS/file_listing.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ File listing loaded: ${data.statistics?.files || 'unknown'} files found`, 'success');
+                    
+                    // Check for LCR files specifically
+                    const lcrData = data.structure?.["III___Etats_relatifs_à_la_réglementation_prudentielle"]?.["Etat_LCR"];
+                    if (lcrData) {
+                        const lcrFiles = Object.values(lcrData["2025"] || {}).flat().filter(f => f);
+                        log(`🎯 LCR files found: ${lcrFiles.length} files`, lcrFiles.length > 0 ? 'success' : 'warning');
+                        lcrFiles.forEach(file => log(`   📄 ${file}`, 'info'));
+                    } else {
+                        log('❌ LCR data not found in JSON', 'error');
+                    }
+                } else {
+                    log(`❌ Failed to load file listing: ${response.status}`, 'error');
+                }
+
+                // Test 2: Initialize reporting data manager
+                log('📊 Test 2: Initializing reporting data manager...', 'info');
+                if (!window.reportingDataManager) {
+                    window.reportingDataManager = new ReportingDataManager();
+                }
+                await window.reportingDataManager.loadReportingData();
+                log('✅ Reporting data manager initialized', 'success');
+
+                // Test 3: Initialize file manager
+                log('📁 Test 3: Initializing file manager...', 'info');
+                if (!window.fileManager) {
+                    window.fileManager = new FileManager();
+                }
+                await window.fileManager.init();
+                log('✅ File manager initialized', 'success');
+
+                // Test 4: Check file statistics
+                log('📊 Test 4: Checking file statistics...', 'info');
+                const stats = window.fileManager.getFileStatistics();
+                log(`📈 Statistics: ${stats.totalFiles} files, ${stats.totalReports} reports, ${stats.totalCategories} categories`, 'info');
+                
+                // Test 5: Check LCR files specifically
+                log('🎯 Test 5: Checking LCR files in file manager...', 'info');
+                const lcrFiles = window.fileManager.getFilesForReportMonth(
+                    "III___Etats_relatifs_à_la_réglementation_prudentielle", 
+                    "Etat_LCR", 
+                    "2025", 
+                    "1"
+                );
+                log(`📄 LCR files for January: ${lcrFiles.length} files`, lcrFiles.length > 0 ? 'success' : 'warning');
+                lcrFiles.forEach(file => log(`   📄 ${file}`, 'info'));
+
+                // Test all months for LCR
+                for (let month = 1; month <= 12; month++) {
+                    const monthFiles = window.fileManager.getFilesForReportMonth(
+                        "III___Etats_relatifs_à_la_réglementation_prudentielle", 
+                        "Etat_LCR", 
+                        "2025", 
+                        month.toString()
+                    );
+                    if (monthFiles.length > 0) {
+                        log(`📅 Month ${month}: ${monthFiles.length} files`, 'success');
+                    }
+                }
+
+                log('🎉 All tests completed!', 'success');
+
+            } catch (error) {
+                log(`❌ Test failed: ${error.message}`, 'error');
+                console.error('Test error:', error);
+            }
+        }
+
+        async function loadFileBrowser() {
+            try {
+                log('🔄 Loading file browser...', 'info');
+                
+                if (!window.fileManager) {
+                    await runAllTests();
+                }
+                
+                const browserHTML = window.fileManager.generateFileBrowserHTML();
+                document.getElementById('file-browser-container').innerHTML = browserHTML;
+                
+                log('✅ File browser loaded successfully', 'success');
+                
+            } catch (error) {
+                log(`❌ Failed to load file browser: ${error.message}`, 'error');
+                console.error('File browser error:', error);
+            }
+        }
+
+        async function inspectRawData() {
+            try {
+                const container = document.getElementById('raw-data-container');
+                container.innerHTML = '🔍 Loading raw data...\n';
+                
+                // Load file listing JSON
+                const response = await fetch('./UPLOADED_REPORTINGS/file_listing.json');
+                const data = await response.json();
+                
+                container.innerHTML = `📊 File Listing JSON Structure:\n${JSON.stringify(data, null, 2)}`;
+                
+            } catch (error) {
+                document.getElementById('raw-data-container').innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+
+        // Toggle functions for file browser
+        function toggleCategory(categoryId) {
+            const element = document.getElementById(`category-${categoryId}`);
+            if (element) {
+                element.style.display = element.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function toggleReport(categoryId, reportId) {
+            const element = document.getElementById(`report-${categoryId}-${reportId}`);
+            if (element) {
+                element.style.display = element.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(runAllTests, 1000);
+        });
+    </script>
+</body>
+</html>

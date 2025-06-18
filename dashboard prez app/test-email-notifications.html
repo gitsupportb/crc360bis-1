@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Email Notifications</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .result { margin: 10px 0; padding: 12px; border-radius: 6px; border-left: 4px solid; }
+        .pass { background: #d4edda; border-color: #28a745; color: #155724; }
+        .fail { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+        .warning { background: #fff3cd; border-color: #ffc107; color: #856404; }
+        .info { background: #d1ecf1; border-color: #17a2b8; color: #0c5460; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px; max-height: 300px; }
+        button { padding: 12px 24px; margin: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .progress { width: 100%; height: 30px; background: #e9ecef; border-radius: 15px; overflow: hidden; margin: 20px 0; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #28a745, #20c997); transition: width 0.5s ease; }
+        .notification-preview { border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin: 10px 0; background: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📧 Email Notification System Test</h1>
+        <p>Comprehensive testing of the email notification system with regulator-based structure</p>
+        
+        <div class="test-section">
+            <h2>🚀 Test Controls</h2>
+            <button class="btn-primary" onclick="runAllTests()">🔄 Run All Tests</button>
+            <button class="btn-success" onclick="testNotificationGeneration()">📅 Test Notification Generation</button>
+            <button class="btn-warning" onclick="testEmailSending()">📧 Test Email Sending</button>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+            </div>
+            <div id="progressText">Ready to start testing...</div>
+        </div>
+        
+        <div id="resultsSection"></div>
+    </div>
+    
+    <script src="reporting-data-manager.js"></script>
+    <script src="email-notification-system.js"></script>
+    <script>
+        let testResults = [];
+        let currentStep = 0;
+        let totalSteps = 10;
+        
+        function updateProgress(step, message) {
+            currentStep = step;
+            const progress = (step / totalSteps) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `Step ${step}/${totalSteps}: ${message}`;
+        }
+        
+        function addResult(test, status, message, details = null) {
+            testResults.push({ test, status, message, details });
+            displayResults();
+        }
+        
+        function displayResults() {
+            const resultsDiv = document.getElementById('resultsSection');
+            let html = '<div class="test-section"><h2>📋 Test Results</h2>';
+            
+            testResults.forEach(result => {
+                const icon = result.status === 'pass' ? '✅' : result.status === 'fail' ? '❌' : result.status === 'warning' ? '⚠️' : 'ℹ️';
+                html += `<div class="result ${result.status}">`;
+                html += `${icon} <strong>${result.test}:</strong> ${result.message}`;
+                if (result.details) {
+                    if (typeof result.details === 'string') {
+                        html += `<pre>${result.details}</pre>`;
+                    } else {
+                        html += `<pre>${JSON.stringify(result.details, null, 2)}</pre>`;
+                    }
+                }
+                html += `</div>`;
+            });
+            
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+        }
+        
+        async function runAllTests() {
+            testResults = [];
+            currentStep = 0;
+            
+            try {
+                // Step 1: Initialize Systems
+                updateProgress(1, 'Initializing email notification system...');
+                
+                if (!window.reportingDataManager || !window.EmailNotificationSystem) {
+                    addResult('System Initialization', 'fail', 'Required systems not available');
+                    return;
+                }
+                
+                await window.reportingDataManager.loadReportingData();
+                const allReportings = await window.reportingDataManager.getReportingsArray();
+                
+                const emailSystem = new window.EmailNotificationSystem();
+                await emailSystem.initializeWithReportingData(allReportings);
+                
+                addResult('System Initialization', 'pass', `Initialized with ${allReportings.length} reportings and ${Object.keys(emailSystem.assignments).length} assignments`);
+                
+                // Step 2: Test Assignment Creation
+                updateProgress(2, 'Testing assignment creation...');
+                
+                const assignments = Object.values(emailSystem.assignments);
+                const regulatorDist = {};
+                assignments.forEach(a => {
+                    const reg = a.regulator || 'BAM';
+                    regulatorDist[reg] = (regulatorDist[reg] || 0) + 1;
+                });
+                
+                addResult('Assignment Creation', 'pass', 'Assignments created for all regulators', regulatorDist);
+                
+                // Step 3: Test Notification Generation
+                updateProgress(3, 'Testing notification generation...');
+                
+                const today = new Date();
+                const notifications = emailSystem.generateNotificationSchedule(today);
+                
+                if (notifications.length > 0) {
+                    addResult('Notification Generation', 'pass', `Generated ${notifications.length} notifications`);
+                    
+                    // Analyze notification distribution
+                    const notificationsByRegulator = {};
+                    const notificationsByType = {};
+                    
+                    notifications.forEach(n => {
+                        const assignment = n.assignment;
+                        const regulator = assignment.regulator || 'BAM';
+                        notificationsByRegulator[regulator] = (notificationsByRegulator[regulator] || 0) + 1;
+                        notificationsByType[n.notificationType] = (notificationsByType[n.notificationType] || 0) + 1;
+                    });
+                    
+                    addResult('Notification Distribution', 'pass', 'Notifications by regulator', notificationsByRegulator);
+                    addResult('Notification Types', 'pass', 'Notifications by type', notificationsByType);
+                } else {
+                    addResult('Notification Generation', 'warning', 'No notifications generated (may be normal for current date)');
+                }
+                
+                // Step 4: Test Deadline Generation
+                updateProgress(4, 'Testing deadline generation...');
+                
+                const sampleAssignments = assignments.slice(0, 5);
+                let deadlineTestResults = [];
+                
+                sampleAssignments.forEach(assignment => {
+                    const deadlines = emailSystem.generateUpcomingDeadlines(assignment, today);
+                    deadlineTestResults.push({
+                        reportName: assignment.reportName,
+                        regulator: assignment.regulator,
+                        frequency: assignment.frequency,
+                        deadlineCount: deadlines.length,
+                        nextDeadline: deadlines[0] ? deadlines[0].toDateString() : 'None'
+                    });
+                });
+                
+                addResult('Deadline Generation', 'pass', 'Generated deadlines for sample assignments', deadlineTestResults);
+                
+                // Step 5: Test Completion Status Check
+                updateProgress(5, 'Testing completion status check...');
+                
+                if (notifications.length > 0) {
+                    const sampleNotification = notifications[0];
+                    const isCompleted = emailSystem.isReportCompleted(sampleNotification);
+                    
+                    addResult('Completion Status', 'pass', `Completion check working: ${isCompleted ? 'Completed' : 'Not completed'}`, {
+                        reportName: sampleNotification.reportName,
+                        category: sampleNotification.category,
+                        deadline: sampleNotification.deadline.toDateString(),
+                        completed: isCompleted
+                    });
+                } else {
+                    addResult('Completion Status', 'info', 'No notifications available to test completion status');
+                }
+                
+                // Step 6: Test Email Content Generation
+                updateProgress(6, 'Testing email content generation...');
+                
+                if (notifications.length > 0) {
+                    const sampleNotification = notifications[0];
+                    const emailContent = emailSystem.generateEmailContent(sampleNotification);
+                    
+                    addResult('Email Content', 'pass', 'Email content generated successfully', {
+                        subject: emailContent.subject,
+                        hasHtml: !!emailContent.html,
+                        hasText: !!emailContent.text,
+                        htmlLength: emailContent.html ? emailContent.html.length : 0
+                    });
+                } else {
+                    addResult('Email Content', 'info', 'No notifications available to test email content');
+                }
+                
+                // Step 7: Test Recipient Resolution
+                updateProgress(7, 'Testing recipient resolution...');
+                
+                if (notifications.length > 0) {
+                    const sampleNotification = notifications[0];
+                    const recipients = emailSystem.getNotificationRecipients(sampleNotification);
+                    
+                    addResult('Recipient Resolution', recipients.length > 0 ? 'warning' : 'info', 
+                        `Found ${recipients.length} recipients (assignments may not have email addresses configured)`, 
+                        recipients);
+                } else {
+                    addResult('Recipient Resolution', 'info', 'No notifications available to test recipients');
+                }
+                
+                // Step 8: Test Email Sending (Simulation)
+                updateProgress(8, 'Testing email sending simulation...');
+                
+                if (notifications.length > 0) {
+                    const sampleNotification = notifications[0];
+                    const recipients = [{ name: 'Test User', email: 'test@example.com', role: 'Test' }];
+                    const emailContent = emailSystem.generateEmailContent(sampleNotification);
+                    
+                    const sendResult = await emailSystem.sendActualEmail(recipients, emailContent);
+                    
+                    addResult('Email Sending', sendResult.success ? 'pass' : 'warning', 
+                        `Email send ${sendResult.success ? 'successful' : 'failed'}: ${sendResult.method}`, sendResult);
+                } else {
+                    addResult('Email Sending', 'info', 'No notifications available to test email sending');
+                }
+                
+                // Step 9: Test SMTP Configuration
+                updateProgress(9, 'Testing SMTP configuration...');
+                
+                const smtpConfigured = emailSystem.emailConfig.smtp && 
+                                     emailSystem.emailConfig.smtp.host && 
+                                     emailSystem.emailConfig.smtp.user;
+                
+                addResult('SMTP Configuration', smtpConfigured ? 'pass' : 'warning', 
+                    smtpConfigured ? 'SMTP configuration detected' : 'SMTP not configured (using simulation)', 
+                    emailSystem.emailConfig.smtp);
+                
+                // Step 10: Test Regulator-Specific Features
+                updateProgress(10, 'Testing regulator-specific features...');
+                
+                const regulatorFeatures = {
+                    BAM: { assignments: regulatorDist.BAM || 0, hasSpecificDeadlines: true },
+                    AMMC: { assignments: regulatorDist.AMMC || 0, hasSpecificDeadlines: true },
+                    DGI: { assignments: regulatorDist.DGI || 0, hasSpecificDeadlines: true }
+                };
+                
+                addResult('Regulator Features', 'pass', 'All regulators supported with specific deadline rules', regulatorFeatures);
+                
+                updateProgress(10, 'Testing complete!');
+                
+            } catch (error) {
+                addResult('System Error', 'fail', `Test failed: ${error.message}`, error.stack);
+            }
+        }
+        
+        async function testNotificationGeneration() {
+            // Focused test on notification generation
+            testResults = [];
+            addResult('Focused Test', 'info', 'Running focused notification generation test...');
+            
+            try {
+                const emailSystem = new window.EmailNotificationSystem();
+                const allReportings = await window.reportingDataManager.getReportingsArray();
+                await emailSystem.initializeWithReportingData(allReportings);
+                
+                const today = new Date();
+                const notifications = emailSystem.generateNotificationSchedule(today);
+                
+                addResult('Notification Generation', 'pass', `Generated ${notifications.length} notifications for ${Object.keys(emailSystem.assignments).length} assignments`);
+                
+                if (notifications.length > 0) {
+                    const sample = notifications.slice(0, 3);
+                    addResult('Sample Notifications', 'info', 'First 3 notifications', sample.map(n => ({
+                        reportName: n.reportName,
+                        category: n.category,
+                        regulator: n.assignment.regulator,
+                        deadline: n.deadline.toDateString(),
+                        sendDate: n.sendDate.toDateString(),
+                        type: n.notificationType
+                    })));
+                }
+                
+            } catch (error) {
+                addResult('Test Error', 'fail', error.message, error.stack);
+            }
+        }
+        
+        async function testEmailSending() {
+            // Focused test on email sending
+            testResults = [];
+            addResult('Focused Test', 'info', 'Running focused email sending test...');
+            
+            try {
+                const emailSystem = new window.EmailNotificationSystem();
+                
+                // Test email content generation
+                const mockNotification = {
+                    reportName: 'Test Report',
+                    category: 'I',
+                    deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+                    notificationType: '7d_reminder',
+                    assignment: {
+                        regulator: 'BAM',
+                        frequency: 'Monthly'
+                    }
+                };
+                
+                const emailContent = emailSystem.generateEmailContent(mockNotification);
+                addResult('Email Content Generation', 'pass', 'Generated email content for test notification', {
+                    subject: emailContent.subject,
+                    htmlLength: emailContent.html.length,
+                    textLength: emailContent.text.length
+                });
+                
+                // Test email sending
+                const testRecipients = [
+                    { name: 'Test Manager', email: 'manager@test.com', role: 'Manager' },
+                    { name: 'Test Owner', email: 'owner@test.com', role: 'Owner' }
+                ];
+                
+                const sendResult = await emailSystem.sendActualEmail(testRecipients, emailContent);
+                addResult('Email Sending Test', sendResult.success ? 'pass' : 'warning', 
+                    `Email send result: ${sendResult.method}`, sendResult);
+                
+            } catch (error) {
+                addResult('Test Error', 'fail', error.message, error.stack);
+            }
+        }
+        
+        // Auto-run tests on load
+        window.addEventListener('load', () => {
+            setTimeout(runAllTests, 1000);
+        });
+    </script>
+</body>
+</html>

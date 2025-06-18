@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Email Admin System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .debug-section { margin: 20px 0; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .debug-result { margin: 10px 0; padding: 12px; border-radius: 6px; border-left: 4px solid; }
+        .success { background: #d4edda; border-color: #28a745; color: #155724; }
+        .error { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+        .warning { background: #fff3cd; border-color: #ffc107; color: #856404; }
+        .info { background: #d1ecf1; border-color: #17a2b8; color: #0c5460; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px; max-height: 300px; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .btn-danger { background: #dc3545; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Email Admin System</h1>
+    <p>This page helps diagnose issues with the email admin system and regulator-based structure.</p>
+    
+    <div class="debug-section">
+        <h2>🚀 Debug Controls</h2>
+        <button class="btn-primary" onclick="debugDataManager()">📊 Debug Data Manager</button>
+        <button class="btn-success" onclick="debugEmailSystem()">📧 Debug Email System</button>
+        <button class="btn-warning" onclick="debugAssignments()">👥 Debug Assignments</button>
+        <button class="btn-danger" onclick="forceReload()">🔄 Force Reload</button>
+    </div>
+    
+    <div id="debugResults"></div>
+    
+    <script src="reporting-data-manager.js"></script>
+    <script src="email-notification-system.js"></script>
+    <script>
+        let debugResults = [];
+        
+        function addDebugResult(category, test, status, message, details = null) {
+            debugResults.push({
+                category,
+                test,
+                status,
+                message,
+                details,
+                timestamp: new Date().toISOString()
+            });
+            displayResults();
+        }
+        
+        function displayResults() {
+            const resultsDiv = document.getElementById('debugResults');
+            let html = '';
+            
+            debugResults.forEach(result => {
+                const statusIcon = result.status === 'success' ? '✅' : 
+                                 result.status === 'error' ? '❌' : 
+                                 result.status === 'warning' ? '⚠️' : 'ℹ️';
+                
+                html += `<div class="debug-section">`;
+                html += `<h3>${result.category} - ${result.test}</h3>`;
+                html += `<div class="debug-result ${result.status}">`;
+                html += `${statusIcon} ${result.message}`;
+                if (result.details) {
+                    html += `<pre>${JSON.stringify(result.details, null, 2)}</pre>`;
+                }
+                html += `</div>`;
+                html += `</div>`;
+            });
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        async function debugDataManager() {
+            debugResults = [];
+            
+            try {
+                // Check if data manager exists
+                addDebugResult('Data Manager', 'Availability', 
+                    window.reportingDataManager ? 'success' : 'error',
+                    window.reportingDataManager ? 'Reporting data manager available' : 'Not available');
+                
+                if (!window.reportingDataManager) return;
+                
+                // Load data
+                await window.reportingDataManager.loadReportingData();
+                addDebugResult('Data Manager', 'Data Loading', 'success', 'Data loaded successfully');
+                
+                // Check raw data structure
+                const rawData = window.reportingDataManager.reportingsData;
+                addDebugResult('Data Manager', 'Raw Data Structure', 'info', 
+                    'Raw data structure analysis', {
+                        hasCategories: !!rawData.categories,
+                        hasBAM: !!rawData.BAM,
+                        hasAMMC: !!rawData.AMMC,
+                        hasDGI: !!rawData.DGI,
+                        categoryKeys: rawData.categories ? Object.keys(rawData.categories) : []
+                    });
+                
+                // Test getReportingsArray
+                const allReportings = await window.reportingDataManager.getReportingsArray();
+                addDebugResult('Data Manager', 'Get All Reportings', 'success', 
+                    `Retrieved ${allReportings.length} reportings`);
+                
+                // Test regulator filtering
+                const bamReportings = await window.reportingDataManager.getReportingsArray('BAM');
+                const ammcReportings = await window.reportingDataManager.getReportingsArray('AMMC');
+                const dgiReportings = await window.reportingDataManager.getReportingsArray('DGI');
+                
+                addDebugResult('Data Manager', 'Regulator Filtering', 'success', 
+                    'Regulator filtering results', {
+                        BAM: bamReportings.length,
+                        AMMC: ammcReportings.length,
+                        DGI: dgiReportings.length,
+                        total: bamReportings.length + ammcReportings.length + dgiReportings.length
+                    });
+                
+                // Sample reportings
+                if (allReportings.length > 0) {
+                    addDebugResult('Data Manager', 'Sample Reportings', 'info', 
+                        'Sample reporting data', {
+                            first: allReportings[0],
+                            regulatorDistribution: allReportings.reduce((acc, r) => {
+                                acc[r.regulator] = (acc[r.regulator] || 0) + 1;
+                                return acc;
+                            }, {}),
+                            categoryDistribution: allReportings.reduce((acc, r) => {
+                                acc[r.category] = (acc[r.category] || 0) + 1;
+                                return acc;
+                            }, {})
+                        });
+                }
+                
+            } catch (error) {
+                addDebugResult('Data Manager', 'Error', 'error', 
+                    `Error: ${error.message}`, error.stack);
+            }
+        }
+        
+        async function debugEmailSystem() {
+            try {
+                // Check if email system exists
+                addDebugResult('Email System', 'Availability', 
+                    window.EmailNotificationSystem ? 'success' : 'error',
+                    window.EmailNotificationSystem ? 'EmailNotificationSystem class available' : 'Not available');
+                
+                if (!window.EmailNotificationSystem) return;
+                
+                // Create instance
+                const emailSystem = new window.EmailNotificationSystem();
+                addDebugResult('Email System', 'Instance Creation', 'success', 'Instance created successfully');
+                
+                // Get reportings for initialization
+                if (window.reportingDataManager) {
+                    const allReportings = await window.reportingDataManager.getReportingsArray();
+                    
+                    // Initialize with reportings
+                    const initResult = await emailSystem.initializeWithReportingData(allReportings);
+                    addDebugResult('Email System', 'Initialization', 
+                        initResult ? 'success' : 'error',
+                        initResult ? 'Initialized successfully' : 'Initialization failed');
+                    
+                    if (initResult) {
+                        // Check assignments
+                        const assignmentCount = Object.keys(emailSystem.assignments).length;
+                        addDebugResult('Email System', 'Assignments Created', 'success', 
+                            `Created ${assignmentCount} assignments`);
+                        
+                        // Sample assignments
+                        const sampleAssignments = Object.entries(emailSystem.assignments).slice(0, 3);
+                        addDebugResult('Email System', 'Sample Assignments', 'info', 
+                            'Sample assignment data', sampleAssignments);
+                        
+                        // Assignment distribution
+                        const assignments = Object.values(emailSystem.assignments);
+                        const regulatorDist = assignments.reduce((acc, a) => {
+                            const reg = a.regulator || 'BAM';
+                            acc[reg] = (acc[reg] || 0) + 1;
+                            return acc;
+                        }, {});
+                        
+                        addDebugResult('Email System', 'Assignment Distribution', 'success', 
+                            'Assignment distribution by regulator', regulatorDist);
+                    }
+                }
+                
+            } catch (error) {
+                addDebugResult('Email System', 'Error', 'error', 
+                    `Error: ${error.message}`, error.stack);
+            }
+        }
+        
+        async function debugAssignments() {
+            try {
+                if (!window.reportingDataManager || !window.EmailNotificationSystem) {
+                    addDebugResult('Assignments', 'Prerequisites', 'error', 
+                        'Data manager or email system not available');
+                    return;
+                }
+                
+                const emailSystem = new window.EmailNotificationSystem();
+                const allReportings = await window.reportingDataManager.getReportingsArray();
+                
+                await emailSystem.initializeWithReportingData(allReportings);
+                
+                // Test assignment key generation
+                const sampleReporting = allReportings[0];
+                const assignmentKey = `${sampleReporting.category}_${sampleReporting.name}`;
+                const assignment = emailSystem.assignments[assignmentKey];
+                
+                addDebugResult('Assignments', 'Assignment Key Generation', 
+                    assignment ? 'success' : 'warning',
+                    `Key: ${assignmentKey}`, {
+                        sampleReporting: sampleReporting,
+                        assignmentExists: !!assignment,
+                        assignment: assignment
+                    });
+                
+                // Test getAssignment method
+                const retrievedAssignment = emailSystem.getAssignment(sampleReporting.category, sampleReporting.name);
+                addDebugResult('Assignments', 'getAssignment Method', 
+                    retrievedAssignment ? 'success' : 'warning',
+                    'getAssignment method test', {
+                        category: sampleReporting.category,
+                        reportName: sampleReporting.name,
+                        assignment: retrievedAssignment
+                    });
+                
+                // Test regulator filtering
+                const bamAssignments = Object.values(emailSystem.assignments).filter(a => (a.regulator || 'BAM') === 'BAM');
+                const ammcAssignments = Object.values(emailSystem.assignments).filter(a => (a.regulator || 'BAM') === 'AMMC');
+                const dgiAssignments = Object.values(emailSystem.assignments).filter(a => (a.regulator || 'BAM') === 'DGI');
+                
+                addDebugResult('Assignments', 'Regulator Filtering', 'success', 
+                    'Assignment filtering by regulator', {
+                        BAM: bamAssignments.length,
+                        AMMC: ammcAssignments.length,
+                        DGI: dgiAssignments.length
+                    });
+                
+            } catch (error) {
+                addDebugResult('Assignments', 'Error', 'error', 
+                    `Error: ${error.message}`, error.stack);
+            }
+        }
+        
+        async function forceReload() {
+            try {
+                // Clear any existing instances
+                if (window.reportingDataManager) {
+                    window.reportingDataManager.isLoaded = false;
+                    window.reportingDataManager.reportingsData = null;
+                }
+                
+                // Reload data
+                await window.reportingDataManager.loadReportingData();
+                
+                addDebugResult('Force Reload', 'Data Reloaded', 'success', 
+                    'Data successfully reloaded');
+                
+                // Run all debug tests
+                await debugDataManager();
+                await debugEmailSystem();
+                await debugAssignments();
+                
+            } catch (error) {
+                addDebugResult('Force Reload', 'Error', 'error', 
+                    `Error: ${error.message}`, error.stack);
+            }
+        }
+        
+        // Auto-run debug on load
+        window.addEventListener('load', () => {
+            setTimeout(debugDataManager, 1000);
+        });
+    </script>
+</body>
+</html>

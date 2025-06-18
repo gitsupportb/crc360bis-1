@@ -1,0 +1,13 @@
+Test Upload File for BCP Securities Services Dashboard
+
+This is a test file to verify the hierarchical upload functionality.
+
+Authority: BAM
+Category: I – Situation comptable et états annexes  
+Report: Situation Comptable provisoire
+Date: January 2025
+
+Expected upload path:
+UPLOADED_REPORTINGS/BAM/I___Situation_comptable_et_états_annexes/Situation_Comptable_provisoire/2025/1/test_upload.txt
+
+This file should be uploaded to the correct hierarchical folder structure.

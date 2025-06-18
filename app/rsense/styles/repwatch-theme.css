@@ -1,0 +1,411 @@
+/* RepWatch Theme for R-Sense - Complete Design System Match */
+
+:root {
+  /* Orange Professional Color Palette - Exact RepWatch Colors */
+  --primary-color: #FF6B35;        /* Vibrant Orange - Primary brand */
+  --primary-hover: #E55A2B;        /* Darker orange for hover */
+  --secondary-color: #FF8C42;      /* Light Orange - Secondary accent */
+  --accent-color: #FFB366;         /* Peach Orange - Accent */
+  --success-color: #28A745;        /* Green - Success states */
+  --warning-color: #FFC107;        /* Amber - Warning states */
+  --danger-color: #DC3545;         /* Red - Error states */
+  --background-color: #FFF8F5;     /* Very Light Orange - Background */
+  --card-background: #FFFFFF;      /* Pure White - Cards */
+  --border-color: #FFE4D6;         /* Light Orange - Borders */
+  --text-primary: #2C1810;         /* Dark Brown - Primary text */
+  --text-secondary: #8B4513;       /* Saddle Brown - Secondary text */
+  --header-gradient: linear-gradient(135deg, #FF6B35 0%, #FF8C42 50%, #FFB366 100%);
+  --shadow: 0 4px 6px -1px rgba(255, 107, 53, 0.1), 0 2px 4px -1px rgba(255, 107, 53, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(255, 107, 53, 0.1), 0 4px 6px -2px rgba(255, 107, 53, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(255, 107, 53, 0.1), 0 10px 10px -5px rgba(255, 107, 53, 0.04);
+}
+
+/* Global Body Styling - RepWatch Style */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  background: linear-gradient(135deg, var(--background-color) 0%, #FFF0E6 50%, var(--accent-color) 100%) !important;
+  color: var(--text-primary) !important;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23FFE4D6" stroke-width="0.5" opacity="0.3"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+  z-index: -1;
+  opacity: 0.4;
+}
+
+/* Header Styling - RepWatch Style */
+.header, header {
+  background: var(--header-gradient) !important;
+  color: white !important;
+  box-shadow: var(--shadow-xl) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before, header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="15" cy="15" r="2" fill="white" opacity="0.15"/><circle cx="85" cy="35" r="1.5" fill="white" opacity="0.12"/><circle cx="45" cy="75" r="1" fill="white" opacity="0.08"/><rect x="20" y="25" width="8" height="2" fill="white" opacity="0.1"/><rect x="30" y="23" width="8" height="4" fill="white" opacity="0.08"/><rect x="40" y="20" width="8" height="7" fill="white" opacity="0.1"/><rect x="50" y="18" width="8" height="9" fill="white" opacity="0.08"/><path d="M65,30 L70,25 L75,28 L80,22 L85,26" stroke="white" stroke-width="1" fill="none" opacity="0.12"/></svg>');
+  z-index: 0;
+}
+
+.header > *, header > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Card Styling - RepWatch Style */
+.card, [class*="card"] {
+  background: var(--card-background) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--shadow) !important;
+  border: 1px solid var(--border-color) !important;
+  transition: all 0.3s ease !important;
+  overflow: hidden;
+}
+
+.card:hover, [class*="card"]:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* Card Headers */
+.card-header, [class*="card-header"] {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  border-bottom: 2px solid var(--primary-hover) !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
+}
+
+.card-title, [class*="card-title"] {
+  color: white !important;
+  font-weight: 700 !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* Button Styling - RepWatch Style */
+.btn, button, [class*="button"] {
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+  border: none !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.btn-primary, .button-primary, [class*="bg-orange"] {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+  color: white !important;
+  border: 2px solid var(--primary-color) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+.btn-primary:hover, .button-primary:hover, [class*="bg-orange"]:hover {
+  background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary-color) 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: var(--shadow-xl) !important;
+  border-color: var(--primary-hover) !important;
+}
+
+/* Table Styling - RepWatch Style */
+table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  font-size: 13px !important;
+  background: white !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: var(--shadow) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+th {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+  font-weight: 600 !important;
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
+  border-bottom: 2px solid var(--primary-hover) !important;
+  padding: 12px 8px !important;
+}
+
+td {
+  padding: 12px 8px !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+tr:hover {
+  background: #f8fafc !important;
+}
+
+/* Form Styling - RepWatch Style */
+input, select, textarea {
+  border: 2px solid var(--border-color) !important;
+  border-radius: 8px !important;
+  padding: 10px !important;
+  font-size: 14px !important;
+  transition: all 0.3s ease !important;
+  background: white !important;
+  color: var(--text-primary) !important;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none !important;
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1) !important;
+}
+
+/* Navigation Styling - RepWatch Style */
+nav, .navigation {
+  background: var(--header-gradient) !important;
+  color: white !important;
+}
+
+.nav-link, [class*="nav"] a {
+  color: white !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+}
+
+.nav-link:hover, [class*="nav"] a:hover {
+  color: var(--accent-color) !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+}
+
+/* Navigation Menu Dropdown Fix */
+[data-radix-popper-content-wrapper] {
+  z-index: 9999 !important;
+}
+
+[data-radix-navigation-menu-content] {
+  z-index: 9999 !important;
+  position: relative !important;
+}
+
+/* Ensure dropdowns are above everything */
+.navigation-menu-content,
+[class*="NavigationMenuContent"],
+[role="menu"],
+[data-state="open"] {
+  z-index: 9999 !important;
+  position: relative !important;
+}
+
+/* Fix for shadcn navigation menu */
+[data-radix-navigation-menu-viewport] {
+  z-index: 9999 !important;
+}
+
+/* Popover and dropdown fixes */
+[data-radix-popover-content],
+[data-radix-dropdown-menu-content] {
+  z-index: 9999 !important;
+}
+
+/* Additional z-index fixes for all overlay elements */
+.fixed, [data-state="open"], [data-side], [data-align] {
+  z-index: 9999 !important;
+}
+
+/* Ensure main content doesn't interfere with dropdowns */
+main {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Page-specific styling improvements */
+.rsense-page {
+  background: var(--background-color) !important;
+  min-height: 100vh !important;
+}
+
+/* Card hover effects enhancement */
+.card:hover, [class*="card"]:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 20px 25px -5px rgba(255, 107, 53, 0.15), 0 10px 10px -5px rgba(255, 107, 53, 0.1) !important;
+}
+
+/* Button hover effects enhancement */
+.btn:hover, button:hover, [class*="button"]:hover {
+  transform: translateY(-1px) !important;
+}
+
+/* Improved text contrast */
+.text-muted-foreground {
+  color: #6b7280 !important;
+}
+
+/* Enhanced border styling */
+.border-orange-200 {
+  border-color: #fed7aa !important;
+}
+
+/* Gradient text effects */
+.text-gradient {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* Animation improvements */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition: all 0.3s ease !important;
+}
+
+/* Override any conflicting z-index from other components */
+[role="dialog"], [role="menu"], [role="listbox"], [role="tooltip"] {
+  z-index: 9999 !important;
+}
+
+/* Text Styling - RepWatch Style */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary) !important;
+  font-weight: 700 !important;
+}
+
+h1 {
+  font-size: 2.2rem !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.text-primary {
+  color: var(--primary-color) !important;
+}
+
+.text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+/* Badge/Status Styling - RepWatch Style */
+.badge, [class*="badge"] {
+  border-radius: 12px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  padding: 4px 8px !important;
+}
+
+.badge-success {
+  background: #dcfce7 !important;
+  color: #166534 !important;
+}
+
+.badge-warning {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+.badge-danger {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+}
+
+/* Modal Styling - RepWatch Style */
+.modal {
+  backdrop-filter: blur(5px) !important;
+}
+
+.modal-content {
+  background-color: var(--card-background) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--shadow-lg) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.modal-header {
+  background: var(--header-gradient) !important;
+  color: white !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+/* Chart Container Styling - RepWatch Style */
+.chart-container, [class*="chart"] {
+  background: var(--card-background) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--shadow) !important;
+  border: 1px solid var(--border-color) !important;
+  transition: all 0.3s ease !important;
+}
+
+.chart-container:hover, [class*="chart"]:hover {
+  box-shadow: var(--shadow-lg) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Progress Bar Styling - RepWatch Style */
+.progress {
+  background: var(--border-color) !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+}
+
+.progress-bar {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Alert/Info Card Styling - RepWatch Style */
+.alert, .info-card {
+  background: var(--card-background) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--shadow) !important;
+  border-left: 4px solid var(--primary-color) !important;
+  padding: 20px !important;
+}
+
+/* Loading Spinner - RepWatch Style */
+.spinner, [class*="loading"] {
+  border: 4px solid #f3f3f3 !important;
+  border-top: 4px solid var(--primary-color) !important;
+  border-radius: 50% !important;
+  animation: spin 1s linear infinite !important;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design - RepWatch Style */
+@media (max-width: 768px) {
+  .card, [class*="card"] {
+    margin: 10px !important;
+    border-radius: 8px !important;
+  }
+  
+  h1 {
+    font-size: 1.8rem !important;
+  }
+  
+  table {
+    font-size: 12px !important;
+  }
+  
+  th, td {
+    padding: 8px 6px !important;
+  }
+}

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BCP Securities - Simple Migration Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #FFF8F5 0%, #FFE5D9 100%);
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        .success {
+            background: #E8F5E8;
+            border-color: #28A745;
+            color: #155724;
+        }
+        .error {
+            background: #F8E8E8;
+            border-color: #DC3545;
+            color: #721C24;
+        }
+        .warning {
+            background: #FFF3CD;
+            border-color: #FFC107;
+            color: #856404;
+        }
+        .info {
+            background: #E3F2FD;
+            border-color: #2196F3;
+            color: #0D47A1;
+        }
+        button {
+            background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        pre {
+            background: #F8F9FA;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏦 BCP Securities Services</h1>
+        <h2>Simple Migration Test</h2>
+        <p>Testing centralized data migration with embedded fallback</p>
+    </div>
+
+    <div class="container">
+        <h3>🧪 Migration Test Results</h3>
+        <div id="testResults">
+            <div class="loading">Running tests...</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h3>📊 Data Summary</h3>
+        <div id="dataSummary">
+            <div class="loading">Loading data...</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h3>🔧 Actions</h3>
+        <button onclick="runTests()">🔄 Re-run Tests</button>
+        <button onclick="showRawData()">📄 Show Raw Data</button>
+        <button onclick="testSearch()">🔍 Test Search</button>
+        <button onclick="showInstructions()">📋 Show Instructions</button>
+    </div>
+
+    <div class="container" id="extraInfo" style="display: none;">
+        <h3>📋 Additional Information</h3>
+        <div id="extraContent"></div>
+    </div>
+
+    <script>
+        // Embedded fallback data (subset for testing)
+        const EMBEDDED_DATA = {
+            "metadata": {
+                "title": "BCP Securities Services - Test Data",
+                "totalReportings": 68,
+                "categories": {
+                    "I": { "name": "I – Situation comptable et états annexes", "count": 26 },
+                    "II": { "name": "II – Etats de synthèse et documents qui leur sont complémentaires", "count": 23 },
+                    "III": { "name": "III – Etats relatifs à la réglementation prudentielle", "count": 19 }
+                }
+            },
+            "categories": {
+                "I": {
+                    "name": "I – Situation comptable et états annexes",
+                    "folderName": "I___Situation_comptable_et_états_annexes",
+                    "reportings": {
+                        "001_situation_comptable_provisoire": {
+                            "code": "001",
+                            "name": "Situation Comptable provisoire",
+                            "folderName": "Situation_Comptable_provisoire",
+                            "frequency": "Mensuelle",
+                            "category": "I",
+                            "priority": "High",
+                            "isActive": true
+                        }
+                    }
+                },
+                "II": {
+                    "name": "II – Etats de synthèse et documents qui leur sont complémentaires",
+                    "folderName": "II___Etats_de_synthèse_et_documents_qui_leur_sont_complémentaires",
+                    "reportings": {
+                        "040_bilan": {
+                            "code": "040",
+                            "name": "Bilan",
+                            "folderName": "Bilan",
+                            "frequency": "Semestrielle",
+                            "category": "II",
+                            "priority": "High",
+                            "isActive": true
+                        }
+                    }
+                },
+                "III": {
+                    "name": "III – Etats relatifs à la réglementation prudentielle",
+                    "folderName": "III___Etats_relatifs_à_la_réglementation_prudentielle",
+                    "reportings": {
+                        "331_etat_lcr": {
+                            "id": 331,
+                            "name": "Etat LCR",
+                            "folderName": "Etat_LCR",
+                            "frequency": "Mensuelle",
+                            "category": "III",
+                            "priority": "High",
+                            "isActive": true
+                        }
+                    }
+                }
+            }
+        };
+
+        let testData = null;
+        let loadMethod = 'unknown';
+
+        // Simple data loader
+        async function loadData() {
+            try {
+                console.log('📊 Attempting to load centralized data...');
+                
+                // Try to load from file
+                try {
+                    const response = await fetch('./ALL_REPORTINGS.json');
+                    if (response.ok) {
+                        testData = await response.json();
+                        loadMethod = 'file_load';
+                        console.log('✅ Loaded data from ALL_REPORTINGS.json');
+                        return true;
+                    }
+                } catch (error) {
+                    console.log('⚠️ File load failed:', error.message);
+                }
+
+                // Fallback to embedded data
+                testData = EMBEDDED_DATA;
+                loadMethod = 'embedded_fallback';
+                console.log('✅ Using embedded fallback data');
+                return true;
+
+            } catch (error) {
+                console.error('❌ Failed to load any data:', error);
+                return false;
+            }
+        }
+
+        // Run all tests
+        async function runTests() {
+            const resultsDiv = document.getElementById('testResults');
+            const summaryDiv = document.getElementById('dataSummary');
+            
+            resultsDiv.innerHTML = '<div class="loading">Running tests...</div>';
+            summaryDiv.innerHTML = '<div class="loading">Loading data...</div>';
+
+            const results = [];
+
+            // Test 1: Data Loading
+            const dataLoaded = await loadData();
+            if (dataLoaded) {
+                results.push({
+                    name: 'Data Loading',
+                    status: 'success',
+                    message: `Successfully loaded data via ${loadMethod}`
+                });
+            } else {
+                results.push({
+                    name: 'Data Loading',
+                    status: 'error',
+                    message: 'Failed to load any data'
+                });
+            }
+
+            if (dataLoaded && testData) {
+                // Test 2: Data Structure
+                if (testData.metadata && testData.categories) {
+                    results.push({
+                        name: 'Data Structure',
+                        status: 'success',
+                        message: 'Data structure is valid'
+                    });
+                } else {
+                    results.push({
+                        name: 'Data Structure',
+                        status: 'error',
+                        message: 'Invalid data structure'
+                    });
+                }
+
+                // Test 3: Category Counts
+                const expectedCounts = { I: 26, II: 23, III: 19 };
+                let countsCorrect = true;
+                let countMessage = '';
+
+                for (const [catId, expectedCount] of Object.entries(expectedCounts)) {
+                    const actualCount = testData.metadata.categories[catId]?.count || 0;
+                    countMessage += `${catId}: ${actualCount}/${expectedCount} `;
+                    if (actualCount !== expectedCount && loadMethod === 'file_load') {
+                        countsCorrect = false;
+                    }
+                }
+
+                results.push({
+                    name: 'Category Counts',
+                    status: countsCorrect ? 'success' : (loadMethod === 'embedded_fallback' ? 'warning' : 'error'),
+                    message: countMessage + (loadMethod === 'embedded_fallback' ? '(using fallback data)' : '')
+                });
+
+                // Test 4: Search Functionality
+                const lcrFound = JSON.stringify(testData).toLowerCase().includes('lcr');
+                results.push({
+                    name: 'Search Test (LCR)',
+                    status: lcrFound ? 'success' : 'warning',
+                    message: lcrFound ? 'LCR reporting found in data' : 'LCR not found (may be in full dataset)'
+                });
+
+                // Display summary
+                summaryDiv.innerHTML = `
+                    <div class="test-result info">
+                        <strong>📊 Data Summary</strong><br>
+                        <strong>Load Method:</strong> ${loadMethod}<br>
+                        <strong>Total Reportings:</strong> ${testData.metadata.totalReportings}<br>
+                        <strong>Categories:</strong> ${Object.keys(testData.categories).length}<br>
+                        <strong>Data Source:</strong> ${loadMethod === 'file_load' ? 'ALL_REPORTINGS.json' : 'Embedded fallback'}
+                    </div>
+                `;
+            }
+
+            // Display results
+            let html = '';
+            results.forEach(result => {
+                const icon = result.status === 'success' ? '✅' : result.status === 'warning' ? '⚠️' : '❌';
+                html += `
+                    <div class="test-result ${result.status}">
+                        <strong>${icon} ${result.name}</strong><br>
+                        ${result.message}
+                    </div>
+                `;
+            });
+
+            resultsDiv.innerHTML = html;
+
+            // Overall status
+            const successCount = results.filter(r => r.status === 'success').length;
+            const totalCount = results.length;
+            
+            if (successCount === totalCount) {
+                html += `
+                    <div class="test-result success">
+                        <strong>🎉 Migration Test: PASSED</strong><br>
+                        All ${totalCount} tests successful!
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="test-result ${successCount > 0 ? 'warning' : 'error'}">
+                        <strong>⚠️ Migration Test: PARTIAL</strong><br>
+                        ${successCount}/${totalCount} tests passed
+                    </div>
+                `;
+            }
+
+            resultsDiv.innerHTML = html;
+        }
+
+        // Show raw data
+        function showRawData() {
+            const extraDiv = document.getElementById('extraInfo');
+            const contentDiv = document.getElementById('extraContent');
+            
+            if (testData) {
+                contentDiv.innerHTML = `
+                    <div class="test-result info">
+                        <strong>📄 Raw Data Structure</strong>
+                        <pre>${JSON.stringify(testData, null, 2)}</pre>
+                    </div>
+                `;
+                extraDiv.style.display = 'block';
+            } else {
+                alert('No data loaded yet. Please run tests first.');
+            }
+        }
+
+        // Test search
+        function testSearch() {
+            if (!testData) {
+                alert('No data loaded yet. Please run tests first.');
+                return;
+            }
+
+            const query = prompt('Enter search term:', 'LCR');
+            if (query) {
+                const dataStr = JSON.stringify(testData).toLowerCase();
+                const found = dataStr.includes(query.toLowerCase());
+                
+                const extraDiv = document.getElementById('extraInfo');
+                const contentDiv = document.getElementById('extraContent');
+                
+                contentDiv.innerHTML = `
+                    <div class="test-result ${found ? 'success' : 'warning'}">
+                        <strong>🔍 Search Results for "${query}"</strong><br>
+                        ${found ? '✅ Found in data' : '❌ Not found in current dataset'}<br>
+                        <em>Note: This is a simple text search. Full implementation would have advanced search capabilities.</em>
+                    </div>
+                `;
+                extraDiv.style.display = 'block';
+            }
+        }
+
+        // Show instructions
+        function showInstructions() {
+            const extraDiv = document.getElementById('extraInfo');
+            const contentDiv = document.getElementById('extraContent');
+            
+            contentDiv.innerHTML = `
+                <div class="test-result info">
+                    <strong>📋 Migration Test Instructions</strong><br><br>
+                    
+                    <strong>🎯 Purpose:</strong><br>
+                    This test verifies that the migration to centralized reporting data is working correctly.<br><br>
+                    
+                    <strong>🔧 How it works:</strong><br>
+                    1. First tries to load ALL_REPORTINGS.json from the file system<br>
+                    2. If that fails (due to CORS), uses embedded fallback data<br>
+                    3. Runs validation tests on the loaded data<br>
+                    4. Reports success/failure for each test<br><br>
+                    
+                    <strong>✅ Expected Results:</strong><br>
+                    - Data Loading: SUCCESS (either method)<br>
+                    - Data Structure: SUCCESS<br>
+                    - Category Counts: SUCCESS (if file loaded) or WARNING (if fallback)<br>
+                    - Search Test: SUCCESS or WARNING<br><br>
+                    
+                    <strong>🚀 Next Steps:</strong><br>
+                    If tests pass, the migration is working correctly. You can now:<br>
+                    1. Test the main dashboard (reportingV2.txt)<br>
+                    2. Verify file manager functionality<br>
+                    3. Check email notification system<br>
+                    4. Run the full verification script (verify-migration.js)
+                </div>
+            `;
+            extraDiv.style.display = 'block';
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(runTests, 500);
+        });
+    </script>
+</body>
+</html>

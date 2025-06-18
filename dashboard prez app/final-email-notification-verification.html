@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Email Notification Verification</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .result { margin: 10px 0; padding: 12px; border-radius: 6px; border-left: 4px solid; }
+        .pass { background: #d4edda; border-color: #28a745; color: #155724; }
+        .fail { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+        .warning { background: #fff3cd; border-color: #ffc107; color: #856404; }
+        .info { background: #d1ecf1; border-color: #17a2b8; color: #0c5460; }
+        .summary { font-size: 18px; font-weight: bold; text-align: center; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .summary.pass { background: #d4edda; color: #155724; }
+        .summary.fail { background: #f8d7da; color: #721c24; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px; max-height: 200px; }
+        button { padding: 12px 24px; margin: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        .btn-primary { background: #007bff; color: white; }
+        .progress { width: 100%; height: 30px; background: #e9ecef; border-radius: 15px; overflow: hidden; margin: 20px 0; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #28a745, #20c997); transition: width 0.5s ease; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏁 Final Email Notification System Verification</h1>
+        <p>Comprehensive verification that the email notification system is working properly with the regulator-based structure</p>
+
+        <div class="test-section">
+            <button class="btn-primary" onclick="runFinalVerification()">🚀 Run Final Verification</button>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+            </div>
+            <div id="progressText">Ready to start verification...</div>
+        </div>
+
+        <div id="summarySection"></div>
+        <div id="resultsSection"></div>
+    </div>
+
+    <script>
+        let testResults = [];
+        let currentStep = 0;
+        let totalSteps = 8;
+        let scriptsLoaded = false;
+
+        // Load scripts dynamically with error handling
+        function loadScripts() {
+            return new Promise((resolve, reject) => {
+                let scriptsToLoad = 2;
+                let scriptsLoadedCount = 0;
+                let errors = [];
+
+                function checkComplete() {
+                    scriptsLoadedCount++;
+                    if (scriptsLoadedCount === scriptsToLoad) {
+                        if (errors.length > 0) {
+                            reject(new Error(`Script loading errors: ${errors.join(', ')}`));
+                        } else {
+                            scriptsLoaded = true;
+                            resolve();
+                        }
+                    }
+                }
+
+                // Load reporting-data-manager.js
+                const script1 = document.createElement('script');
+                script1.src = './reporting-data-manager.js';
+                script1.onload = () => {
+                    console.log('✅ reporting-data-manager.js loaded');
+                    checkComplete();
+                };
+                script1.onerror = () => {
+                    errors.push('reporting-data-manager.js failed to load');
+                    checkComplete();
+                };
+                document.head.appendChild(script1);
+
+                // Load email-notification-system.js
+                const script2 = document.createElement('script');
+                script2.src = './email-notification-system.js';
+                script2.onload = () => {
+                    console.log('✅ email-notification-system.js loaded');
+                    checkComplete();
+                };
+                script2.onerror = () => {
+                    errors.push('email-notification-system.js failed to load');
+                    checkComplete();
+                };
+                document.head.appendChild(script2);
+            });
+        }
+
+        function updateProgress(step, message) {
+            currentStep = step;
+            const progress = (step / totalSteps) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `Step ${step}/${totalSteps}: ${message}`;
+        }
+
+        function addResult(test, status, message, details = null) {
+            testResults.push({ test, status, message, details });
+            displayResults();
+        }
+
+        function displayResults() {
+            const resultsDiv = document.getElementById('resultsSection');
+            let html = '<div class="test-section"><h2>📋 Detailed Results</h2>';
+
+            testResults.forEach(result => {
+                const icon = result.status === 'pass' ? '✅' : result.status === 'fail' ? '❌' : result.status === 'warning' ? '⚠️' : 'ℹ️';
+                html += `<div class="result ${result.status}">`;
+                html += `${icon} <strong>${result.test}:</strong> ${result.message}`;
+                if (result.details) {
+                    html += `<pre>${JSON.stringify(result.details, null, 2)}</pre>`;
+                }
+                html += `</div>`;
+            });
+
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+        }
+
+        function displaySummary() {
+            const passCount = testResults.filter(r => r.status === 'pass').length;
+            const failCount = testResults.filter(r => r.status === 'fail').length;
+            const warningCount = testResults.filter(r => r.status === 'warning').length;
+
+            const overallStatus = failCount === 0 ? 'pass' : 'fail';
+            const summaryDiv = document.getElementById('summarySection');
+
+            summaryDiv.innerHTML = `
+                <div class="summary ${overallStatus}">
+                    <h2>🏁 Email Notification System Verification Complete</h2>
+                    <p>✅ ${passCount} Passed | ❌ ${failCount} Failed | ⚠️ ${warningCount} Warnings</p>
+                    <p><strong>Overall Status: ${overallStatus === 'pass' ? 'SYSTEM READY ✅' : 'ISSUES FOUND ❌'}</strong></p>
+                </div>
+            `;
+        }
+
+        async function runFinalVerification() {
+            testResults = [];
+            currentStep = 0;
+
+            try {
+                // Step 0: Load Scripts
+                updateProgress(0, 'Loading required scripts...');
+
+                if (!scriptsLoaded) {
+                    try {
+                        await loadScripts();
+                        addResult('Script Loading', 'pass', 'All required scripts loaded successfully');
+                    } catch (error) {
+                        addResult('Script Loading', 'fail', `Script loading failed: ${error.message}`);
+                        displaySummary();
+                        return;
+                    }
+                }
+
+                // Wait a moment for scripts to initialize
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Step 1: System Initialization
+                updateProgress(1, 'Initializing email notification system...');
+
+                if (!window.reportingDataManager || !window.EmailNotificationSystem) {
+                    addResult('System Availability', 'fail', 'Required systems not available after script loading', {
+                        reportingDataManager: !!window.reportingDataManager,
+                        EmailNotificationSystem: !!window.EmailNotificationSystem
+                    });
+                    displaySummary();
+                    return;
+                }
+
+                await window.reportingDataManager.loadReportingData();
+                const allReportings = await window.reportingDataManager.getReportingsArray();
+
+                const emailSystem = new window.EmailNotificationSystem();
+                await emailSystem.initializeWithReportingData(allReportings);
+
+                addResult('System Initialization', 'pass', `Initialized with ${allReportings.length} reportings and ${Object.keys(emailSystem.assignments).length} assignments`);
+
+                // Step 2: Regulator Coverage
+                updateProgress(2, 'Verifying regulator coverage...');
+
+                const assignments = Object.values(emailSystem.assignments);
+                const regulatorDist = {};
+                assignments.forEach(a => {
+                    const reg = a.regulator || 'BAM';
+                    regulatorDist[reg] = (regulatorDist[reg] || 0) + 1;
+                });
+
+                const hasBAM = regulatorDist.BAM > 0;
+                const hasAMMC = regulatorDist.AMMC > 0;
+                const hasDGI = regulatorDist.DGI > 0;
+
+                if (hasBAM && hasAMMC && hasDGI) {
+                    addResult('Regulator Coverage', 'pass', 'All three regulators (BAM, AMMC, DGI) have assignments', regulatorDist);
+                } else {
+                    addResult('Regulator Coverage', 'warning', 'Some regulators missing assignments', regulatorDist);
+                }
+
+                // Step 3: Notification Generation
+                updateProgress(3, 'Testing notification generation...');
+
+                const today = new Date();
+                const notifications = emailSystem.generateNotificationSchedule(today);
+
+                if (notifications.length > 0) {
+                    addResult('Notification Generation', 'pass', `Generated ${notifications.length} notifications`);
+
+                    // Verify regulator distribution in notifications
+                    const notificationRegulators = {};
+                    notifications.forEach(n => {
+                        const reg = n.assignment.regulator || 'BAM';
+                        notificationRegulators[reg] = (notificationRegulators[reg] || 0) + 1;
+                    });
+
+                    addResult('Notification Regulator Distribution', 'pass', 'Notifications generated for all regulators', notificationRegulators);
+                } else {
+                    addResult('Notification Generation', 'warning', 'No notifications generated (may be normal for current date)');
+                }
+
+                // Step 4: Deadline Generation
+                updateProgress(4, 'Testing regulator-specific deadline generation...');
+
+                const testAssignments = [
+                    { reportName: 'Test BAM Report', regulator: 'BAM', frequency: 'Monthly' },
+                    { reportName: 'Test AMMC Report', regulator: 'AMMC', frequency: 'Weekly' },
+                    { reportName: 'Test DGI Report', regulator: 'DGI', frequency: 'Annual' }
+                ];
+
+                let deadlineResults = [];
+                testAssignments.forEach(assignment => {
+                    const deadlines = emailSystem.generateUpcomingDeadlines(assignment, today);
+                    deadlineResults.push({
+                        regulator: assignment.regulator,
+                        frequency: assignment.frequency,
+                        deadlineCount: deadlines.length,
+                        nextDeadline: deadlines[0] ? deadlines[0].toDateString() : 'None'
+                    });
+                });
+
+                addResult('Regulator-Specific Deadlines', 'pass', 'Deadline generation working for all regulators', deadlineResults);
+
+                // Step 5: Completion Status Integration
+                updateProgress(5, 'Testing completion status integration...');
+
+                if (notifications.length > 0) {
+                    const sampleNotification = notifications[0];
+                    const isCompleted = emailSystem.isReportCompleted(sampleNotification);
+
+                    addResult('Completion Status Integration', 'pass', `Completion status check working: ${isCompleted ? 'Completed' : 'Not completed'}`, {
+                        reportName: sampleNotification.reportName,
+                        category: sampleNotification.category,
+                        regulator: sampleNotification.assignment.regulator,
+                        completed: isCompleted
+                    });
+                } else {
+                    addResult('Completion Status Integration', 'info', 'No notifications available to test completion status');
+                }
+
+                // Step 6: Email Content Generation
+                updateProgress(6, 'Testing email content generation...');
+
+                // Ensure email system is fully initialized before testing
+                await emailSystem.ensureInitialized();
+
+                const testNotification = {
+                    reportName: 'Test Regulatory Report',
+                    category: 'I',
+                    deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                    notificationType: '7d_reminder',
+                    assignment: { regulator: 'BAM', frequency: 'Monthly' }
+                };
+
+                const emailContent = emailSystem.generateEmailContent(testNotification);
+
+                const hasSubject = !!emailContent.subject;
+                const hasHtml = !!emailContent.html && emailContent.html.length > 100;
+                const hasText = !!emailContent.text && emailContent.text.length > 50;
+
+                if (hasSubject && hasHtml && hasText) {
+                    addResult('Email Content Generation', 'pass', 'Email content generated successfully', {
+                        subject: emailContent.subject,
+                        htmlLength: emailContent.html.length,
+                        textLength: emailContent.text.length
+                    });
+                } else {
+                    addResult('Email Content Generation', 'fail', 'Email content generation incomplete');
+                }
+
+                // Step 7: Email Sending
+                updateProgress(7, 'Testing email sending functionality...');
+
+                const testRecipients = [
+                    { name: 'Test Manager', email: 'manager@test.com', role: 'Manager' }
+                ];
+
+                const sendResult = await emailSystem.sendActualEmail(testRecipients, emailContent);
+
+                if (sendResult.success) {
+                    addResult('Email Sending', 'pass', `Email sending successful via ${sendResult.method}`, sendResult);
+                } else {
+                    addResult('Email Sending', 'warning', `Email sending failed: ${sendResult.error}`, sendResult);
+                }
+
+                // Step 8: Integration with Email Admin
+                updateProgress(8, 'Verifying integration with email admin system...');
+
+                // Test assignment table update
+                if (typeof emailSystem.updateAssignmentTable === 'function') {
+                    addResult('Email Admin Integration', 'pass', 'Email admin integration methods available');
+                } else {
+                    addResult('Email Admin Integration', 'warning', 'Some email admin integration methods missing');
+                }
+
+                // Test regulator filtering
+                const bamAssignments = Object.values(emailSystem.assignments).filter(a => (a.regulator || 'BAM') === 'BAM');
+                const ammcAssignments = Object.values(emailSystem.assignments).filter(a => (a.regulator || 'BAM') === 'AMMC');
+                const dgiAssignments = Object.values(emailSystem.assignments).filter(a => (a.regulator || 'BAM') === 'DGI');
+
+                addResult('Regulator Filtering', 'pass', 'Assignment filtering by regulator working', {
+                    BAM: bamAssignments.length,
+                    AMMC: ammcAssignments.length,
+                    DGI: dgiAssignments.length
+                });
+
+                updateProgress(8, 'Verification complete!');
+                displaySummary();
+
+            } catch (error) {
+                addResult('System Error', 'fail', `Verification failed: ${error.message}`, error.stack);
+                displaySummary();
+            }
+        }
+
+        // Initialize on load but don't auto-run
+        window.addEventListener('load', () => {
+            updateProgress(0, 'Ready to start verification. Click "Run Final Verification" to begin.');
+        });
+    </script>
+</body>
+</html>

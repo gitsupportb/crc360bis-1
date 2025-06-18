@@ -1,0 +1,77 @@
+# BCP2S Development Container - All Services in One (Development Mode)
+FROM node:18-alpine
+
+# Install system dependencies
+RUN apk add --no-cache \
+    python3 \
+    py3-pip \
+    gcc \
+    musl-dev \
+    sqlite-dev \
+    curl \
+    supervisor
+
+# Install pnpm globally
+RUN npm install -g pnpm
+
+# Set working directory
+WORKDIR /app
+
+# Install Django and dependencies for Python services
+RUN pip3 install --break-system-packages \
+    Django>=5.1.6 \
+    django-cors-headers
+
+# Copy package.json files for all Node.js services
+COPY package.json pnpm-lock.yaml* ./
+
+# Copy all source code first
+COPY . .
+
+# Install dependencies for main dashboard
+RUN pnpm install
+
+# Install dependencies for other Node.js services
+WORKDIR /app/app/dashboard/bcp2s-risk-platform
+RUN pnpm install
+
+WORKDIR /app/app/documents/bcp-docs-platforme
+RUN pnpm install
+
+WORKDIR /app/app/calculs/bcp2s-risk-platform
+RUN pnpm install
+
+WORKDIR "/app/app/aml/LBCFT WEBAPP (1)/LBCFT WEBAPP"
+RUN npm install
+
+# Source code already copied above
+
+# Setup Django services
+WORKDIR /app/app/dashboard/bcp2s-risk-platform/AMMC
+RUN python3 manage.py migrate
+
+WORKDIR /app/app/dashboard/bcp2s-risk-platform/components/myfirstproject
+RUN python3 manage.py migrate
+RUN mkdir -p media/uploaded_reports
+
+# Setup supervisor for development
+WORKDIR /app
+RUN mkdir -p /etc/supervisor/conf.d /var/log/supervisor /var/run
+COPY supervisord-dev.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Create a non-root user
+RUN addgroup --system --gid 1001 bcp2s
+RUN adduser --system --uid 1001 bcp2s
+RUN chown -R bcp2s:bcp2s /app
+
+# Expose all ports
+EXPOSE 3000 3010 3003 3005 5000 8080 8000
+
+# Set environment variables for development
+ENV NODE_ENV=development
+ENV DJANGO_SETTINGS_MODULE_AMMC=AMMC.settings
+ENV DJANGO_SETTINGS_MODULE_BAM=myfirstproject.settings
+ENV DEBUG=1
+
+# Start all services using supervisor (as root for now)
+CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Structure Test - BCP Securities Services</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #ff6600;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        .section h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        .upload-form {
+            display: grid;
+            gap: 15px;
+            max-width: 500px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        select, input[type="file"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #ff6600;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #e55a00;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .file-structure {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+        .folder {
+            color: #007bff;
+            font-weight: bold;
+        }
+        .file {
+            color: #28a745;
+        }
+        .path-example {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📁 Upload Structure Test - BCP Securities Services</h1>
+
+        <div class="section">
+            <h2>📋 New Folder Structure</h2>
+            <p>The uploaded documents are now organized in the following structure:</p>
+            <div class="path-example">
+                ./UPLOADED_REPORTINGS/CATEGORY/REPORTING_NAME/YEAR/MONTH/REPORTING.XLSX
+            </div>
+            <p><strong>Example:</strong></p>
+            <div class="file-structure">
+<span class="folder">UPLOADED_REPORTINGS/</span>
+├── <span class="folder">I_Situation_comptable_et_etats_annexes/</span>
+│   ├── <span class="folder">Situation_Comptable_provisoire/</span>
+│   │   ├── <span class="folder">2024/</span>
+│   │   │   ├── <span class="folder">01/</span>
+│   │   │   │   └── <span class="file">situation_comptable_jan_2024.xlsx</span>
+│   │   │   ├── <span class="folder">02/</span>
+│   │   │   │   └── <span class="file">situation_comptable_feb_2024.xlsx</span>
+│   │   │   └── <span class="folder">03/</span>
+│   │   │       └── <span class="file">situation_comptable_mar_2024.xlsx</span>
+│   │   └── <span class="folder">2023/</span>
+│   │       └── <span class="folder">12/</span>
+│   │           └── <span class="file">situation_comptable_dec_2023.xlsx</span>
+│   └── <span class="folder">Situation_Comptable_definitive/</span>
+│       └── <span class="folder">2024/</span>
+│           └── <span class="folder">03/</span>
+│               └── <span class="file">situation_comptable_def_q1_2024.xlsx</span>
+├── <span class="folder">II_Etats_de_synthese_et_documents_qui_leur_sont_complementaires/</span>
+│   └── <span class="folder">Bilan_et_hors_bilan/</span>
+│       └── <span class="folder">2024/</span>
+│           ├── <span class="folder">01/</span>
+│           │   └── <span class="file">bilan_jan_2024.xlsx</span>
+│           └── <span class="folder">02/</span>
+│               └── <span class="file">bilan_feb_2024.xlsx</span>
+└── <span class="folder">III_Etats_relatifs_a_la_reglementation_prudentielle/</span>
+    └── <span class="folder">Fonds_propres_reglementaires/</span>
+        └── <span class="folder">2024/</span>
+            ├── <span class="folder">01/</span>
+            │   └── <span class="file">fonds_propres_jan_2024.xlsx</span>
+            └── <span class="folder">02/</span>
+                └── <span class="file">fonds_propres_feb_2024.xlsx</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🧪 Test Upload Functionality</h2>
+            <div class="upload-form">
+                <div class="form-group">
+                    <label for="testCategorySelect">Select Category:</label>
+                    <select id="testCategorySelect">
+                        <option value="">Choose a category...</option>
+                        <option value="I">I – Situation comptable et états annexes</option>
+                        <option value="II">II – Etats de synthèse et documents qui leur sont complémentaires</option>
+                        <option value="III">III – Etats relatifs à la réglementation prudentielle</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="testReportSelect">Select Report:</label>
+                    <select id="testReportSelect">
+                        <option value="">Choose a report...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="testFileInput">Select File:</label>
+                    <input type="file" id="testFileInput" accept=".pdf,.xlsx,.xls,.doc,.docx">
+                </div>
+
+                <button onclick="testUpload()">🚀 Test Upload Structure</button>
+            </div>
+
+            <div id="testResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="section">
+            <h2>📊 File Browser</h2>
+            <button onclick="loadFileBrowser()">🔄 Load File Structure</button>
+            <div id="fileBrowser" style="margin-top: 15px;"></div>
+        </div>
+
+        <div class="section">
+            <h2>📈 Statistics</h2>
+            <button onclick="loadStatistics()">📊 Load Statistics</button>
+            <div id="statisticsDisplay" style="margin-top: 15px;"></div>
+        </div>
+    </div>
+
+    <!-- Include the file manager -->
+    <script src="file-manager.js"></script>
+
+    <script>
+        // Sample reports data for testing
+        const testReports = {
+            'I': [
+                'Situation Comptable provisoire',
+                'Situation Comptable définitive',
+                'Etats de synthèse',
+                'Annexes aux états de synthèse'
+            ],
+            'II': [
+                'Bilan et hors bilan',
+                'Compte de résultat',
+                'Tableau de financement',
+                'Etats annexes'
+            ],
+            'III': [
+                'Fonds propres réglementaires',
+                'Ratios prudentiels',
+                'Expositions par segment',
+                'Provisions réglementaires'
+            ]
+        };
+
+        // Update report dropdown when category changes
+        document.getElementById('testCategorySelect').addEventListener('change', function() {
+            const category = this.value;
+            const reportSelect = document.getElementById('testReportSelect');
+
+            // Clear existing options
+            reportSelect.innerHTML = '<option value="">Choose a report...</option>';
+
+            if (category && testReports[category]) {
+                testReports[category].forEach(report => {
+                    const option = document.createElement('option');
+                    option.value = report;
+                    option.textContent = report;
+                    reportSelect.appendChild(option);
+                });
+            }
+        });
+
+        function testUpload() {
+            const category = document.getElementById('testCategorySelect').value;
+            const report = document.getElementById('testReportSelect').value;
+            const fileInput = document.getElementById('testFileInput');
+            const file = fileInput.files[0];
+            const resultDiv = document.getElementById('testResult');
+
+            if (!category) {
+                showResult('Please select a category.', 'error');
+                return;
+            }
+
+            if (!report) {
+                showResult('Please select a report.', 'error');
+                return;
+            }
+
+            if (!file) {
+                showResult('Please select a file.', 'error');
+                return;
+            }
+
+            // Simulate the upload process
+            showResult('Testing upload structure...', 'info');
+
+            setTimeout(() => {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+
+                // Clean names for folder structure
+                const cleanCategory = cleanFolderName(getCategoryFullName(category));
+                const cleanReport = cleanFolderName(report);
+
+                const expectedPath = `./UPLOADED_REPORTINGS/${cleanCategory}/${cleanReport}/${year}/${month}/${file.name}`;
+
+                const result = `✅ Upload Structure Test Successful!
+
+📁 Expected folder structure:
+${expectedPath}
+
+📋 Details:
+• Category: ${getCategoryFullName(category)}
+• Report: ${report}
+• Year: ${year}
+• Month: ${month}
+• File: ${file.name}
+• File Size: ${(file.size / 1024).toFixed(2)} KB
+• File Type: ${file.type || 'Unknown'}
+
+🔧 Cleaned folder names:
+• Category folder: ${cleanCategory}
+• Report folder: ${cleanReport}
+
+This structure ensures:
+✓ Organized by category for easy navigation
+✓ Separated by reporting name for clarity
+✓ Chronological organization by year/month
+✓ All files are easily accessible and searchable`;
+
+                showResult(result, 'success');
+            }, 1000);
+        }
+
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.textContent = message;
+            resultDiv.className = `result ${type}`;
+            resultDiv.style.display = 'block';
+        }
+
+        function getCategoryFullName(categoryKey) {
+            switch(categoryKey) {
+                case 'I':
+                    return 'I – Situation comptable et états annexes';
+                case 'II':
+                    return 'II – Etats de synthèse et documents qui leur sont complémentaires';
+                case 'III':
+                    return 'III – Etats relatifs à la réglementation prudentielle';
+                default:
+                    return 'Unknown';
+            }
+        }
+
+        function cleanFolderName(name) {
+            if (!name || name === "Unknown") {
+                return "Unknown";
+            }
+
+            // Replace special characters with underscores
+            var cleaned = name.replace(/[^\w\s\-]/g, '_');
+            // Replace multiple spaces with single underscore
+            cleaned = cleaned.replace(/\s+/g, '_');
+            // Remove leading and trailing underscores
+            cleaned = cleaned.replace(/^_+|_+$/g, '');
+
+            return cleaned || "Unknown";
+        }
+
+        function loadFileBrowser() {
+            const browserDiv = document.getElementById('fileBrowser');
+
+            if (window.fileManager) {
+                const browserHTML = window.fileManager.generateFileBrowserHTML();
+                browserDiv.innerHTML = browserHTML;
+            } else {
+                browserDiv.innerHTML = '<p class="error">File manager not available. Please ensure file-manager.js is loaded.</p>';
+            }
+        }
+
+        function loadStatistics() {
+            const statsDiv = document.getElementById('statisticsDisplay');
+
+            if (window.fileManager) {
+                const stats = window.fileManager.getFileStatistics();
+
+                let html = '<div class="file-structure">';
+                html += `📊 File Statistics:\n\n`;
+                html += `Total Files: ${stats.totalFiles}\n`;
+                html += `Total Categories: ${stats.totalCategories}\n`;
+                html += `Total Reports: ${stats.totalReports}\n\n`;
+                html += `📁 Category Breakdown:\n`;
+
+                for (const [category, data] of Object.entries(stats.categoryStats)) {
+                    html += `• ${window.fileManager.formatCategoryName(category)}: ${data.files} files, ${data.reports} reports\n`;
+                }
+
+                html += '</div>';
+                statsDiv.innerHTML = html;
+            } else {
+                statsDiv.innerHTML = '<p class="error">File manager not available. Please ensure file-manager.js is loaded.</p>';
+            }
+        }
+    </script>
+</body>
+</html>

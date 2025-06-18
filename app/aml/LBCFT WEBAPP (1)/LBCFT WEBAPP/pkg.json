@@ -1,0 +1,14 @@
+{
+  "bin": "server.js",
+  "pkg": {
+    "assets": [
+      "views/**/*",
+      "public/**/*",
+      "uploads/**/*",
+      "node_modules/pdf-parse/lib/**/*",
+      "node_modules/pdf-parse/lib/pdf.js/**/*",
+      "node_modules/pdf-parse/index.js"
+    ],
+    "outputPath": "dist"
+  }
+}

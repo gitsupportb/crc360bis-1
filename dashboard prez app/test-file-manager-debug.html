@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Manager Debug Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        .info { background: #d1ecf1; border-color: #bee5eb; }
+        .warning { background: #fff3cd; border-color: #ffeaa7; }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 300px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 File Manager Debug Test</h1>
+        <p>This page tests the file manager initialization and data loading to debug the file browser issue.</p>
+
+        <div class="test-section info">
+            <h3>📋 Test Controls</h3>
+            <button onclick="runAllTests()">🚀 Run All Tests</button>
+            <button onclick="testFileManagerInit()">🔧 Test File Manager Init</button>
+            <button onclick="testDataLoading()">📊 Test Data Loading</button>
+            <button onclick="testStructureGeneration()">🏗️ Test Structure Generation</button>
+            <button onclick="clearResults()">🧹 Clear Results</button>
+        </div>
+
+        <div id="results"></div>
+
+        <div class="test-section">
+            <h3>📊 File Manager Statistics</h3>
+            <div id="statsContainer">
+                <p>Run tests to see statistics...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Raw Data Inspection</h3>
+            <button onclick="showRawData()">Show Raw Data</button>
+            <div id="rawDataContainer"></div>
+        </div>
+    </div>
+
+    <!-- Load the file manager -->
+    <script src="file-manager.js"></script>
+
+    <script>
+        let testResults = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            testResults.push({
+                timestamp,
+                message,
+                type
+            });
+            updateResults();
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function updateResults() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = testResults.map(result => `
+                <div class="test-section ${result.type}">
+                    <strong>[${result.timestamp}]</strong> ${result.message}
+                </div>
+            `).join('');
+        }
+
+        function clearResults() {
+            testResults = [];
+            updateResults();
+            document.getElementById('statsContainer').innerHTML = '<p>Run tests to see statistics...</p>';
+            document.getElementById('rawDataContainer').innerHTML = '';
+        }
+
+        async function runAllTests() {
+            clearResults();
+            log('🚀 Starting comprehensive file manager tests...', 'info');
+            
+            await testFileManagerInit();
+            await testDataLoading();
+            await testStructureGeneration();
+            
+            log('✅ All tests completed!', 'success');
+        }
+
+        async function testFileManagerInit() {
+            log('🔧 Testing file manager initialization...', 'info');
+            
+            try {
+                // Create new file manager instance
+                if (!window.fileManager) {
+                    window.fileManager = new FileManager();
+                    log('✅ File manager instance created', 'success');
+                } else {
+                    log('ℹ️ File manager instance already exists', 'info');
+                }
+
+                // Initialize the file manager
+                await window.fileManager.init();
+                log('✅ File manager initialized successfully', 'success');
+
+                // Check if ALL_REPORTINGS.json was loaded
+                if (window.fileManager.allReportingsData) {
+                    const totalReportings = window.fileManager.allReportingsData.metadata?.totalReportings || 'unknown';
+                    log(`✅ ALL_REPORTINGS.json loaded with ${totalReportings} total reportings`, 'success');
+                } else {
+                    log('❌ ALL_REPORTINGS.json not loaded', 'error');
+                }
+
+            } catch (error) {
+                log(`❌ File manager initialization failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testDataLoading() {
+            log('📊 Testing data loading...', 'info');
+            
+            if (!window.fileManager) {
+                log('❌ File manager not available', 'error');
+                return;
+            }
+
+            try {
+                // Test ALL_REPORTINGS.json loading
+                if (window.fileManager.allReportingsData) {
+                    const data = window.fileManager.allReportingsData;
+                    log(`✅ ALL_REPORTINGS.json structure: ${Object.keys(data).join(', ')}`, 'success');
+                    
+                    if (data.categories) {
+                        const categories = Object.keys(data.categories);
+                        log(`✅ Categories found: ${categories.join(', ')}`, 'success');
+                        
+                        // Count reportings per category
+                        for (const [catKey, catData] of Object.entries(data.categories)) {
+                            if (catData.reportings) {
+                                const count = Object.keys(catData.reportings).length;
+                                log(`📊 ${catKey}: ${count} reportings`, 'info');
+                            }
+                        }
+                    } else {
+                        log('❌ No categories found in ALL_REPORTINGS.json', 'error');
+                    }
+                } else {
+                    log('❌ ALL_REPORTINGS.json data not available', 'error');
+                }
+
+            } catch (error) {
+                log(`❌ Data loading test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testStructureGeneration() {
+            log('🏗️ Testing structure generation...', 'info');
+            
+            if (!window.fileManager) {
+                log('❌ File manager not available', 'error');
+                return;
+            }
+
+            try {
+                // Test file structure generation
+                const stats = window.fileManager.getFileStatistics();
+                log(`📊 File structure statistics:`, 'info');
+                log(`   - Total categories: ${stats.totalCategories}`, 'info');
+                log(`   - Total reports: ${stats.totalReports}`, 'info');
+                log(`   - Total files: ${stats.totalFiles}`, 'info');
+
+                // Update stats display
+                updateStatsDisplay(stats);
+
+                // Test structure by regulator
+                if (window.fileManager.fileStructure) {
+                    const structure = window.fileManager.fileStructure;
+                    log(`✅ File structure regulators: ${Object.keys(structure).join(', ')}`, 'success');
+                    
+                    // Check BAM structure
+                    if (structure.BAM) {
+                        const bamCategories = Object.keys(structure.BAM);
+                        log(`✅ BAM categories: ${bamCategories.length} found`, 'success');
+                        
+                        for (const category of bamCategories) {
+                            const reportCount = Object.keys(structure.BAM[category] || {}).length;
+                            log(`   - ${category}: ${reportCount} reports`, 'info');
+                        }
+                    }
+                    
+                    // Check AMMC structure
+                    if (structure.AMMC) {
+                        const ammcEntities = Object.keys(structure.AMMC);
+                        log(`✅ AMMC entities: ${ammcEntities.length} found`, 'success');
+                        
+                        for (const entity of ammcEntities) {
+                            const reportCount = Object.keys(structure.AMMC[entity] || {}).length;
+                            log(`   - ${entity}: ${reportCount} reports`, 'info');
+                        }
+                    }
+                } else {
+                    log('❌ File structure not generated', 'error');
+                }
+
+            } catch (error) {
+                log(`❌ Structure generation test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function updateStatsDisplay(stats) {
+            const statsContainer = document.getElementById('statsContainer');
+            statsContainer.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.totalCategories}</div>
+                        <div class="stat-label">Total Categories</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.totalReports}</div>
+                        <div class="stat-label">Total Reports</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.totalFiles}</div>
+                        <div class="stat-label">Total Files</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showRawData() {
+            const container = document.getElementById('rawDataContainer');
+            
+            if (!window.fileManager) {
+                container.innerHTML = '<p style="color: red;">File manager not available</p>';
+                return;
+            }
+
+            const data = {
+                allReportingsData: window.fileManager.allReportingsData,
+                fileStructure: window.fileManager.fileStructure,
+                statistics: window.fileManager.getFileStatistics()
+            };
+
+            container.innerHTML = `
+                <h4>🔍 Raw Data Inspection</h4>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+        }
+
+        // Auto-run tests when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 File Manager Debug Test page loaded', 'info');
+            setTimeout(() => {
+                runAllTests();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

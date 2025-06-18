@@ -1,0 +1,121 @@
+# BCP Securities Services - Docker Ignore File
+# Excludes unnecessary files from Docker build context for faster builds
+
+# ============================================================================
+# Version Control
+# ============================================================================
+.git
+.gitignore
+.gitattributes
+
+# ============================================================================
+# Docker Files (avoid recursion)
+# ============================================================================
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# ============================================================================
+# Documentation and Markdown Files
+# ============================================================================
+*.md
+README*
+CHANGELOG*
+LICENSE*
+docs/
+documentation/
+
+# ============================================================================
+# Development and Testing Files
+# ============================================================================
+test-*.html
+*test*.html
+testing/
+tests/
+.pytest_cache/
+coverage/
+.coverage
+
+# ============================================================================
+# IDE and Editor Files
+# ============================================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ============================================================================
+# Python Cache and Virtual Environments
+# ============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.env
+
+# ============================================================================
+# Logs and Temporary Files
+# ============================================================================
+*.log
+logs/
+tmp/
+temp/
+.tmp/
+
+# ============================================================================
+# Backup and Archive Files
+# ============================================================================
+*.bak
+*.backup
+*.old
+*.orig
+*.tar
+*.tar.gz
+*.zip
+*.rar
+
+# ============================================================================
+# OS Generated Files
+# ============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ============================================================================
+# Application Specific Exclusions
+# ============================================================================
+# Exclude copy folders (keep only main UPLOADED_REPORTINGS)
+UPLOADED_REPORTINGS - Copie/
+
+# Exclude development scripts that aren't needed in container
+create-demo-folders.py
+clean-folders-for-real-data.py
+add-sample-files.py
+update-embedded-files.py
+
+# Exclude batch files (Windows specific)
+*.bat
+
+# ============================================================================
+# Keep Essential Files (explicitly include if needed)
+# ============================================================================
+# The following files WILL be included:
+# - complete_dashboard.html
+# - ALL_REPORTINGS.json
+# - serve.py
+# - *.js files
+# - UPLOADED_REPORTINGS/ (main folder)
+# - *.html files (except test files)

@@ -1,0 +1,1620 @@
+%%html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Reporting Dashboard – Enhanced Version</title>
+  <style>
+    :root {
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      --secondary-color: #64748b;
+      --success-color: #059669;
+      --warning-color: #d97706;
+      --danger-color: #dc2626;
+      --background-color: #f8fafc;
+      --card-background: #ffffff;
+      --border-color: #e2e8f0;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      color: var(--text-primary);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: var(--card-background);
+      border-radius: 16px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 0;
+      padding: 30px 20px;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+      color: white;
+      font-size: 2.5rem;
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Date selector styling */
+    .date-selector {
+      background: var(--card-background);
+      padding: 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .date-selector label {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .date-selector select, .date-selector input {
+      padding: 8px 12px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      background: white;
+      transition: border-color 0.3s ease;
+    }
+
+    .date-selector select:focus, .date-selector input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
+    }
+
+    .btn-success {
+      background: var(--success-color);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #047857;
+      transform: translateY(-1px);
+    }
+
+    /* Top-level tabs */
+    .top-tabs {
+      overflow: hidden;
+      background: var(--card-background);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .top-tablinks {
+      background: transparent;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 16px 24px;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border-bottom: 3px solid transparent;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .top-tablinks:hover {
+      background: #f1f5f9;
+      color: var(--text-primary);
+    }
+
+    .top-tablinks.active {
+      background: #f1f5f9;
+      color: var(--primary-color);
+      border-bottom-color: var(--primary-color);
+      font-weight: 600;
+    }
+
+    .top-tabcontent {
+      display: none;
+      padding: 0;
+      background: var(--card-background);
+    }
+
+    /* Nested (sub-) tabs */
+    .sub-tabs {
+      overflow: hidden;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-wrap: wrap;
+      padding: 0 20px;
+    }
+
+    .sub-tablinks {
+      background: transparent;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 12px 20px;
+      transition: all 0.3s ease;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border-radius: 8px 8px 0 0;
+      margin-right: 4px;
+      margin-top: 8px;
+    }
+
+    .sub-tablinks:hover {
+      background: var(--card-background);
+      color: var(--text-primary);
+    }
+
+    .sub-tablinks.active {
+      background: var(--card-background);
+      color: var(--primary-color);
+      font-weight: 600;
+      box-shadow: 0 -2px 4px rgba(0,0,0,0.05);
+    }
+
+    .sub-tabcontent {
+      display: none;
+      padding: 20px;
+      background: var(--card-background);
+    }
+
+    /* Table styling */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      margin-top: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: white;
+    }
+
+    th, td {
+      padding: 12px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      font-weight: 600;
+      color: var(--text-primary);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    tr:hover {
+      background: #f8fafc;
+    }
+
+    .toggle-checkbox {
+      transform: scale(1.3);
+      accent-color: var(--success-color);
+    }
+
+    /* Plotly container */
+    .progress-chart {
+      width: 100%;
+      height: 400px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    /* Module d'upload */
+    #uploadSection {
+      border: 2px dashed var(--border-color);
+      border-radius: 12px;
+      padding: 30px;
+      margin: 20px;
+      background: var(--card-background);
+      text-align: center;
+      transition: border-color 0.3s ease;
+    }
+
+    #uploadSection:hover {
+      border-color: var(--primary-color);
+    }
+
+    #uploadSection h2 {
+      color: var(--text-primary);
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .form-group select, .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-group select:focus, .form-group input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    /* Monthly tasks specific styling */
+    .monthly-tasks-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .download-btn {
+      background: var(--success-color);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .download-btn:hover {
+      background: #047857;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
+    }
+
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-completed {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-overdue {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      h1 {
+        font-size: 2rem;
+        padding: 20px;
+      }
+
+      .top-tablinks, .sub-tablinks {
+        font-size: 12px;
+        padding: 12px 16px;
+      }
+
+      .sub-tabcontent {
+        padding: 15px;
+      }
+
+      table {
+        font-size: 12px;
+      }
+
+      th, td {
+        padding: 8px 6px;
+      }
+    }
+  </style>
+  <!-- Include Plotly.js and html2canvas for image export -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <!-- Include centralized reporting data manager -->
+  <script src="./reporting-data-manager.js"></script>
+</head>
+<body>
+  <div class="container">
+    <!-- Enhanced Header with Logo -->
+    <div class="header">
+      <div class="header-left">
+        <div class="logo-container">
+          <div class="logo">📊</div>
+          <div class="header-title">
+            <h1>Reporting Dashboard</h1>
+            <div class="subtitle">Compliance Management System</div>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="current-date" id="currentDateTime">
+          <!-- Current date/time will be populated by JavaScript -->
+        </div>
+        <div class="status-indicator" title="System Online"></div>
+      </div>
+    </div>
+
+    <!-- Enhanced Date selector -->
+    <div class="date-selector">
+      <label for="daySelector">Day:</label>
+      <select id="daySelector">
+        <!-- Days will be populated dynamically -->
+      </select>
+
+      <label for="monthSelector">Month:</label>
+      <select id="monthSelector">
+        <option value="1">January</option>
+        <option value="2">February</option>
+        <option value="3">March</option>
+        <option value="4">April</option>
+        <option value="5">May</option>
+        <option value="6">June</option>
+        <option value="7">July</option>
+        <option value="8">August</option>
+        <option value="9">September</option>
+        <option value="10">October</option>
+        <option value="11">November</option>
+        <option value="12">December</option>
+      </select>
+
+      <label for="yearSelector">Year:</label>
+      <select id="yearSelector">
+        <option value="2020">2020</option>
+        <option value="2021">2021</option>
+        <option value="2022">2022</option>
+        <option value="2023">2023</option>
+        <option value="2024">2024</option>
+        <option value="2025" selected>2025</option>
+        <option value="2026">2026</option>
+        <option value="2027">2027</option>
+        <option value="2028">2028</option>
+        <option value="2029">2029</option>
+      </select>
+
+      <button id="updateDateButton" class="btn btn-primary">Update Date</button>
+    </div>
+
+    <!-- Module d'upload -->
+    <div id="uploadSection">
+      <h2>Upload Reporting File</h2>
+      <div class="form-group">
+        <label for="reportSelect">Select Report:</label>
+        <select id="reportSelect">
+          <!-- Options added dynamically -->
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="fileInput">Select File:</label>
+        <input type="file" id="fileInput">
+      </div>
+      <button id="uploadButton" class="btn btn-success">Upload File</button>
+      <span id="uploadStatus"></span>
+    </div>
+
+    <!-- Main tabs -->
+    <div class="top-tabs">
+      <button class="top-tablinks" onclick="openTopTab(event, 'cat1')" id="defaultTopTab">I – Situation comptable et états annexes</button>
+      <button class="top-tablinks" onclick="openTopTab(event, 'cat2')">II – Etats de synthèse et documents qui leur sont complémentaires</button>
+      <button class="top-tablinks" onclick="openTopTab(event, 'cat3')">III – Etats relatifs à la réglementation prudentielle</button>
+      <button class="top-tablinks" onclick="openTopTab(event, 'progressAll')">Progression Overview</button>
+    </div>
+
+    <!-- CATEGORY I -->
+    <div id="cat1" class="top-tabcontent">
+      <div class="sub-tabs">
+        <button class="sub-tablinks" onclick="openSubTab(event, 'cat1_upcoming')" id="defaultSubTab_cat1">Upcoming Events</button>
+        <button class="sub-tablinks" onclick="openSubTab(event, 'cat1_reports')">All Reports</button>
+        <button class="sub-tablinks" onclick="openSubTab(event, 'cat1_monthly')">This Month Tasks</button>
+      </div>
+
+      <div id="cat1_upcoming" class="sub-tabcontent">
+        <h2>Upcoming Events – Situation comptable et états annexes</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Appellation</th>
+                <th>Frequency</th>
+                <th>Transmission</th>
+                <th>Deadline Rule</th>
+                <th>Date d'arrêté</th>
+                <th>Deadline</th>
+                <th>Days Remaining</th>
+              </tr>
+            </thead>
+            <tbody id="upcoming-table-cat1">
+              <!-- Rows generated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="cat1_reports" class="sub-tabcontent">
+        <h2>All Reports – Situation comptable et états annexes</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Appellation</th>
+                <th>Frequency</th>
+                <th>Transmission</th>
+                <th>Deadline Rule</th>
+                <th>Date d'arrêté</th>
+                <th>Deadline</th>
+                <th>Days Remaining</th>
+                <th>Toggle</th>
+                <th>Progress (%)</th>
+              </tr>
+            </thead>
+            <tbody id="reports-table-cat1">
+              <!-- Rows generated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="cat1_monthly" class="sub-tabcontent">
+        <div class="monthly-tasks-header">
+          <h2>Evenement de presentation du comité risk mensuelle - Category I</h2>
+          <button onclick="downloadTableAsImage('monthly-table-cat1')" class="download-btn">
+            📥 Download as Image
+          </button>
+        </div>
+        <div class="table-container">
+          <table id="monthly-table-cat1">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Appellation</th>
+                <th>Status</th>
+                <th>Deadline</th>
+                <th>Priority</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody id="monthly-tasks-cat1">
+              <!-- Monthly tasks generated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CATEGORY II -->
+    <div id="cat2" class="top-tabcontent">
+      <div class="sub-tabs">
+        <button class="sub-tablinks" onclick="openSubTab(event, 'cat2_upcoming')" id="defaultSubTab_cat2">Upcoming Events</button>
+        <button class="sub-tablinks" onclick="openSubTab(event, 'cat2_reports')">All Reports</button>
+        <button class="sub-tablinks" onclick="openSubTab(event, 'cat2_monthly')">This Month Tasks</button>
+      </div>
+
+      <div id="cat2_upcoming" class="sub-tabcontent">
+        <h2>Upcoming Events – Etats de synthèse et documents complémentaires</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Appellation</th>
+                <th>Frequency</th>
+                <th>Transmission</th>
+                <th>Deadline Rule</th>
+                <th>Date d'arrêté</th>
+                <th>Deadline</th>
+                <th>Days Remaining</th>
+              </tr>
+            </thead>
+            <tbody id="upcoming-table-cat2">
+              <!-- Rows generated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="cat2_reports" class="sub-tabcontent">
+        <h2>All Reports – Etats de synthèse et documents complémentaires</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Appellation</th>
+                <th>Frequency</th>
+                <th>Transmission</th>
+                <th>Deadline Rule</th>
+                <th>Date d'arrêté</th>
+                <th>Deadline</th>
+                <th>Days Remaining</th>
+                <th>Toggle</th>
+                <th>Progress (%)</th>
+              </tr>
+            </thead>
+            <tbody id="reports-table-cat2">
+              <!-- Rows generated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="cat2_monthly" class="sub-tabcontent">
+        <div class="monthly-tasks-header">
+          <h2>Evenement de presentation du comité risk mensuelle - Category II</h2>
+          <button onclick="downloadTableAsImage('monthly-table-cat2')" class="download-btn">
+            📥 Download as Image
+          </button>
+        </div>
+        <div class="table-container">
+          <table id="monthly-table-cat2">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Appellation</th>
+                <th>Status</th>
+                <th>Deadline</th>
+                <th>Priority</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody id="monthly-tasks-cat2">
+              <!-- Monthly tasks generated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CATEGORY III -->
+    <div id="cat3" class="top-tabcontent">
+      <div class="sub-tabs">
+        <button class="sub-tablinks" onclick="openSubTab(event, 'cat3_upcoming')" id="defaultSubTab_cat3">Upcoming Events</button>
+        <button class="sub-tablinks" onclick="openSubTab(event, 'cat3_reports')">All Reports</button>
+        <button class="sub-tablinks" onclick="openSubTab(event, 'cat3_monthly')">This Month Tasks</button>
+      </div>
+
+      <div id="cat3_upcoming" class="sub-tabcontent">
+        <h2>Upcoming Events – Etats relatifs à la réglementation prudentielle</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Reporting Name</th>
+                <th>Frequency</th>
+                <th>Submission Method</th>
+                <th>Deadline Rule</th>
+                <th>Date d'arrêté</th>
+                <th>Deadline</th>
+                <th>Days Remaining</th>
+              </tr>
+            </thead>
+            <tbody id="upcoming-table-cat3">
+              <!-- Rows generated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="cat3_reports" class="sub-tabcontent">
+        <h2>All Reports – Etats relatifs à la réglementation prudentielle</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Reporting Name</th>
+                <th>Frequency</th>
+                <th>Submission Method</th>
+                <th>Deadline Rule</th>
+                <th>Date d'arrêté</th>
+                <th>Deadline</th>
+                <th>Days Remaining</th>
+                <th>Toggle</th>
+                <th>Progress (%)</th>
+              </tr>
+            </thead>
+            <tbody id="reports-table-cat3">
+              <!-- Rows generated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="cat3_monthly" class="sub-tabcontent">
+        <div class="monthly-tasks-header">
+          <h2>Evenement de presentation du comité risk mensuelle - Category III</h2>
+          <button onclick="downloadTableAsImage('monthly-table-cat3')" class="download-btn">
+            📥 Download as Image
+          </button>
+        </div>
+        <div class="table-container">
+          <table id="monthly-table-cat3">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Reporting Name</th>
+                <th>Status</th>
+                <th>Deadline</th>
+                <th>Priority</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody id="monthly-tasks-cat3">
+              <!-- Monthly tasks generated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROGRESSION OVERVIEW -->
+    <div id="progressAll" class="top-tabcontent">
+      <div style="padding: 20px;">
+        <h2>Progression Overview (Yearly Completion %)</h2>
+        <div id="progress-bars-cat1" class="progress-chart"></div>
+        <div id="progress-bars-cat2" class="progress-chart"></div>
+        <div id="progress-bars-cat3" class="progress-chart"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Code -->
+  <script>
+    /* ---------- Tab Functions ---------- */
+    function openTopTab(evt, tabName) {
+      var contents = document.getElementsByClassName("top-tabcontent");
+      for (var i = 0; i < contents.length; i++) { contents[i].style.display = "none"; }
+      var links = document.getElementsByClassName("top-tablinks");
+      for (var i = 0; i < links.length; i++) { links[i].className = links[i].className.replace(" active", ""); }
+      document.getElementById(tabName).style.display = "block";
+      evt.currentTarget.className += " active";
+    }
+
+    function openSubTab(evt, subTabName) {
+      var container = evt.currentTarget.parentNode.parentNode;
+      var contents = container.getElementsByClassName("sub-tabcontent");
+      for (var i = 0; i < contents.length; i++) { contents[i].style.display = "none"; }
+      var links = container.getElementsByClassName("sub-tablinks");
+      for (var i = 0; i < links.length; i++) { links[i].className = links[i].className.replace(" active", ""); }
+      document.getElementById(subTabName).style.display = "block";
+      evt.currentTarget.className += " active";
+    }
+
+    /* ---------- Date Functions ---------- */
+    function populateDaySelector() {
+      var daySelector = document.getElementById("daySelector");
+      var monthSelector = document.getElementById("monthSelector");
+      var yearSelector = document.getElementById("yearSelector");
+
+      var selectedMonth = parseInt(monthSelector.value);
+      var selectedYear = parseInt(yearSelector.value);
+      var daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+
+      daySelector.innerHTML = "";
+      for (var i = 1; i <= daysInMonth; i++) {
+        var option = document.createElement("option");
+        option.value = i;
+        option.textContent = i;
+        daySelector.appendChild(option);
+      }
+
+      // Set current day as default
+      var today = new Date();
+      if (selectedMonth === today.getMonth() + 1 && selectedYear === today.getFullYear()) {
+        daySelector.value = today.getDate();
+      } else {
+        daySelector.value = 1;
+      }
+    }
+
+    function initializeDateSelectors() {
+      var today = new Date();
+      document.getElementById("monthSelector").value = today.getMonth() + 1;
+      document.getElementById("yearSelector").value = today.getFullYear();
+      populateDaySelector();
+
+      // Add event listeners
+      document.getElementById("monthSelector").addEventListener("change", populateDaySelector);
+      document.getElementById("yearSelector").addEventListener("change", populateDaySelector);
+    }
+
+    function getSelectedDate() {
+      var day = parseInt(document.getElementById("daySelector").value);
+      var month = parseInt(document.getElementById("monthSelector").value);
+      var year = parseInt(document.getElementById("yearSelector").value);
+      return new Date(year, month - 1, day);
+    }
+
+    /* ---------- Utility Functions ---------- */
+    function addDays(date, days) {
+      var result = new Date(date);
+      result.setDate(result.getDate() + days);
+      return result;
+    }
+
+    function getLastDayOfMonth(year, month) {
+      return new Date(year, month, 0);
+    }
+
+    function monthNameToNumber(monthName) {
+      monthName = monthName.toLowerCase();
+      var months = {
+        'janvier': 0, 'février': 1, 'fevrier': 1, 'mars': 2, 'avril': 3, 'mai': 4, 'juin': 5,
+        'juillet': 6, 'août': 7, 'aout': 7, 'septembre': 8, 'octobre': 9, 'novembre': 10,
+        'décembre': 11, 'decembre': 11
+      };
+      return months[monthName];
+    }
+
+    function parseFixedDeadline(rule, repDate) {
+      var matches = [];
+      var regex = /(?:(\d{1,2})|fin)\s*(janvier|février|fevrier|mars|avril|mai|juin|juillet|août|aout|septembre|octobre|novembre|décembre|decembre)/gi;
+      var m;
+      while ((m = regex.exec(rule)) !== null) {
+        var day;
+        var monthNumber = monthNameToNumber(m[2]);
+        if (m[1]) {
+          day = parseInt(m[1]);
+        } else {
+          day = new Date(repDate.getFullYear(), monthNumber + 1, 0).getDate();
+        }
+        var candidate = new Date(repDate.getFullYear(), monthNumber, day);
+        if (candidate < repDate) {
+          candidate = new Date(repDate.getFullYear() + 1, monthNumber, day);
+        }
+        matches.push(candidate);
+      }
+      if (matches.length === 0) return null;
+      matches.sort(function(a, b){ return a - b; });
+      for (var i = 0; i < matches.length; i++){
+        if (matches[i] >= repDate) return matches[i];
+      }
+      return matches[0];
+    }
+
+    function calculateDeadline(repDate, rule) {
+      rule = rule.toLowerCase();
+      if (rule.includes("fin du mois suivant")) {
+        var nextMonth = repDate.getMonth() + 1;
+        var year = repDate.getFullYear();
+        if (nextMonth > 11) { nextMonth = 0; year++; }
+        return new Date(year, nextMonth + 1, 0);
+      }
+      if (rule.includes("un mois")) return addDays(repDate, 30);
+      if (rule.includes("15 jours")) return addDays(repDate, 15);
+      if (rule.includes("12 jours")) return addDays(repDate, 12);
+      if (rule.includes("21 jours")) return addDays(repDate, 21);
+      if (rule.includes("30 jours")) return addDays(repDate, 30);
+      var fixed = parseFixedDeadline(rule, repDate);
+      if (fixed) return fixed;
+      return null;
+    }
+
+    function formatDate(date) {
+      if (!(date instanceof Date)) return "N/A";
+      var day = ("0" + date.getDate()).slice(-2);
+      var month = ("0" + (date.getMonth() + 1)).slice(-2);
+      var year = date.getFullYear();
+      return day + "/" + month + "/" + year;
+    }
+
+    function getStatusBadge(event, now) {
+      if (event.completed) {
+        return '<span class="status-badge status-completed">Completed</span>';
+      } else if (event.Deadline instanceof Date && event.Deadline < now) {
+        return '<span class="status-badge status-overdue">Overdue</span>';
+      } else {
+        return '<span class="status-badge status-pending">Pending</span>';
+      }
+    }
+
+    function getPriority(event, now) {
+      if (event.completed) return "Low";
+      if (!(event.Deadline instanceof Date)) return "Medium";
+
+      var daysRemaining = Math.ceil((event.Deadline - now) / (1000 * 60 * 60 * 24));
+      if (daysRemaining < 0) return "Critical";
+      if (daysRemaining <= 7) return "High";
+      if (daysRemaining <= 14) return "Medium";
+      return "Low";
+    }
+
+    /* ---------- Image Download Function ---------- */
+    function downloadTableAsImage(tableId) {
+      var table = document.getElementById(tableId);
+      if (!table) {
+        alert("Table not found!");
+        return;
+      }
+
+      // Create a temporary container with better styling for the image
+      var tempContainer = document.createElement('div');
+      tempContainer.style.cssText = `
+        background: white;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+        width: auto;
+        height: auto;
+      `;
+
+      // Clone the table
+      var tableClone = table.cloneNode(true);
+      tableClone.style.cssText = `
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 12px;
+        margin: 0;
+      `;
+
+      // Style the cloned table cells
+      var cells = tableClone.querySelectorAll('th, td');
+      cells.forEach(function(cell) {
+        cell.style.cssText = `
+          border: 1px solid #ddd;
+          padding: 8px;
+          text-align: left;
+          background: ${cell.tagName === 'TH' ? '#f8f9fa' : 'white'};
+          font-weight: ${cell.tagName === 'TH' ? 'bold' : 'normal'};
+        `;
+      });
+
+      // Add title
+      var title = document.createElement('h2');
+      title.textContent = table.closest('.sub-tabcontent').querySelector('h2').textContent;
+      title.style.cssText = `
+        margin: 0 0 20px 0;
+        color: #1e293b;
+        font-size: 18px;
+        text-align: center;
+      `;
+
+      tempContainer.appendChild(title);
+      tempContainer.appendChild(tableClone);
+      document.body.appendChild(tempContainer);
+
+      // Use html2canvas to capture the image
+      html2canvas(tempContainer, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true
+      }).then(function(canvas) {
+        // Create download link
+        var link = document.createElement('a');
+        link.download = tableId + '_' + new Date().toISOString().slice(0, 10) + '.png';
+        link.href = canvas.toDataURL();
+        link.click();
+
+        // Clean up
+        document.body.removeChild(tempContainer);
+      }).catch(function(error) {
+        console.error('Error generating image:', error);
+        alert('Error generating image. Please try again.');
+        document.body.removeChild(tempContainer);
+      });
+    }
+
+    /* ---------- Centralized Data Loading ---------- */
+    // Global variables for reporting data
+    let dataCat1 = [];
+    let dataCat2 = [];
+    let dataCat3 = [];
+    let isDataLoaded = false;
+
+    /**
+     * Load centralized reporting data
+     */
+    async function loadCentralizedData() {
+      console.log('🚀 Loading centralized reporting data...');
+
+      try {
+        // Load data using the centralized manager
+        await reportingDataManager.loadReportingData();
+
+        // Get data in legacy format for backward compatibility
+        dataCat1 = await reportingDataManager.getLegacyFormat('I');
+        dataCat2 = await reportingDataManager.getLegacyFormat('II');
+        dataCat3 = await reportingDataManager.getLegacyFormat('III');
+
+        isDataLoaded = true;
+        console.log('✅ Centralized data loaded successfully');
+        console.log(`📊 Loaded: Category I (${dataCat1.length}), Category II (${dataCat2.length}), Category III (${dataCat3.length})`);
+
+        // Validate data integrity
+        const validation = await reportingDataManager.validateData();
+        if (!validation.isValid) {
+          console.warn('⚠️ Data validation warnings:', validation.warnings);
+          console.error('❌ Data validation errors:', validation.errors);
+        }
+
+        return true;
+
+      } catch (error) {
+        console.error('❌ Error loading centralized data:', error);
+        console.log('🔄 Falling back to hardcoded data...');
+
+        // Fallback to minimal hardcoded data
+        dataCat1 = getFallbackDataCat1();
+        dataCat2 = getFallbackDataCat2();
+        dataCat3 = getFallbackDataCat3();
+
+        isDataLoaded = true;
+        return false;
+      }
+    }
+
+    /**
+     * Fallback data for Category I (essential reportings only)
+     */
+    function getFallbackDataCat1() {
+      return [
+        { Code: "001", Appellation: "Situation Comptable provisoire", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" },
+        { Code: "001", Appellation: "Situation Comptable définitive (*)", Frequency: "Trimestrielle", Transmission: "Télétransmission", DeadlineRule: "15 mars pour le provisoire, 30 avril pour le définitif à fin décembre\n31 mai pour l'état arrêté à fin mars\n30 août pour le définitif à fin juin\n30 novembre pour l'état arrêté à fin septembre" },
+        { Code: "005", Appellation: "Ventilation, en fonction de la résidence et par catégorie de contrepartie, des opérations de trésorerie et des créances sur les établissements de crédit et assimilés", Frequency: "Mensuelle", Transmission: "Télétransmission", DeadlineRule: "12 jours après la date d'arrêté" }
+      ];
+    }
+
+    /**
+     * Fallback data for Category II (essential reportings only)
+     */
+    function getFallbackDataCat2() {
+      return [
+        { Code: "040", Appellation: "Bilan", Frequency: "Semestrielle", Transmission: "Télétransmission", DeadlineRule: "15 mars pour le provisoire, 30 avril pour le définitif à fin décembre et 30 Août pour le définitif à fin juin" },
+        { Code: "041", Appellation: "Compte de produits et charges", Frequency: "Semestrielle", Transmission: "Télétransmission", DeadlineRule: "15 mars pour le provisoire, 30 avril pour le définitif à fin décembre et 30 Août pour le définitif à fin juin" },
+        { Code: "042", Appellation: "Etat des soldes de gestion", Frequency: "Semestrielle", Transmission: "Télétransmission", DeadlineRule: "15 mars pour le provisoire, 30 avril pour le définitif à fin décembre et 30 Août pour le définitif à fin juin" }
+      ];
+    }
+
+    /**
+     * Fallback data for Category III (essential reportings only)
+     */
+    function getFallbackDataCat3() {
+      return [
+        { ID: 159, ReportingName: "Reporting réglementaire IRRBB", Frequency: "Trimestrielle", SubmissionMethod: "Télétransmission et Excel", DeadlineRule: "Un mois après la date l'arrêté" },
+        { ID: 331, ReportingName: "Etat LCR", Frequency: "Mensuelle", SubmissionMethod: "Excel", DeadlineRule: "15 jours après la date d'arrêté" },
+        { ID: 333, ReportingName: "Etat de calcul du ratio de levier sur base individuelle", Frequency: "Semestrielle", SubmissionMethod: "Télétransmission", DeadlineRule: "Fin mars pour l'état arrêté à fin décembre et fin septembre pour l'état arrêté à fin juin" }
+      ];
+    }
+
+    /* ---------- Event Generation Functions ---------- */
+    function generateEventsForItem(item, isCat3) {
+      var events = [];
+      var freq = item.Frequency.toLowerCase().trim();
+      var rule = item.DeadlineRule.toLowerCase().trim();
+      var selectedDate = getSelectedDate();
+      var currentYear = selectedDate.getFullYear();
+
+      function pushEvent(repDate, deadline) {
+        events.push({
+          code: isCat3 ? item.ID : item.Code,
+          event: isCat3 ? item.ReportingName : item.Appellation,
+          Frequency: item.Frequency,
+          Support: isCat3 ? item.SubmissionMethod : item.Transmission,
+          DeadlineRule: item.DeadlineRule,
+          DateArrete: repDate,
+          Deadline: deadline,
+          completed: false,
+          progress: 0,
+          Category: item.Category
+        });
+      }
+
+      if (freq === "trimestrielle") {
+        if (rule.includes("15 mars") && rule.includes("31 mai") &&
+             rule.includes("30 août") && rule.includes("30 novembre")) {
+          var rep1 = new Date(currentYear - 1, 11, 31);
+          var rep2 = new Date(currentYear, 2, 31);
+          var rep3 = new Date(currentYear, 5, 30);
+          var rep4 = new Date(currentYear, 8, 30);
+          var dead1 = new Date(currentYear, 2, 15);
+          var dead2 = new Date(currentYear, 4, 31);
+          var dead3 = rule.includes("31 août") ? new Date(currentYear, 7, 31) : new Date(currentYear, 7, 30);
+          var dead4 = new Date(currentYear, 10, 30);
+          pushEvent(rep1, dead1);
+          pushEvent(rep2, dead2);
+          pushEvent(rep3, dead3);
+          pushEvent(rep4, dead4);
+        } else if (rule.includes("12 jours après")) {
+          var periods = !isCat3 ? [
+            { year: currentYear - 1, month: 12, day: 31 },
+            { year: currentYear, month: 6, day: 30 },
+            { year: currentYear, month: 9, day: 30 }
+          ] : [
+            { year: currentYear - 1, month: 12, day: 31 },
+            { year: currentYear, month: 3, day: 31 },
+            { year: currentYear, month: 6, day: 30 },
+            { year: currentYear, month: 9, day: 30 }
+          ];
+          periods.forEach(p => {
+            var rep = new Date(p.year, p.month - 1, p.day);
+            var dead = addDays(rep, 12);
+            pushEvent(rep, dead);
+          });
+        } else if (rule.includes("un mois après")) {
+          var periods = !isCat3 ? [
+            { year: currentYear - 1, month: 12, day: 31 },
+            { year: currentYear, month: 6, day: 30 },
+            { year: currentYear, month: 9, day: 30 }
+          ] : [
+            { year: currentYear - 1, month: 12, day: 31 },
+            { year: currentYear, month: 3, day: 31 },
+            { year: currentYear, month: 6, day: 30 },
+            { year: currentYear, month: 9, day: 30 }
+          ];
+          periods.forEach(p => {
+            var rep = new Date(p.year, p.month - 1, p.day);
+            var dead = new Date(rep.getFullYear(), rep.getMonth() + 2, 0);
+            pushEvent(rep, dead);
+          });
+        } else if (rule.includes("21 jours après")) {
+          var periods = !isCat3 ? [
+            { year: currentYear - 1, month: 12, day: 31 },
+            { year: currentYear, month: 6, day: 30 },
+            { year: currentYear, month: 9, day: 30 }
+          ] : [
+            { year: currentYear - 1, month: 12, day: 31 },
+            { year: currentYear, month: 3, day: 31 },
+            { year: currentYear, month: 6, day: 30 },
+            { year: currentYear, month: 9, day: 30 }
+          ];
+          periods.forEach(p => {
+            var rep = new Date(p.year, p.month - 1, p.day);
+            var dead = addDays(rep, 21);
+            pushEvent(rep, dead);
+          });
+        } else if (rule.includes("30 jours après")) {
+          var periods = !isCat3 ? [
+            { year: currentYear - 1, month: 12, day: 31 },
+            { year: currentYear, month: 6, day: 30 },
+            { year: currentYear, month: 9, day: 30 }
+          ] : [
+            { year: currentYear - 1, month: 12, day: 31 },
+            { year: currentYear, month: 3, day: 31 },
+            { year: currentYear, month: 6, day: 30 },
+            { year: currentYear, month: 9, day: 30 }
+          ];
+          periods.forEach(p => {
+            var rep = new Date(p.year, p.month - 1, p.day);
+            var dead = addDays(rep, 30);
+            pushEvent(rep, dead);
+          });
+        }
+      } else if (freq === "mensuelle") {
+        for (var m = 1; m <= 12; m++) {
+          var rep = new Date(currentYear, m, 0);
+          if (rule.includes("12 jours après")) {
+             pushEvent(rep, addDays(rep, 12));
+          } else if (rule.includes("15 jours après")) {
+             pushEvent(rep, addDays(rep, 15));
+          } else if (rule.includes("fin du mois suivant")) {
+             var nextMonth = rep.getMonth() + 1;
+             var nextYear = rep.getFullYear();
+             if (nextMonth > 11) { nextMonth = 0; nextYear++; }
+             pushEvent(rep, new Date(nextYear, nextMonth + 1, 0));
+          }
+        }
+      } else if (freq === "semestrielle") {
+        var repDec = new Date(currentYear - 1, 11, 31);
+        var repJun = new Date(currentYear, 5, 30);
+        if (rule.includes("15 mars pour le provisoire") && rule.includes("30 avril")) {
+          var tempDeadDec = new Date(currentYear, 2, 15);
+          var defDeadDec = new Date(currentYear, 3, 30);
+          pushEvent(repDec, tempDeadDec);
+          pushEvent(repDec, defDeadDec);
+          if (rule.includes("31 août")) {
+            pushEvent(repJun, new Date(currentYear, 7, 31));
+          } else if (rule.includes("30 août")) {
+            pushEvent(repJun, new Date(currentYear, 7, 30));
+          } else {
+            pushEvent(repJun, new Date(currentYear, 7, 30));
+          }
+        } else if (rule.includes("fin mars") && rule.includes("fin septembre")) {
+          var deadDec = new Date(currentYear, 3, 0);
+          var deadJun = new Date(currentYear, 10, 0);
+          pushEvent(repDec, deadDec);
+          pushEvent(repJun, deadJun);
+        } else if (rule.replace(/\s/g, "").includes("31mars") && rule.replace(/\s/g, "").includes("15septembre")) {
+          var deadDec = new Date(currentYear, 2, 31);
+          var deadJun = new Date(currentYear, 8, 15);
+          pushEvent(repDec, deadDec);
+          pushEvent(repJun, deadJun);
+        } else if (rule.includes("fin janvier") && rule.includes("fin juillet")) {
+          var deadDec = new Date(currentYear, 1, 0);
+          var deadJun = new Date(currentYear, 7, 0);
+          pushEvent(repDec, deadDec);
+          pushEvent(repJun, deadJun);
+        } else if (rule.includes("fin mars suivant")) {
+          var deadDec = new Date(currentYear, 3, 0);
+          var deadJun = new Date(currentYear, 10, 0);
+          pushEvent(repDec, deadDec);
+          pushEvent(repJun, deadJun);
+        }
+      } else if (freq === "annuelle" || freq === "annuelle ou changement") {
+        var repAnn = new Date(currentYear - 1, 11, 31);
+        if (rule.includes("31 janvier")) {
+          pushEvent(repAnn, new Date(currentYear, 0, 31));
+        } else if (rule.includes("fin mars")) {
+          pushEvent(repAnn, new Date(currentYear, 3, 0));
+        }
+      }
+      return events;
+    }
+
+    /* ---------- Storage Functions ---------- */
+    function saveProgressForCategory(key, eventsArray) {
+      localStorage.setItem(key, JSON.stringify(eventsArray.map(e => ({ completed: e.completed, progress: e.progress }))));
+    }
+
+    function loadProgressForCategory(key, eventsArray) {
+      var saved = localStorage.getItem(key);
+      if (saved) {
+        try {
+          var arr = JSON.parse(saved);
+          if (arr.length === eventsArray.length) {
+            arr.forEach(function(state, i) {
+              eventsArray[i].completed = state.completed;
+              eventsArray[i].progress = state.progress;
+            });
+          }
+        } catch(e) {
+          console.error("Error loading progress:", e);
+        }
+      }
+    }
+
+    /* ---------- Table Update Functions ---------- */
+    function updateUpcomingTable(tableId, eventsArray) {
+      var tbody = document.getElementById(tableId);
+      tbody.innerHTML = "";
+      var now = new Date();
+      var filtered = eventsArray.filter(function(e) {
+        return (e.Deadline instanceof Date && e.Deadline > now && e.Deadline <= addDays(now, 30));
+      });
+      filtered.sort(function(a, b) { return a.Deadline - b.Deadline; });
+
+      filtered.forEach(function(e) {
+        var tr = document.createElement("tr");
+        ["code", "event", "Frequency", "Support", "DeadlineRule"].forEach(function(prop) {
+          var td = document.createElement("td");
+          td.textContent = e[prop];
+          tr.appendChild(td);
+        });
+        var tdArrete = document.createElement("td");
+        tdArrete.textContent = formatDate(e.DateArrete);
+        tr.appendChild(tdArrete);
+        var tdDeadline = document.createElement("td");
+        tdDeadline.textContent = e.Deadline ? formatDate(e.Deadline) : "N/A";
+        tr.appendChild(tdDeadline);
+        var tdDays = document.createElement("td");
+        if (e.Deadline instanceof Date)
+          tdDays.textContent = Math.ceil((e.Deadline - now) / (1000 * 60 * 60 * 24));
+        else
+          tdDays.textContent = "N/A";
+        tr.appendChild(tdDays);
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateReportsTable(tableId, eventsArray, storageKey) {
+      var tbody = document.getElementById(tableId);
+      tbody.innerHTML = "";
+      var now = new Date();
+      var sorted = eventsArray.slice().sort(function(a, b) {
+        var aDays = (a.Deadline instanceof Date) ? (a.Deadline - now) : Infinity;
+        var bDays = (b.Deadline instanceof Date) ? (b.Deadline - now) : Infinity;
+        return aDays - bDays;
+      });
+
+      sorted.forEach(function(e) {
+        var tr = document.createElement("tr");
+        var tdCode = document.createElement("td");
+        tdCode.textContent = e.code;
+        tr.appendChild(tdCode);
+        var tdEvent = document.createElement("td");
+        tdEvent.textContent = e.event;
+        tr.appendChild(tdEvent);
+        var tdFreq = document.createElement("td");
+        tdFreq.textContent = e.Frequency;
+        tr.appendChild(tdFreq);
+        var tdSupport = document.createElement("td");
+        tdSupport.textContent = e.Support;
+        tr.appendChild(tdSupport);
+        var tdRule = document.createElement("td");
+        tdRule.textContent = e.DeadlineRule;
+        tr.appendChild(tdRule);
+        var tdArrete = document.createElement("td");
+        tdArrete.textContent = formatDate(e.DateArrete);
+        tr.appendChild(tdArrete);
+        var tdDeadline = document.createElement("td");
+        tdDeadline.textContent = e.Deadline ? formatDate(e.Deadline) : "N/A";
+        tr.appendChild(tdDeadline);
+        var tdDays = document.createElement("td");
+        if (e.Deadline instanceof Date)
+          tdDays.textContent = Math.ceil((e.Deadline - now) / (1000 * 60 * 60 * 24));
+        else
+          tdDays.textContent = "N/A";
+        tr.appendChild(tdDays);
+        var tdToggle = document.createElement("td");
+        var checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "toggle-checkbox";
+        checkbox.checked = e.completed;
+        checkbox.addEventListener("change", function() {
+          e.completed = checkbox.checked;
+          e.progress = checkbox.checked ? 100 : 0;
+          saveProgressForCategory(storageKey, eventsArray);
+          updateReportsTable(tableId, eventsArray, storageKey);
+          updateProgressOverview();
+          updateMonthlyTasksTable(tableId.replace('reports-table', 'monthly-tasks'), eventsArray);
+        });
+        tdToggle.appendChild(checkbox);
+        tr.appendChild(tdToggle);
+        var tdProgress = document.createElement("td");
+        tdProgress.textContent = e.progress + "%";
+        tr.appendChild(tdProgress);
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateMonthlyTasksTable(tableId, eventsArray) {
+      var tbody = document.getElementById(tableId);
+      if (!tbody) return;
+
+      tbody.innerHTML = "";
+      var now = new Date();
+      var selectedDate = getSelectedDate();
+      var currentMonth = selectedDate.getMonth();
+      var currentYear = selectedDate.getFullYear();
+
+      // Filter events for the selected month
+      var monthlyEvents = eventsArray.filter(function(e) {
+        if (!(e.Deadline instanceof Date)) return false;
+        return e.Deadline.getMonth() === currentMonth && e.Deadline.getFullYear() === currentYear;
+      });
+
+      monthlyEvents.sort(function(a, b) { return a.Deadline - b.Deadline; });
+
+      monthlyEvents.forEach(function(e) {
+        var tr = document.createElement("tr");
+
+        // Code/ID column
+        var tdCode = document.createElement("td");
+        tdCode.textContent = e.code;
+        tr.appendChild(tdCode);
+
+        // Event/Reporting Name column
+        var tdEvent = document.createElement("td");
+        tdEvent.textContent = e.event;
+        tr.appendChild(tdEvent);
+
+        // Status column
+        var tdStatus = document.createElement("td");
+        tdStatus.innerHTML = getStatusBadge(e, now);
+        tr.appendChild(tdStatus);
+
+        // Deadline column
+        var tdDeadline = document.createElement("td");
+        tdDeadline.textContent = formatDate(e.Deadline);
+        tr.appendChild(tdDeadline);
+
+        // Priority column
+        var tdPriority = document.createElement("td");
+        var priority = getPriority(e, now);
+        tdPriority.innerHTML = '<span class="status-badge status-' +
+          (priority === 'Critical' ? 'overdue' : priority === 'High' ? 'overdue' :
+           priority === 'Medium' ? 'pending' : 'completed') + '">' + priority + '</span>';
+        tr.appendChild(tdPriority);
+
+        // Notes column
+        var tdNotes = document.createElement("td");
+        var daysRemaining = Math.ceil((e.Deadline - now) / (1000 * 60 * 60 * 24));
+        if (e.completed) {
+          tdNotes.textContent = "Task completed";
+        } else if (daysRemaining < 0) {
+          tdNotes.textContent = "Overdue by " + Math.abs(daysRemaining) + " days";
+        } else if (daysRemaining <= 7) {
+          tdNotes.textContent = "Due soon - " + daysRemaining + " days remaining";
+        } else {
+          tdNotes.textContent = "On track - " + daysRemaining + " days remaining";
+        }
+        tr.appendChild(tdNotes);
+
+        tbody.appendChild(tr);
+      });
+
+      if (monthlyEvents.length === 0) {
+        var tr = document.createElement("tr");
+        var td = document.createElement("td");
+        td.colSpan = 6;
+        td.textContent = "No events scheduled for this month";
+        td.style.textAlign = "center";
+        td.style.fontStyle = "italic";
+        td.style.color = "#64748b";
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+      }
+    }
+
+    function updateProgressOverview() {
+      function plotCategoryProgress(categoryName, eventsArray, containerId, color) {
+        var group = {};
+        eventsArray.forEach(function(e) {
+          if (!group[e.event]) { group[e.event] = { total: 0, completed: 0 }; }
+          group[e.event].total++;
+          if (e.completed) group[e.event].completed++;
+        });
+        var reportingNames = [], percentages = [];
+        for (var rep in group) {
+          reportingNames.push(rep);
+          percentages.push((group[rep].completed / group[rep].total) * 100);
+        }
+        var data = [{
+          type: 'bar',
+          x: percentages,
+          y: reportingNames,
+          orientation: 'h',
+          marker: { color: color }
+        }];
+        var layout = {
+          title: categoryName + " Progression Overview (Yearly Completion %)",
+          margin: { l: 200, r: 50, t: 50, b: 50 },
+          font: { family: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif' }
+        };
+        Plotly.newPlot(containerId, data, layout);
+      }
+
+      plotCategoryProgress("I – Situation comptable et états annexes", eventsCat1, "progress-bars-cat1", "rgba(55,128,191,0.6)");
+      plotCategoryProgress("II – Etats de synthèse et documents qui leur sont complémentaires", eventsCat2, "progress-bars-cat2", "rgba(50,171,96,0.6)");
+      plotCategoryProgress("III – Etats relatifs à la réglementation prudentielle", eventsCat3, "progress-bars-cat3", "rgba(219,64,82,0.6)");
+    }
+
+    /* ---------- Global Variables and Main Functions ---------- */
+    var eventsCat1 = [];
+    var eventsCat2 = [];
+    var eventsCat3 = [];
+
+    function updateAll() {
+      var selectedDate = getSelectedDate();
+      var currentYear = selectedDate.getFullYear();
+
+      eventsCat1 = [];
+      dataCat1.forEach(function(item) {
+        item.Category = "I – Situation comptable et états annexes";
+        eventsCat1 = eventsCat1.concat(generateEventsForItem(item, false));
+      });
+
+      eventsCat2 = [];
+      dataCat2.forEach(function(item) {
+        item.Category = "II – Etats de synthèse et documents qui leur sont complémentaires";
+        eventsCat2 = eventsCat2.concat(generateEventsForItem(item, false));
+      });
+
+      eventsCat3 = [];
+      dataCat3.forEach(function(item) {
+        item.Category = "III – Etats relatifs à la réglementation prudentielle";
+        eventsCat3 = eventsCat3.concat(generateEventsForItem(item, true));
+      });
+
+      loadProgressForCategory("progressCat1_" + currentYear, eventsCat1);
+      loadProgressForCategory("progressCat2_" + currentYear, eventsCat2);
+      loadProgressForCategory("progressCat3_" + currentYear, eventsCat3);
+
+      updateUpcomingTable("upcoming-table-cat1", eventsCat1);
+      updateReportsTable("reports-table-cat1", eventsCat1, "progressCat1_" + currentYear);
+      updateMonthlyTasksTable("monthly-tasks-cat1", eventsCat1);
+
+      updateUpcomingTable("upcoming-table-cat2", eventsCat2);
+      updateReportsTable("reports-table-cat2", eventsCat2, "progressCat2_" + currentYear);
+      updateMonthlyTasksTable("monthly-tasks-cat2", eventsCat2);
+
+      updateUpcomingTable("upcoming-table-cat3", eventsCat3);
+      updateReportsTable("reports-table-cat3", eventsCat3, "progressCat3_" + currentYear);
+      updateMonthlyTasksTable("monthly-tasks-cat3", eventsCat3);
+
+      updateProgressOverview();
+      populateReportSelect();
+    }
+
+    /* ---------- Report Selection Functions ---------- */
+    function populateReportSelect() {
+      var select = document.getElementById("reportSelect");
+      select.innerHTML = "";
+      var reports = {};
+      [eventsCat1, eventsCat2, eventsCat3].forEach(function(arr) {
+        arr.forEach(function(e) { reports[e.event] = true; });
+      });
+      for (var rep in reports) {
+        var option = document.createElement("option");
+        option.value = rep;
+        option.textContent = rep;
+        select.appendChild(option);
+      }
+    }
+
+    /* ---------- File Upload Functions ---------- */
+    function markReportUploaded(reportName) {
+      var now = new Date();
+      var month = now.getMonth();
+      var marked = false;
+      [eventsCat1, eventsCat2, eventsCat3].forEach(function(arr) {
+        arr.forEach(function(e) {
+          if (e.event === reportName && e.Deadline instanceof Date &&
+              e.Deadline.getMonth() === month && e.Deadline.getFullYear() === now.getFullYear()) {
+            e.completed = true;
+            e.progress = 100;
+            marked = true;
+          }
+        });
+      });
+      if (marked) {
+        var selectedDate = getSelectedDate();
+        var currentYear = selectedDate.getFullYear();
+        saveProgressForCategory("progressCat1_" + currentYear, eventsCat1);
+        saveProgressForCategory("progressCat2_" + currentYear, eventsCat2);
+        saveProgressForCategory("progressCat3_" + currentYear, eventsCat3);
+        updateAll();
+      }
+    }
+
+    /* ---------- Event Listeners and Initialization ---------- */
+    document.addEventListener('DOMContentLoaded', async function() {
+      console.log('🚀 Initializing BCP Securities Services Dashboard...');
+
+      try {
+        // Load centralized reporting data first
+        const dataLoaded = await loadCentralizedData();
+
+        if (dataLoaded) {
+          console.log('✅ Using centralized reporting data');
+        } else {
+          console.log('⚠️ Using fallback data - some features may be limited');
+        }
+
+        // Initialize date selectors
+        initializeDateSelectors();
+
+        // Set up event listeners
+        document.getElementById("updateDateButton").addEventListener("click", updateAll);
+
+        // Upload functionality
+        document.getElementById("uploadButton").addEventListener("click", function() {
+          var reportSelect = document.getElementById("reportSelect");
+          var selectedReport = reportSelect.value;
+          var fileInput = document.getElementById("fileInput");
+          var file = fileInput.files[0];
+
+          if (!file) {
+            document.getElementById("uploadStatus").textContent = "Please select a file.";
+            return;
+          }
+
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            var base64Data = e.target.result;
+            var selectedDate = getSelectedDate();
+            var currentMonth = selectedDate.getMonth() + 1;
+            var currentYear = selectedDate.getFullYear();
+
+            // For this demo, we'll simulate the upload success
+            // In the original version, this would call google.colab.kernel.invokeFunction
+            setTimeout(function() {
+              document.getElementById("uploadStatus").textContent = "File uploaded successfully!";
+              markReportUploaded(selectedReport);
+            }, 1000);
+          };
+          reader.readAsDataURL(file);
+        });
+
+        // Initialize the application
+        updateAll();
+
+        // Set default active tabs
+        document.getElementById("defaultTopTab").click();
+        document.getElementById("defaultSubTab_cat1").click();
+        document.getElementById("defaultSubTab_cat2").click();
+        document.getElementById("defaultSubTab_cat3").click();
+
+        // Set up periodic updates
+        setInterval(function() {
+          updateUpcomingTable("upcoming-table-cat1", eventsCat1);
+          updateReportsTable("reports-table-cat1", eventsCat1, "progressCat1_" + getSelectedDate().getFullYear());
+          updateMonthlyTasksTable("monthly-tasks-cat1", eventsCat1);
+
+          updateUpcomingTable("upcoming-table-cat2", eventsCat2);
+          updateReportsTable("reports-table-cat2", eventsCat2, "progressCat2_" + getSelectedDate().getFullYear());
+          updateMonthlyTasksTable("monthly-tasks-cat2", eventsCat2);
+
+          updateUpcomingTable("upcoming-table-cat3", eventsCat3);
+          updateReportsTable("reports-table-cat3", eventsCat3, "progressCat3_" + getSelectedDate().getFullYear());
+          updateMonthlyTasksTable("monthly-tasks-cat3", eventsCat3);
+
+          updateProgressOverview();
+        }, 60000); // Update every minute
+
+        console.log('✅ Dashboard initialization complete');
+
+      } catch (error) {
+        console.error('❌ Error initializing dashboard:', error);
+        alert('Error loading dashboard. Please refresh the page.');
+      }
+    });
+  </script>
+</body>
+</html>

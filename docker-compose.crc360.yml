@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  crc360:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: CRC360
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+    volumes:
+      # Persist uploaded files and documents
+      - crc360_uploads:/app/uploads
+      - crc360_aml_uploads:/app/app/amlcenter/uploads
+      - crc360_docsecure:/app/docsecureDOCS
+      # Persist public files that might be uploaded
+      - crc360_public_uploads:/app/public/UPLOADED_REPORTINGS
+    restart: unless-stopped
+    networks:
+      - crc360-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  crc360-network:
+    driver: bridge
+
+volumes:
+  crc360_uploads:
+    driver: local
+  crc360_aml_uploads:
+    driver: local
+  crc360_docsecure:
+    driver: local
+  crc360_public_uploads:
+    driver: local
