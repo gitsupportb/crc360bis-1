@@ -1,19 +1,94 @@
+# Dependencies
 node_modules
-npm-debug.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Git
 .git
 .gitignore
-README.md
-.env
+
+# Documentation
+README*.md
+CHANGELOG.md
+CONTRIBUTING.md
+LICENSE
+docs/
+
+# Environment
+.env*
 .nyc_output
+
+# Testing
 coverage
+*.lcov
+test/
+tests/
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+
+# Build outputs
 .cache
 .next
-.DS_Store
-*.log
 dist
 build
+out/
+
+# Logs
+*.log
+logs/
+
+# IDE
+.DS_Store
 .vscode
 .idea
 *.swp
 *.swo
 *~
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.ipynb_checkpoints
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Scripts
+*.bat
+*.sh
+
+# Temporary
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup
+
+# Development configs
+.eslintrc*
+.prettierrc*
+# tsconfig.json - needed for build
+# tailwind.config.* - needed for build
+# postcss.config.* - needed for build
+
+# Runtime directories (created in container)
+uploads/
+app/amlcenter/uploads/
+
+# Separate services
+dashboard prez app/

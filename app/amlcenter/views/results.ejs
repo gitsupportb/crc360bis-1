@@ -4,39 +4,70 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Matching Results - LBCFT Sanctions Matching Tool</title>
-  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/amlcenter/css/styles.css">
 </head>
 <body>
-  <div class="container mt-4">
-    <h1 class="mb-4 text-center">Matching Results</h1>
-    
-    <div class="card mb-4">
-      <div class="card-header bg-primary text-white">
-        <h5 class="mb-0">Summary</h5>
-      </div>
-      <div class="card-body">
-        <div class="row">
-          <div class="col-md-4">
-            <div class="alert alert-info">
-              <p><strong>Excel Entries:</strong> <%= excelData.length %></p>
-            </div>
+  <div class="container-fluid">
+    <!-- AML Center Header - RepWatch Style -->
+    <div class="header">
+      <div class="header-left">
+        <div class="logo-container">
+          <div class="logo">
+            <div class="logo-fallback">🛡️</div>
           </div>
-          <div class="col-md-4">
-            <div class="alert alert-info">
-              <p><strong>Sanctions Entries:</strong> <%= pdfData.length %></p>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="alert <%= matchResults.some(r => r.bestMatchScore > 0.7) ? 'alert-danger' : 'alert-success' %>">
-              <p><strong>Potential Matches:</strong> <%= matchResults.filter(r => r.bestMatchScore > 0.7).length %></p>
-            </div>
+          <div class="header-title">
+            <h1>Matching Results</h1>
+            <div class="subtitle">Sanctions List Matching Tool</div>
           </div>
         </div>
-        <a href="/" class="btn btn-secondary mt-2">Back to Home</a>
-        <button class="btn btn-primary mt-2 ms-2" onclick="window.print()">Print Results</button>
+      </div>
+      <div class="header-right">
+        <a href="/" class="back-to-dashboard-btn">
+          <span>←</span>
+          Back to Main Menu
+        </a>
+        <a href="/amlcenter" class="back-to-dashboard-btn">
+          <span>🏠</span>
+          Back to Home
+        </a>
+        <div class="current-date">
+          <%= new Date().toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+        </div>
       </div>
     </div>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Summary</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="alert alert-info">
+                <p><strong>Excel Entries:</strong> <%= excelData.length %></p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="alert alert-info">
+                <p><strong>Sanctions Entries:</strong> <%= pdfData.length %></p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="alert <%= matchResults.some(r => r.bestMatchScore > 0.7) ? 'alert-danger' : 'alert-success' %>">
+                <p><strong>Potential Matches:</strong> <%= matchResults.filter(r => r.bestMatchScore > 0.7).length %></p>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-primary mt-2 ms-2" onclick="window.print()">Print Results</button>
+        </div>
+      </div>
     
     <div class="card">
       <div class="card-header bg-dark text-white">
@@ -380,7 +411,7 @@
       </div>
     </div>
   </div>
-  
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

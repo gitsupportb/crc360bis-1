@@ -25,7 +25,7 @@ import {
   Mail,
   Globe
 } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/components/ui/use-toast"
 
 export default function DocSecureSettingsPage() {
   const [settings, setSettings] = useState({
