@@ -18,12 +18,15 @@ export default function AMLCenterPage() {
 
   // Show loading while redirecting
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <div className="text-4xl mb-4">🛡️</div>
-        <h1 className="text-2xl font-bold mb-2">AML Center</h1>
-        <p className="text-gray-600 mb-4">Loading AML Center...</p>
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6">
+      <div className="text-center max-w-md mx-auto">
+        <div className="text-6xl md:text-7xl mb-8 animate-pulse">🛡️</div>
+        <h1 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800 tracking-tight">AML Center</h1>
+        <p className="text-lg text-gray-600 mb-8 leading-relaxed px-2">Loading Anti-Money Laundering compliance system...</p>
+        <div className="flex items-center justify-center space-x-2 mb-6">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-orange-500"></div>
+        </div>
+        <div className="text-sm text-gray-500 font-medium">Please wait while we initialize your secure environment</div>
       </div>
     </div>
   );

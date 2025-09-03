@@ -17,7 +17,11 @@ import shutil
 class DocSecureDatabase:
     """Main database class for DOC Secure document management"""
     
-    def __init__(self, base_path: str = "docsecureDOCS"):
+    def __init__(self, base_path: str = None):
+        if base_path is None:
+            # Use the docsecureDOCS folder at the project root
+            project_root = Path(__file__).parent.parent.parent
+            base_path = project_root / "docsecureDOCS"
         self.base_path = Path(base_path)
         self.db_path = self.base_path / "metadata.db"
         self.categories = {

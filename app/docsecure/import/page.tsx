@@ -23,7 +23,51 @@ export default function DocSecureImportPage() {
   const [file, setFile] = useState<File | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()
+
+  // Check admin status on page load
+  useEffect(() => {
+    const checkAdminStatus = () => {
+      const localSession = localStorage.getItem('docsecure-admin-session');
+      setIsAdmin(localSession === 'authenticated');
+      setIsLoading(false);
+    }
+    checkAdminStatus()
+  }, [])
+
+  // Redirect non-admin users
+  if (isLoading) {
+    return (
+      <DocSecureDashboardLayout>
+        <div className="flex items-center justify-center min-h-96">
+          <div className="text-center">
+            <div className="w-8 h-8 border-4 border-orange-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="mt-4 text-gray-600">Vérification des autorisations...</p>
+          </div>
+        </div>
+      </DocSecureDashboardLayout>
+    )
+  }
+
+  if (!isAdmin) {
+    return (
+      <DocSecureDashboardLayout>
+        <div className="flex items-center justify-center min-h-96">
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+              <Upload className="w-8 h-8 text-red-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800">Accès restreint</h2>
+            <p className="text-gray-600 max-w-md">
+              Cette page est réservée aux administrateurs. Vous n'avez pas les autorisations nécessaires pour importer des documents.
+            </p>
+          </div>
+        </div>
+      </DocSecureDashboardLayout>
+    )
+  }
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()

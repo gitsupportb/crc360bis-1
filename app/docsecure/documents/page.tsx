@@ -9,8 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Eye, Search, ArrowUpDown, FileText, Clock } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { useToast } from "@/components/ui/use-toast"
+import { DocumentPreview } from "@/components/docsecure/document-preview"
 
 // Types de documents
 const documentTypes = ["Procédures", "Modes d'emploi", "Notes internes", "Politiques"]
@@ -37,6 +37,7 @@ export default function DocSecureDocumentsPage() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
   const [activeTab, setActiveTab] = useState("all")
   const [previewDocument, setPreviewDocument] = useState<Document | null>(null)
+  const [showPreview, setShowPreview] = useState(false)
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
@@ -312,45 +313,18 @@ export default function DocSecureDocumentsPage() {
                           <TableCell className="text-gray-600">{formatDate(doc.upload_date)}</TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-1">
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => setPreviewDocument(doc)}
-                                    className="hover:bg-blue-50 hover:text-blue-600"
-                                    title="Aperçu du document"
-                                  >
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent className="max-w-4xl">
-                                  <DialogHeader>
-                                    <DialogTitle className="text-xl">{previewDocument?.title}</DialogTitle>
-                                  </DialogHeader>
-                                  <div className="mt-4 p-6 border rounded-lg bg-gradient-to-br from-gray-50 to-gray-100 min-h-[500px] flex items-center justify-center">
-                                    <div className="text-center space-y-3">
-                                      <FileText className="h-16 w-16 text-gray-400 mx-auto" />
-                                      <p className="text-gray-600 text-lg">Aperçu du document</p>
-                                      <p className="text-gray-500 text-sm">Le contenu du document s'afficherait ici</p>
-                                      <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                                        <p className="text-sm text-blue-700">
-                                          <strong>Titre:</strong> {previewDocument?.title}
-                                        </p>
-                                        <p className="text-sm text-blue-700 mt-1">
-                                          <strong>Catégorie:</strong> {previewDocument?.category}
-                                        </p>
-                                        <p className="text-sm text-blue-700 mt-1">
-                                          <strong>Taille:</strong> {previewDocument ? (previewDocument.file_size / 1024 / 1024).toFixed(2) : 0} MB
-                                        </p>
-                                        <p className="text-sm text-blue-700 mt-1">
-                                          <strong>Date d'upload:</strong> {previewDocument ? formatDate(previewDocument.upload_date) : ''}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </DialogContent>
-                              </Dialog>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  setPreviewDocument(doc);
+                                  setShowPreview(true);
+                                }}
+                                className="hover:bg-blue-50 hover:text-blue-600"
+                                title="Aperçu du document"
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
                             </div>
                           </TableCell>
                         </TableRow>
@@ -364,6 +338,16 @@ export default function DocSecureDocumentsPage() {
           </Tabs>
         </div>
       </div>
+      
+      {/* Document Preview Modal */}
+      <DocumentPreview
+        document={previewDocument}
+        isOpen={showPreview}
+        onClose={() => {
+          setShowPreview(false);
+          setPreviewDocument(null);
+        }}
+      />
     </DocSecureDashboardLayout>
   )
 }

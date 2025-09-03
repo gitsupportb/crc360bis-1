@@ -32,6 +32,17 @@ export function DocSecureMainNav() {
     return () => clearInterval(interval)
   }, [])
 
+  // Check if user is admin
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  useEffect(() => {
+    const checkAdminStatus = () => {
+      const localSession = localStorage.getItem('docsecure-admin-session');
+      setIsAdmin(localSession === 'authenticated');
+    }
+    checkAdminStatus()
+  }, [])
+
   const routes = [
     {
       href: "/docsecure/dashboard",
@@ -45,12 +56,12 @@ export function DocSecureMainNav() {
       icon: FileText,
       active: pathname === "/docsecure/documents",
     },
-    {
+    ...(isAdmin ? [{
       href: "/docsecure/import",
       label: "Importer",
       icon: Upload,
       active: pathname === "/docsecure/import",
-    },
+    }] : []),
     {
       href: "/docsecure/analytics",
       label: "Analytiques",
@@ -129,19 +140,6 @@ export function DocSecureMainNav() {
             <FileText className="w-6 h-6 text-orange-500" />
           </Link>
 
-          {/* Import Button */}
-          <Link
-            href="/docsecure/import"
-            className="flex items-center justify-center bg-white rounded-lg shadow-md border-2 border-white/20 overflow-hidden transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-lg cursor-pointer"
-            style={{
-              width: '50px',
-              height: '50px',
-              boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-            }}
-            title="Importer"
-          >
-            <Upload className="w-6 h-6 text-orange-500" />
-          </Link>
         </div>
       </div>
 

@@ -99,3 +99,187 @@
 .animate-pulse-custom {
   animation: pulse 2s infinite;
 }
+
+/* Security CSS Rules for DocSecure */
+.docsecure-secure {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+  
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  
+  pointer-events: auto;
+}
+
+.docsecure-secure * {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
+/* Disable print styles for secure documents */
+@media print {
+  .docsecure-no-print {
+    display: none !important;
+  }
+  
+  .docsecure-secure {
+    display: none !important;
+  }
+}
+
+/* Disable context menu styling */
+.docsecure-secure::-webkit-scrollbar {
+  display: none;
+}
+
+.docsecure-secure {
+  scrollbar-width: none;
+}
+
+/* Additional PDF iframe security */
+.docsecure-secure iframe {
+  pointer-events: auto;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+/* Prevent text selection in PDF viewer */
+.docsecure-secure iframe::selection {
+  background: transparent;
+}
+
+.docsecure-secure iframe::-moz-selection {
+  background: transparent;
+}
+
+/* Hide scrollbars in secure PDF viewer */
+.docsecure-secure iframe::-webkit-scrollbar {
+  display: none;
+}
+
+/* Overlay protection */
+.docsecure-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  z-index: 999;
+  pointer-events: none;
+}
+
+/* Additional PDF security - disable all context menus in secure containers */
+.docsecure-secure, .docsecure-secure * {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  -khtml-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  
+  /* Disable context menu */
+  -webkit-context-menu: none !important;
+  -moz-context-menu: none !important;
+  context-menu: none !important;
+}
+
+/* Force disable context menu on iframes */
+.docsecure-secure iframe {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  pointer-events: auto !important;
+  -webkit-context-menu: none !important;
+  -moz-context-menu: none !important;
+  context-menu: none !important;
+}
+
+/* Block all context menus in PDF containers */
+.docsecure-secure iframe,
+.docsecure-secure iframe *,
+.docsecure-secure iframe embed,
+.docsecure-secure iframe object {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  -webkit-context-menu: none !important;
+  -moz-context-menu: none !important;
+  context-menu: none !important;
+  user-select: none !important;
+}
+
+/* Aggressively block PDF viewer context menus */
+iframe[src*="data:application/pdf"] {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  -webkit-context-menu: none !important;
+  -moz-context-menu: none !important;
+  context-menu: none !important;
+  user-select: none !important;
+}
+
+/* Block context menu on PDF viewer plugin content */
+iframe[src*="data:application/pdf"] *,
+iframe[src*="data:application/pdf"] embed,
+iframe[src*="data:application/pdf"] object {
+  -webkit-touch-callout: none !important;
+  -webkit-context-menu: none !important;
+  -moz-context-menu: none !important;
+  context-menu: none !important;
+}
+
+/* Comprehensive context menu blocking for specific docsecure containers */
+.docsecure-no-context,
+.docsecure-no-context *,
+.docsecure-no-context iframe,
+.docsecure-no-context iframe *,
+.docsecure-iframe,
+.docsecure-iframe * {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  -webkit-context-menu: none !important;
+  -moz-context-menu: none !important;
+  context-menu: none !important;
+  user-select: none !important;
+}
+
+/* Disable right-click events at browser level */
+.docsecure-no-context {
+  -moz-user-select: none !important;
+  -webkit-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+  -khtml-user-drag: none !important;
+  -moz-user-drag: none !important;
+  -o-user-drag: none !important;
+  user-drag: none !important;
+}
+
+/* Block context menu on document preview dialog */
+[role="dialog"] {
+  -webkit-touch-callout: none;
+  -webkit-context-menu: none;
+  -moz-context-menu: none;
+  context-menu: none;
+}
+
+[role="dialog"] * {
+  -webkit-touch-callout: none;
+  -webkit-context-menu: none;
+  -moz-context-menu: none;
+  context-menu: none;
+}

@@ -6548,6 +6548,15 @@
         triggerProgressionUpdate();
       }
 
+      // Store events in localStorage for PWA access
+      storeEventsForPWA();
+      
+      // Update notification badge
+      updateNotificationBadge();
+      
+      // Create consolidated data for PWA after all processing
+      setTimeout(triggerRepWatchDataSync, 500);
+      
       console.log('✅ All BAM events and tables updated successfully');
       console.log(`📊 Total events: Cat1(${eventsCat1.length}), Cat2(${eventsCat2.length}), Cat3(${eventsCat3.length})`);
     }
@@ -6571,6 +6580,197 @@
         } catch(e) {
           console.error("Error loading progress:", e);
         }
+      }
+    }
+
+    /* ---------- PWA Data Storage ---------- */
+    function storeEventsForPWA() {
+      try {
+        // Store BAM events data for PWA access
+        localStorage.setItem('eventsCat1', JSON.stringify(eventsCat1));
+        localStorage.setItem('eventsCat2', JSON.stringify(eventsCat2));
+        localStorage.setItem('eventsCat3', JSON.stringify(eventsCat3));
+        
+        // Store AMMC data if available
+        if (typeof ammcBcpData !== 'undefined') {
+          localStorage.setItem('ammcBcpData', JSON.stringify(ammcBcpData));
+        }
+        if (typeof ammcBcp2sData !== 'undefined') {
+          localStorage.setItem('ammcBcp2sData', JSON.stringify(ammcBcp2sData));
+        }
+        if (typeof ammcBankAlYousrData !== 'undefined') {
+          localStorage.setItem('ammcBankAlYousrData', JSON.stringify(ammcBankAlYousrData));
+        }
+        
+        // Store DGI data if available
+        if (typeof dgiData !== 'undefined') {
+          localStorage.setItem('dgiData', JSON.stringify(dgiData));
+        }
+        
+        
+        console.log('📅 Stored RepWatch events in localStorage for PWA access');
+      } catch (error) {
+        console.error('Failed to store RepWatch events for PWA:', error);
+      }
+    }
+    
+    function triggerRepWatchDataSync() {
+      try {
+        // Create a consolidated dataset directly from the dashboard data
+        var consolidatedDeadlines = [];
+        
+        // Add BAM events
+        [eventsCat1, eventsCat2, eventsCat3].forEach(function(categoryEvents, categoryIndex) {
+          var categoryKey = categoryIndex === 0 ? 'I' : categoryIndex === 1 ? 'II' : 'III';
+          var categoryName = categoryIndex === 0 ? 'I – Situation comptable et états annexes' :
+                           categoryIndex === 1 ? 'II – Etats de synthèse et documents qui leur sont complémentaires' :
+                           'III – Etats relatifs à la réglementation prudentielle';
+          
+          categoryEvents.forEach(function(event) {
+            if (event.Deadline instanceof Date) {
+              var today = new Date();
+              today.setHours(0, 0, 0, 0);
+              var daysRemaining = Math.ceil((event.Deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+              
+              var urgencyLevel = 'info';
+              if (daysRemaining <= 0) urgencyLevel = 'urgent';
+              else if (daysRemaining <= 3) urgencyLevel = 'urgent';
+              else if (daysRemaining <= 7) urgencyLevel = 'warning';
+              else if (daysRemaining <= 30) urgencyLevel = 'normal';
+              
+              consolidatedDeadlines.push({
+                id: 'BAM-' + categoryKey + '-' + event.code + '-' + event.Deadline.getTime(),
+                code: event.code,
+                name: event.event || event.Appellation,
+                description: event.event || event.Appellation,
+                deadline: event.Deadline.toISOString(),
+                dateArrete: event.DateArrete ? event.DateArrete.toISOString() : undefined,
+                frequency: event.Frequency,
+                regulator: 'BAM',
+                category: categoryName,
+                categoryKey: categoryKey,
+                completed: event.completed || false,
+                daysRemaining: daysRemaining,
+                urgencyLevel: urgencyLevel,
+                url: '/rep-watch#bam-' + categoryKey.toLowerCase()
+              });
+            }
+          });
+        });
+        
+        // Add AMMC events if available
+        if (typeof dataAMMC_BCP !== 'undefined' && dataAMMC_BCP.length > 0) {
+          var ammcBcpEvents = generateAMMCEvents(dataAMMC_BCP);
+          ammcBcpEvents.forEach(function(event) {
+            if (event.deadline instanceof Date || typeof event.deadline === 'string') {
+              var eventDate = event.deadline instanceof Date ? event.deadline : new Date(event.deadline);
+              var today = new Date();
+              today.setHours(0, 0, 0, 0);
+              var daysRemaining = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+              
+              var urgencyLevel = 'info';
+              if (daysRemaining <= 0) urgencyLevel = 'urgent';
+              else if (daysRemaining <= 3) urgencyLevel = 'urgent';
+              else if (daysRemaining <= 7) urgencyLevel = 'warning';
+              else if (daysRemaining <= 30) urgencyLevel = 'normal';
+              
+              consolidatedDeadlines.push({
+                id: 'AMMC-BCP-' + event.code + '-' + eventDate.getTime(),
+                code: event.code,
+                name: event.Appellation,
+                description: event.Appellation,
+                deadline: eventDate.toISOString(),
+                dateArrete: event.dateArrete ? (event.dateArrete instanceof Date ? event.dateArrete.toISOString() : new Date(event.dateArrete).toISOString()) : undefined,
+                frequency: event.Frequency,
+                regulator: 'AMMC',
+                category: 'AMMC - BCP',
+                categoryKey: 'AMMC_BCP',
+                completed: false,
+                daysRemaining: daysRemaining,
+                urgencyLevel: urgencyLevel,
+                url: '/rep-watch#ammc-bcp'
+              });
+            }
+          });
+        }
+        
+        // Add AMMC BCP2S events if available
+        if (typeof dataAMMC_BCP2S !== 'undefined' && dataAMMC_BCP2S.length > 0) {
+          var ammcBcp2sEvents = generateAMMCEvents(dataAMMC_BCP2S);
+          ammcBcp2sEvents.forEach(function(event) {
+            if (event.deadline instanceof Date || typeof event.deadline === 'string') {
+              var eventDate = event.deadline instanceof Date ? event.deadline : new Date(event.deadline);
+              var today = new Date();
+              today.setHours(0, 0, 0, 0);
+              var daysRemaining = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+              
+              var urgencyLevel = 'info';
+              if (daysRemaining <= 0) urgencyLevel = 'urgent';
+              else if (daysRemaining <= 3) urgencyLevel = 'urgent';
+              else if (daysRemaining <= 7) urgencyLevel = 'warning';
+              else if (daysRemaining <= 30) urgencyLevel = 'normal';
+              
+              consolidatedDeadlines.push({
+                id: 'AMMC-BCP2S-' + event.code + '-' + eventDate.getTime(),
+                code: event.code,
+                name: event.Appellation,
+                description: event.Appellation,
+                deadline: eventDate.toISOString(),
+                dateArrete: event.dateArrete ? (event.dateArrete instanceof Date ? event.dateArrete.toISOString() : new Date(event.dateArrete).toISOString()) : undefined,
+                frequency: event.Frequency,
+                regulator: 'AMMC',
+                category: 'AMMC - BCP2S',
+                categoryKey: 'AMMC_BCP2S',
+                completed: false,
+                daysRemaining: daysRemaining,
+                urgencyLevel: urgencyLevel,
+                url: '/rep-watch#ammc-bcp2s'
+              });
+            }
+          });
+        }
+        
+        // Store consolidated data
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('rep-watch-deadlines', JSON.stringify(consolidatedDeadlines));
+          console.log('📅 Stored ' + consolidatedDeadlines.length + ' consolidated RepWatch deadlines for PWA');
+        }
+      } catch (error) {
+        console.warn('Failed to create consolidated RepWatch data:', error);
+      }
+    }
+    
+    function storeAMMCDataForPWA() {
+      try {
+        // Store AMMC raw data for PWA access
+        if (typeof dataAMMC_BCP !== 'undefined') {
+          localStorage.setItem('ammcBcpData', JSON.stringify(dataAMMC_BCP));
+        }
+        if (typeof dataAMMC_BCP2S !== 'undefined') {
+          localStorage.setItem('ammcBcp2sData', JSON.stringify(dataAMMC_BCP2S));
+        }
+        if (typeof dataAMMC_BANK_AL_YOUSR !== 'undefined') {
+          localStorage.setItem('ammcBankAlYousrData', JSON.stringify(dataAMMC_BANK_AL_YOUSR));
+        }
+        
+        
+        console.log('📅 Stored AMMC data in localStorage for PWA access');
+      } catch (error) {
+        console.error('Failed to store AMMC data for PWA:', error);
+      }
+    }
+    
+    function storeDGIDataForPWA() {
+      try {
+        // Store DGI raw data for PWA access
+        if (typeof dataDGI !== 'undefined') {
+          localStorage.setItem('dgiData', JSON.stringify(dataDGI));
+        }
+        
+        
+        console.log('📅 Stored DGI data in localStorage for PWA access');
+      } catch (error) {
+        console.error('Failed to store DGI data for PWA:', error);
       }
     }
 
@@ -7277,6 +7477,12 @@
       updateAMMCBCP2STables();
       updateAMMCBANKALYOUSRTables();
 
+      // Store AMMC data for PWA access
+      storeAMMCDataForPWA();
+      
+      // Update notification badge
+      updateNotificationBadge();
+
       console.log('✅ AMMC tables updated successfully');
     }
 
@@ -7839,6 +8045,12 @@
       updateDGIUpcomingTable(dataDGI, "upcoming-table-dgi");
       updateDGIReportsTable(dataDGI, "reports-table-dgi");
       updateDGIMonthlyTasksTable(dataDGI, "monthly-tasks-dgi");
+
+      // Store DGI data for PWA access
+      storeDGIDataForPWA();
+      
+      // Update notification badge
+      updateNotificationBadge();
 
       console.log('✅ DGI tables updated successfully');
     }

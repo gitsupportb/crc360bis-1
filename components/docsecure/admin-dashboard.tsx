@@ -15,9 +15,9 @@ import {
   AlertTriangle, CheckCircle, Upload, Package, Trash, CheckSquare,
   Square, FolderOpen
 } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Checkbox } from "@/components/ui/checkbox"
 import { AdminImportDialog } from "./admin-import-dialog"
+import { DocumentPreview } from "./document-preview"
 
 // Types de documents
 const documentTypes = ["Procédures", "Modes d'emploi", "Notes internes", "Politiques"]
@@ -54,6 +54,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
   const [activeTab, setActiveTab] = useState("documents")
   const [previewDocument, setPreviewDocument] = useState<Document | null>(null)
+  const [showPreview, setShowPreview] = useState(false)
   const [documents, setDocuments] = useState<Document[]>([])
   const [statistics, setStatistics] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -655,36 +656,18 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
                                 <TableCell className="text-gray-600">{formatDate(doc.upload_date)}</TableCell>
                                 <TableCell className="text-right">
                                   <div className="flex justify-end gap-1">
-                                    <Dialog>
-                                      <DialogTrigger asChild>
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          onClick={() => setPreviewDocument(doc)}
-                                          className="hover:bg-blue-50 hover:text-blue-600"
-                                          title="Aperçu"
-                                        >
-                                          <Eye className="h-4 w-4" />
-                                        </Button>
-                                      </DialogTrigger>
-                                      <DialogContent className="max-w-4xl">
-                                        <DialogHeader>
-                                          <DialogTitle>{previewDocument?.title}</DialogTitle>
-                                        </DialogHeader>
-                                        <div className="mt-4 p-6 border rounded-lg bg-gray-50 min-h-[400px]">
-                                          <div className="text-center space-y-3">
-                                            <FileText className="h-16 w-16 text-gray-400 mx-auto" />
-                                            <p className="text-gray-600">Aperçu du document</p>
-                                            <div className="mt-4 p-4 bg-blue-50 rounded-lg text-left">
-                                              <p><strong>Titre:</strong> {previewDocument?.title}</p>
-                                              <p><strong>Catégorie:</strong> {previewDocument?.category}</p>
-                                              <p><strong>Taille:</strong> {previewDocument ? (previewDocument.file_size / 1024 / 1024).toFixed(2) : 0} MB</p>
-                                              <p><strong>Date:</strong> {previewDocument ? formatDate(previewDocument.upload_date) : ''}</p>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </DialogContent>
-                                    </Dialog>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => {
+                                        setPreviewDocument(doc);
+                                        setShowPreview(true);
+                                      }}
+                                      className="hover:bg-blue-50 hover:text-blue-600"
+                                      title="Aperçu"
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                    </Button>
                                     
                                     <Button
                                       variant="ghost"
@@ -745,6 +728,17 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
           loadDocuments()
           loadStatistics()
         }}
+      />
+      
+      {/* Document Preview Modal */}
+      <DocumentPreview
+        document={previewDocument}
+        isOpen={showPreview}
+        onClose={() => {
+          setShowPreview(false);
+          setPreviewDocument(null);
+        }}
+        showAdminFeatures={true}
       />
     </div>
   )
